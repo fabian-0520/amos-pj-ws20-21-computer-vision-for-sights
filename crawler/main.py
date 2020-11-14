@@ -331,7 +331,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--skip', type=str, default='true',
                         help='Skips keyword already downloaded before. This is needed when re-downloading.')
-    parser.add_argument('--threads', type=int, default=1, help='Number of threads to download.')
+    parser.add_argument('--threads', type=int, default=4, help='Number of threads to download.')
     parser.add_argument('--google', type=str, default='true', help='Download from google.com (boolean)')
     parser.add_argument('--naver', type=str, default='false', help='Download from naver.com (boolean)')
     parser.add_argument('--full', type=str, default='false', help='Download full resolution image instead of thumbnails (slow)')
