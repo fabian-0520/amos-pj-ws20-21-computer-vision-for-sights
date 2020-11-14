@@ -14,7 +14,6 @@ Copyright 2018 YoongiKim
    limitations under the License.
 """
 
-
 import time
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -28,7 +27,7 @@ import os.path as osp
 
 
 class CollectLinks:
-    def __init__(self, no_gui=False):
+    def __init__(self, no_gui=False, no_driver=False):
         executable = ''
 
         if platform.system() == 'Windows':
@@ -51,7 +50,10 @@ class CollectLinks:
         chrome_options.add_argument('--disable-dev-shm-usage')
         if no_gui:
             chrome_options.add_argument('--headless')
-        self.browser = webdriver.Chrome(executable, chrome_options=chrome_options)
+        if no_driver:
+            self.browser = webdriver.Chrome(chrome_options=chrome_options)
+        else:
+            self.browser = webdriver.Chrome(executable, chrome_options=chrome_options)
 
         browser_version = 'Failed to detect version'
         chromedriver_version = 'Failed to detect version'
@@ -72,7 +74,8 @@ class CollectLinks:
         print('Current chrome-driver version:\t{}'.format(chromedriver_version))
         if major_version_different:
             print('warning: Version different')
-            print('Download correct version at "http://chromedriver.chromium.org/downloads" and place in "./chromedriver"')
+            print(
+                'Download correct version at "http://chromedriver.chromium.org/downloads" and place in "./chromedriver"')
         print('_________________________________')
 
     def get_scroll(self):
@@ -96,7 +99,8 @@ class CollectLinks:
         return elem
 
     def highlight(self, element):
-        self.browser.execute_script("arguments[0].setAttribute('style', arguments[1]);", element, "background: yellow; border: 2px solid red;")
+        self.browser.execute_script("arguments[0].setAttribute('style', arguments[1]);", element,
+                                    "background: yellow; border: 2px solid red;")
 
     @staticmethod
     def remove_duplicates(_list):
@@ -157,7 +161,7 @@ class CollectLinks:
 
         return links
 
-    def google_full(self, keyword, add_url=""):
+    def google_full(self, keyword, add_url="", limit=5000):
         print('[Full Resolution Mode]')
 
         self.browser.get("https://www.google.com/search?q={}&tbm=isch{}".format(keyword, add_url))
@@ -176,7 +180,7 @@ class CollectLinks:
         last_scroll = 0
         scroll_patience = 0
 
-        while True:
+        for i in range(limit):
             try:
                 xpath = '//div[@id="islsp"]//div[@class="v4dQwb"]'
                 div_box = self.browser.find_element(By.XPATH, xpath)

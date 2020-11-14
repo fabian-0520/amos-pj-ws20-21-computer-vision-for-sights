@@ -14,7 +14,6 @@ Copyright 2018 YoongiKim
    limitations under the License.
 """
 
-
 import os
 import requests
 import shutil
@@ -44,7 +43,7 @@ class Sites:
 
 class AutoCrawler:
     def __init__(self, skip_already_exist=True, n_threads=4, do_google=True, download_path='download',
-                 full_resolution=False, face=False, no_gui=False, limit=0):
+                 full_resolution=False, face=False, no_gui=False, limit=0, no_driver=False):
         """
         :param skip_already_exist: Skips keyword already downloaded before. This is needed when re-downloading.
         :param n_threads: Number of threads to download.
@@ -54,6 +53,7 @@ class AutoCrawler:
         :param face: Face search mode
         :param no_gui: No GUI mode. Acceleration for full_resolution mode.
         :param limit: Maximum count of images to download. (0: infinite)
+        :param no_driver: If the default drivers shouldnt be used
         """
 
         self.skip = skip_already_exist
@@ -64,6 +64,7 @@ class AutoCrawler:
         self.face = face
         self.no_gui = no_gui
         self.limit = limit
+        self.no_driver = no_driver
 
         os.makedirs('./{}'.format(self.download_path), exist_ok=True)
 
@@ -178,7 +179,8 @@ class AutoCrawler:
                     ext = self.get_extension_from_link(link)
                     is_base64 = False
 
-                no_ext_path = '{}/{}/{}_{}'.format(self.download_path.replace('"', ''), keyword, site_name, str(index).zfill(4))
+                no_ext_path = '{}/{}/{}_{}'.format(self.download_path.replace('"', ''), keyword, site_name,
+                                                   str(index).zfill(4))
                 path = no_ext_path + '.' + ext
                 self.save_object_to_file(response, path, is_base64=is_base64)
 
@@ -205,7 +207,7 @@ class AutoCrawler:
         add_url = Sites.get_face_url(site_code) if self.face else ""
 
         try:
-            collect = CollectLinks(no_gui=self.no_gui)  # initialize chrome driver
+            collect = CollectLinks(no_gui=self.no_gui, no_driver=self.no_driver)  # initialize chrome driver
         except Exception as e:
             print('Error occurred while initializing chromedriver - {}'.format(e))
             return
@@ -217,7 +219,7 @@ class AutoCrawler:
                 links = collect.google(keyword, add_url)
 
             elif site_code == Sites.GOOGLE_FULL:
-                links = collect.google_full(keyword, add_url)
+                links = collect.google_full(keyword, add_url, self.limit)
 
             else:
                 print('Invalid Site Code')
@@ -311,18 +313,24 @@ if __name__ == '__main__':
                         help='Skips keyword already downloaded before. This is needed when re-downloading.')
     parser.add_argument('--threads', type=int, default=4, help='Number of threads to download.')
     parser.add_argument('--google', type=str, default='true', help='Download from google.com (boolean)')
-    parser.add_argument('--full', type=str, default='false', help='Download full resolution image instead of thumbnails (slow)')
+    parser.add_argument('--full', type=str, default='false',
+                        help='Download full resolution image instead of thumbnails (slow)')
     parser.add_argument('--face', type=str, default='false', help='Face search mode')
-    parser.add_argument('--no_gui', type=str, default='auto', help='No GUI mode. Acceleration for full_resolution mode. '
-                                                                   'But unstable on thumbnail mode. '
-                                                                    'Default: "auto" - false if full=false, true if full=true')
-    parser.add_argument('--limit', type=int, default=0, help='Maximum count of images to download per site. (0: infinite)')
+    parser.add_argument('--no_gui', type=str, default='auto',
+                        help='No GUI mode. Acceleration for full_resolution mode. '
+                             'But unstable on thumbnail mode. '
+                             'Default: "auto" - false if full=false, true if full=true')
+    parser.add_argument('--limit', type=int, default=0,
+                        help='Maximum count of images to download per site. (0: infinite)')
+    parser.add_argument('--no_driver', type=str, default='false',
+                        help='Whether a preconfigured driver should not be used (by default false, meaning it will)')
     args = parser.parse_args()
 
     _skip = False if str(args.skip).lower() == 'false' else True
     _threads = args.threads
     _google = False if str(args.google).lower() == 'false' else True
     _full = False if str(args.full).lower() == 'false' else True
+    _no_driver = True if str(args.no_driver).lower() == 'true' else False
     _face = False if str(args.face).lower() == 'false' else True
     _limit = int(args.limit)
 
@@ -339,5 +347,5 @@ if __name__ == '__main__':
 
     crawler = AutoCrawler(skip_already_exist=_skip, n_threads=_threads,
                           do_google=_google, full_resolution=_full,
-                          face=_face, no_gui=_no_gui, limit=_limit)
+                          face=_face, no_gui=_no_gui, limit=_limit, no_driver=_no_driver)
     crawler.do_crawling()

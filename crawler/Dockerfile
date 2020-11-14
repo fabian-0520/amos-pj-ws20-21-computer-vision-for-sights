@@ -17,4 +17,4 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # run crawler with no gui (important, this only works if this is the case)
-ENTRYPOINT python3 main.py --no_gui true
+ENTRYPOINT python3 main.py --no_gui true --full true --limit 10 --no_driver true
