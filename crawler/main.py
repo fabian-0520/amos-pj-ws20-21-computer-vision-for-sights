@@ -22,6 +22,7 @@ import argparse
 from collect_links import CollectLinks
 import imghdr
 import base64
+import ast
 
 
 class Sites:
@@ -43,7 +44,8 @@ class Sites:
 
 class AutoCrawler:
     def __init__(self, skip_already_exist=True, n_threads=4, do_google=True, download_path='download',
-                 full_resolution=False, face=False, no_gui=False, limit=0, no_driver=False):
+                 full_resolution=False, face=False, no_gui=False, limit=0, no_driver=False,
+                 keyword_list="['Brandenburger Tor', 'Alexanderplatz']"):
         """
         :param skip_already_exist: Skips keyword already downloaded before. This is needed when re-downloading.
         :param n_threads: Number of threads to download.
@@ -54,6 +56,7 @@ class AutoCrawler:
         :param no_gui: No GUI mode. Acceleration for full_resolution mode.
         :param limit: Maximum count of images to download. (0: infinite)
         :param no_driver: If the default drivers shouldnt be used
+        :param keyword_list: List of keywords that will be downloaded
         """
 
         self.skip = skip_already_exist
@@ -65,6 +68,7 @@ class AutoCrawler:
         self.no_gui = no_gui
         self.limit = limit
         self.no_driver = no_driver
+        self.keyword_list = ast.literal_eval(keyword_list)
 
         os.makedirs('./{}'.format(self.download_path), exist_ok=True)
 
@@ -115,24 +119,6 @@ class AutoCrawler:
         path = os.path.join(current_path, dirname)
         if not os.path.exists(path):
             os.makedirs(path)
-
-    @staticmethod
-    def get_keywords(keywords_file='keywords.txt'):
-        # read search keywords from file
-        with open(keywords_file, 'r', encoding='utf-8-sig') as f:
-            text = f.read()
-            lines = text.split('\n')
-            lines = filter(lambda x: x != '' and x is not None, lines)
-            keywords = sorted(set(lines))
-
-        print('{} keywords found: {}'.format(len(keywords), keywords))
-
-        # re-save sorted keywords
-        with open(keywords_file, 'w+', encoding='utf-8') as f:
-            for keyword in keywords:
-                f.write('{}\n'.format(keyword))
-
-        return keywords
 
     @staticmethod
     def save_object_to_file(object, file_path, is_base64=False):
@@ -237,7 +223,7 @@ class AutoCrawler:
         self.download_from_site(keyword=args[0], site_code=args[1])
 
     def do_crawling(self):
-        keywords = self.get_keywords()
+        keywords = self.keyword_list
 
         tasks = []
 
@@ -325,6 +311,8 @@ if __name__ == '__main__':
     parser.add_argument('--no_driver', type=str, default='false',
                         help='Whether a preconfigured driver should not be used (by default false, meaning it will)')
     args = parser.parse_args()
+    parser.add_argument('--keyword_list', type=str, default="['Brandenburger Tor', 'Alexanderplatz']",
+                        help='List of keywords that will be downloaded')
 
     _skip = False if str(args.skip).lower() == 'false' else True
     _threads = args.threads
@@ -333,6 +321,7 @@ if __name__ == '__main__':
     _no_driver = True if str(args.no_driver).lower() == 'true' else False
     _face = False if str(args.face).lower() == 'false' else True
     _limit = int(args.limit)
+    _keywords = args.keyword_list
 
     no_gui_input = str(args.no_gui).lower()
     if no_gui_input == 'auto':
@@ -342,10 +331,10 @@ if __name__ == '__main__':
     else:
         _no_gui = False
 
-    print('Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}'
-          .format(_skip, _threads, _google, _full, _face, _no_gui, _limit))
+    print('Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, keyword_list:{}'
+          .format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _keywords))
 
     crawler = AutoCrawler(skip_already_exist=_skip, n_threads=_threads,
                           do_google=_google, full_resolution=_full,
-                          face=_face, no_gui=_no_gui, limit=_limit, no_driver=_no_driver)
+                          face=_face, no_gui=_no_gui, limit=_limit, keyword_list=_keywords, no_driver=_no_driver)
     crawler.do_crawling()
