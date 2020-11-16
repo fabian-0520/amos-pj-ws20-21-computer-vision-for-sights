@@ -17,4 +17,6 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # run crawler with no gui (important, this only works if this is the case)
-ENTRYPOINT python3 main.py --no_gui true --full true --limit 10 --no_driver true
+ENTRYPOINT ["python3", "main.py","--no_gui","true","--full", "true","--limit", "10","--no_driver","true","--keyword_list"]
+CMD ["['Brandenburger Tor']"]
+# To run: docker run --name crawler image_name "['keyword','list','here']"

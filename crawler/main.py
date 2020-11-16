@@ -310,9 +310,9 @@ if __name__ == '__main__':
                         help='Maximum count of images to download per site. (0: infinite)')
     parser.add_argument('--no_driver', type=str, default='false',
                         help='Whether a preconfigured driver should not be used (by default false, meaning it will)')
-    args = parser.parse_args()
     parser.add_argument('--keyword_list', type=str, default="['Brandenburger Tor', 'Alexanderplatz']",
                         help='List of keywords that will be downloaded')
+    args = parser.parse_args()
 
     _skip = False if str(args.skip).lower() == 'false' else True
     _threads = args.threads
@@ -331,8 +331,10 @@ if __name__ == '__main__':
     else:
         _no_gui = False
 
-    print('Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, keyword_list:{}'
-          .format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _keywords))
+    print(
+        'Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, keyword_list:{}, '
+        'no_driver:{} '
+        .format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _keywords, _no_driver))
 
     crawler = AutoCrawler(skip_already_exist=_skip, n_threads=_threads,
                           do_google=_google, full_resolution=_full,
