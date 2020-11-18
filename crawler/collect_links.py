@@ -14,7 +14,6 @@ Copyright 2018 YoongiKim
    limitations under the License.
 """
 
-
 import time
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -28,7 +27,7 @@ import os.path as osp
 
 
 class CollectLinks:
-    def __init__(self, no_gui=False):
+    def __init__(self, no_gui=False, no_driver=False):
         executable = ''
 
         if platform.system() == 'Windows':
@@ -51,7 +50,10 @@ class CollectLinks:
         chrome_options.add_argument('--disable-dev-shm-usage')
         if no_gui:
             chrome_options.add_argument('--headless')
-        self.browser = webdriver.Chrome(executable, chrome_options=chrome_options)
+        if no_driver:
+            self.browser = webdriver.Chrome(chrome_options=chrome_options)
+        else:
+            self.browser = webdriver.Chrome(executable, chrome_options=chrome_options)
 
         browser_version = 'Failed to detect version'
         chromedriver_version = 'Failed to detect version'
@@ -72,7 +74,8 @@ class CollectLinks:
         print('Current chrome-driver version:\t{}'.format(chromedriver_version))
         if major_version_different:
             print('warning: Version different')
-            print('Download correct version at "http://chromedriver.chromium.org/downloads" and place in "./chromedriver"')
+            print(
+                'Download correct version at "http://chromedriver.chromium.org/downloads" and place in "./chromedriver"')
         print('_________________________________')
 
     def get_scroll(self):
@@ -96,7 +99,8 @@ class CollectLinks:
         return elem
 
     def highlight(self, element):
-        self.browser.execute_script("arguments[0].setAttribute('style', arguments[1]);", element, "background: yellow; border: 2px solid red;")
+        self.browser.execute_script("arguments[0].setAttribute('style', arguments[1]);", element,
+                                    "background: yellow; border: 2px solid red;")
 
     @staticmethod
     def remove_duplicates(_list):
@@ -157,55 +161,7 @@ class CollectLinks:
 
         return links
 
-    def naver(self, keyword, add_url=""):
-        self.browser.get("https://search.naver.com/search.naver?where=image&sm=tab_jum&query={}{}".format(keyword, add_url))
-
-        time.sleep(1)
-
-        print('Scrolling down')
-
-        elem = self.browser.find_element_by_tag_name("body")
-
-        for i in range(60):
-            elem.send_keys(Keys.PAGE_DOWN)
-            time.sleep(0.2)
-
-        try:
-            self.wait_and_click('//a[@class="btn_more _more"]')
-
-            for i in range(60):
-                elem.send_keys(Keys.PAGE_DOWN)
-                time.sleep(0.2)
-
-        except ElementNotVisibleException:
-            pass
-
-        photo_grid_boxes = self.browser.find_elements(By.XPATH, '//div[@class="photo_grid _box"]')
-
-        print('Scraping links')
-
-        links = []
-
-        for box in photo_grid_boxes:
-            try:
-                imgs = box.find_elements(By.CLASS_NAME, '_img')
-
-                for img in imgs:
-                    # self.highlight(img)
-                    src = img.get_attribute("src")
-                    if src[0] != 'd':
-                        links.append(src)
-            except Exception as e:
-                print('[Exception occurred while collecting links from naver] {}'.format(e))
-
-        links = self.remove_duplicates(links)
-
-        print('Collect links done. Site: {}, Keyword: {}, Total: {}'.format('naver', keyword, len(links)))
-        self.browser.close()
-
-        return links
-
-    def google_full(self, keyword, add_url=""):
+    def google_full(self, keyword, add_url="", limit=5000):
         print('[Full Resolution Mode]')
 
         self.browser.get("https://www.google.com/search?q={}&tbm=isch{}".format(keyword, add_url))
@@ -224,7 +180,7 @@ class CollectLinks:
         last_scroll = 0
         scroll_patience = 0
 
-        while True:
+        for i in range(limit):
             try:
                 xpath = '//div[@id="islsp"]//div[@class="v4dQwb"]'
                 div_box = self.browser.find_element(By.XPATH, xpath)
@@ -273,66 +229,6 @@ class CollectLinks:
 
         return links
 
-    def naver_full(self, keyword, add_url=""):
-        print('[Full Resolution Mode]')
-
-        self.browser.get("https://search.naver.com/search.naver?where=image&sm=tab_jum&query={}{}".format(keyword, add_url))
-        time.sleep(1)
-
-        elem = self.browser.find_element_by_tag_name("body")
-
-        print('Scraping links')
-
-        self.wait_and_click('//div[@class="img_area _item"]')
-        time.sleep(1)
-
-        links = []
-        count = 1
-
-        last_scroll = 0
-        scroll_patience = 0
-
-        while True:
-            try:
-                xpath = '//div[@class="image_viewer_wrap _sauImageViewer"]//img[@class="_image_source"]'
-                imgs = self.browser.find_elements(By.XPATH, xpath)
-
-                for img in imgs:
-                    self.highlight(img)
-                    src = img.get_attribute('src')
-
-                    if src not in links and src is not None:
-                        links.append(src)
-                        print('%d: %s' % (count, src))
-                        count += 1
-
-            except StaleElementReferenceException:
-                # print('[Expected Exception - StaleElementReferenceException]')
-                pass
-            except Exception as e:
-                print('[Exception occurred while collecting links from naver_full] {}'.format(e))
-
-            scroll = self.get_scroll()
-            if scroll == last_scroll:
-                scroll_patience += 1
-            else:
-                scroll_patience = 0
-                last_scroll = scroll
-
-            if scroll_patience >= 30:
-                break
-
-            elem.send_keys(Keys.RIGHT)
-
-        links = self.remove_duplicates(links)
-
-        print('Collect links done. Site: {}, Keyword: {}, Total: {}'.format('naver_full', keyword, len(links)))
-        self.browser.close()
-
-        return links
-
 
 if __name__ == '__main__':
     collect = CollectLinks()
-    links = collect.naver_full('박보영')
-    print(len(links), links)

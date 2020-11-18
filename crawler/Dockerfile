@@ -1,22 +1,22 @@
-# alpine image with headless chrome
-FROM zenika/alpine-chrome
+FROM alpine
+
+# set root user
 USER root
 
+# Install python, chromium and chromedriver
 RUN apk update
-
-# Install python and chromedriver
 RUN apk add py-pip
+RUN apk add chromium
 RUN apk add --no-cache chromium-chromedriver
 
+# Set directory to copy files into, and copy
 WORKDIR /crawler
-
 COPY . .
-
-# start chrome with necessary flags
-ENTRYPOINT ["chromium-browser", "--no-sandbox", "--remote-debugging-port=9222", "--headless", "--use-gl=swiftshader", "--disable-software-rasterizer", "--disable-dev-shm-usage"]
 
 # Install selenium & co
 RUN pip install -r requirements.txt
 
-# run crawler
-CMD ["python", "main.py"]
+# run crawler with no gui (important, this only works if this is the case)
+ENTRYPOINT ["python3", "main.py","--no_gui","true","--full", "true","--limit", "10","--no_driver","true","--keyword_list"]
+CMD ["['Brandenburger Tor']"]
+# To run: docker run --name crawler image_name "['keyword','list','here']"

@@ -14,7 +14,6 @@ Copyright 2018 YoongiKim
    limitations under the License.
 """
 
-
 import os
 import requests
 import shutil
@@ -28,54 +27,47 @@ import ast
 
 class Sites:
     GOOGLE = 1
-    NAVER = 2
     GOOGLE_FULL = 3
-    NAVER_FULL = 4
 
     @staticmethod
     def get_text(code):
         if code == Sites.GOOGLE:
             return 'google'
-        elif code == Sites.NAVER:
-            return 'naver'
         elif code == Sites.GOOGLE_FULL:
             return 'google'
-        elif code == Sites.NAVER_FULL:
-            return 'naver'
 
     @staticmethod
     def get_face_url(code):
         if code == Sites.GOOGLE or Sites.GOOGLE_FULL:
             return "&tbs=itp:face"
-        if code == Sites.NAVER or Sites.NAVER_FULL:
-            return "&face=1"
 
 
 class AutoCrawler:
-    def __init__(self, skip_already_exist=True, n_threads=4, do_google=True, do_naver=True, download_path='download',
-                 full_resolution=False, face=False, no_gui=False, limit=0, keyword_list="['Brandenburger Tor', 'Alexanderplatz']"):
+    def __init__(self, skip_already_exist=True, n_threads=4, do_google=True, download_path='download',
+                 full_resolution=False, face=False, no_gui=False, limit=0, no_driver=False,
+                 keyword_list="['Brandenburger Tor', 'Alexanderplatz']"):
         """
         :param skip_already_exist: Skips keyword already downloaded before. This is needed when re-downloading.
         :param n_threads: Number of threads to download.
         :param do_google: Download from google.com (boolean)
-        :param do_naver: Download from naver.com (boolean)
         :param download_path: Download folder path
         :param full_resolution: Download full resolution image instead of thumbnails (slow)
         :param face: Face search mode
         :param no_gui: No GUI mode. Acceleration for full_resolution mode.
         :param limit: Maximum count of images to download. (0: infinite)
+        :param no_driver: If the default drivers shouldnt be used
         :param keyword_list: List of keywords that will be downloaded
         """
 
         self.skip = skip_already_exist
         self.n_threads = n_threads
         self.do_google = do_google
-        self.do_naver = do_naver
         self.download_path = download_path
         self.full_resolution = full_resolution
         self.face = face
         self.no_gui = no_gui
         self.limit = limit
+        self.no_driver = no_driver
         self.keyword_list = ast.literal_eval(keyword_list)
 
         os.makedirs('./{}'.format(self.download_path), exist_ok=True)
@@ -173,7 +165,8 @@ class AutoCrawler:
                     ext = self.get_extension_from_link(link)
                     is_base64 = False
 
-                no_ext_path = '{}/{}/{}_{}'.format(self.download_path.replace('"', ''), keyword, site_name, str(index).zfill(4))
+                no_ext_path = '{}/{}/{}_{}'.format(self.download_path.replace('"', ''), keyword, site_name,
+                                                   str(index).zfill(4))
                 path = no_ext_path + '.' + ext
                 self.save_object_to_file(response, path, is_base64=is_base64)
 
@@ -200,7 +193,7 @@ class AutoCrawler:
         add_url = Sites.get_face_url(site_code) if self.face else ""
 
         try:
-            collect = CollectLinks(no_gui=self.no_gui)  # initialize chrome driver
+            collect = CollectLinks(no_gui=self.no_gui, no_driver=self.no_driver)  # initialize chrome driver
         except Exception as e:
             print('Error occurred while initializing chromedriver - {}'.format(e))
             return
@@ -211,14 +204,8 @@ class AutoCrawler:
             if site_code == Sites.GOOGLE:
                 links = collect.google(keyword, add_url)
 
-            elif site_code == Sites.NAVER:
-                links = collect.naver(keyword, add_url)
-
             elif site_code == Sites.GOOGLE_FULL:
-                links = collect.google_full(keyword, add_url)
-
-            elif site_code == Sites.NAVER_FULL:
-                links = collect.naver_full(keyword, add_url)
+                links = collect.google_full(keyword, add_url, self.limit)
 
             else:
                 print('Invalid Site Code')
@@ -251,12 +238,6 @@ class AutoCrawler:
                     tasks.append([keyword, Sites.GOOGLE_FULL])
                 else:
                     tasks.append([keyword, Sites.GOOGLE])
-
-            if self.do_naver:
-                if self.full_resolution:
-                    tasks.append([keyword, Sites.NAVER_FULL])
-                else:
-                    tasks.append([keyword, Sites.NAVER])
 
         pool = Pool(self.n_threads)
         pool.map_async(self.download, tasks)
@@ -316,23 +297,28 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--skip', type=str, default='true',
                         help='Skips keyword already downloaded before. This is needed when re-downloading.')
-    parser.add_argument('--threads', type=int, default=1, help='Number of threads to download.')
+    parser.add_argument('--threads', type=int, default=4, help='Number of threads to download.')
     parser.add_argument('--google', type=str, default='true', help='Download from google.com (boolean)')
-    parser.add_argument('--naver', type=str, default='false', help='Download from naver.com (boolean)')
-    parser.add_argument('--full', type=str, default='false', help='Download full resolution image instead of thumbnails (slow)')
+    parser.add_argument('--full', type=str, default='false',
+                        help='Download full resolution image instead of thumbnails (slow)')
     parser.add_argument('--face', type=str, default='false', help='Face search mode')
-    parser.add_argument('--no_gui', type=str, default='auto', help='No GUI mode. Acceleration for full_resolution mode. '
-                                                                   'But unstable on thumbnail mode. '
-                                                                    'Default: "auto" - false if full=false, true if full=true')
-    parser.add_argument('--limit', type=int, default=100, help='Maximum count of images to download per site. (0: infinite)')
-    parser.add_argument('--keyword_list', type=str, default="['Brandenburger Tor', 'Alexanderplatz']", help='List of keywords that will be downloaded')
+    parser.add_argument('--no_gui', type=str, default='auto',
+                        help='No GUI mode. Acceleration for full_resolution mode. '
+                             'But unstable on thumbnail mode. '
+                             'Default: "auto" - false if full=false, true if full=true')
+    parser.add_argument('--limit', type=int, default=0,
+                        help='Maximum count of images to download per site. (0: infinite)')
+    parser.add_argument('--no_driver', type=str, default='false',
+                        help='Whether a preconfigured driver should not be used (by default false, meaning it will)')
+    parser.add_argument('--keyword_list', type=str, default="['Brandenburger Tor', 'Alexanderplatz']",
+                        help='List of keywords that will be downloaded')
     args = parser.parse_args()
 
     _skip = False if str(args.skip).lower() == 'false' else True
     _threads = args.threads
     _google = False if str(args.google).lower() == 'false' else True
-    _naver = False if str(args.naver).lower() == 'false' else True
     _full = False if str(args.full).lower() == 'false' else True
+    _no_driver = True if str(args.no_driver).lower() == 'true' else False
     _face = False if str(args.face).lower() == 'false' else True
     _limit = int(args.limit)
     _keywords = args.keyword_list
@@ -345,10 +331,12 @@ if __name__ == '__main__':
     else:
         _no_gui = False
 
-    print('Options - skip:{}, threads:{}, google:{}, naver:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, keyword_list:{}'
-          .format(_skip, _threads, _google, _naver, _full, _face, _no_gui, _limit, _keywords))
+    print(
+        'Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, keyword_list:{}, '
+        'no_driver:{} '
+        .format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _keywords, _no_driver))
 
     crawler = AutoCrawler(skip_already_exist=_skip, n_threads=_threads,
-                          do_google=_google, do_naver=_naver, full_resolution=_full,
-                          face=_face, no_gui=_no_gui, limit=_limit, keyword_list=_keywords)
+                          do_google=_google, full_resolution=_full,
+                          face=_face, no_gui=_no_gui, limit=_limit, keyword_list=_keywords, no_driver=_no_driver)
     crawler.do_crawling()
