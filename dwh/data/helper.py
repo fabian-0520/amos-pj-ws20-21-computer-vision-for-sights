@@ -32,7 +32,7 @@ def insert_image():
 
 
 def getRecordData():
-    with open('./amos/tests/fixtures/data.json') as f:
+    with open('./dwh/tests/fixtures/data.json') as f:
         data = json.load(f)
         f = open(data["sightImage"], 'rb')
         filedata = f.read()
