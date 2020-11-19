@@ -1,0 +1,11 @@
+{
+  "id": "12345678-abcd-1234-abcd-1234567890ab",
+  "sightName": "Brandenburger Tor",
+  "sightImage": "./amos/tests/fixtures/images/Berlin_Brandenburger_Tor_BW_2.jpg",
+  "sightCity": "Berlin",
+  "sightImageResolution": "1920*1250",
+  "sightImageDataSource": "https://de.wikipedia.org/wiki/Brandenburger_Tor#/media/Datei:Berlin_Brandenburger_Tor_BW_2.jpg"
+}
+
+
+
