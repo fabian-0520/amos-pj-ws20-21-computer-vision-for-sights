@@ -2,12 +2,11 @@
 
 Either run locally (by following steps below) or in docker container (Dockerfile)
 
-Dockerfile is still WIP
-
-TODOS: collecting sight lists for city, getting it to run properly inside container
+With docker: `docker run --name crawler image_name "['keyword','list','here']"` where the image name is the image tag 
+you set for the configuration.
 
 ## AutoCrawler library
-Google, Naver multiprocess image crawler (High Quality & Speed & Customizable)
+Google multiprocess image crawler (High Quality & Speed & Customizable)
 
 ### How to use
 
@@ -35,8 +34,6 @@ python3 main.py [--skip true] [--threads 4] [--google true] [--naver true] [--fu
 
 --google true      Download from google.com (boolean)
 
---naver true       Download from naver.com (boolean)
-
 --full false       Download full resolution image instead of thumbnails (slow)
 
 --face false       Face search mode
@@ -46,6 +43,10 @@ python3 main.py [--skip true] [--threads 4] [--google true] [--naver true] [--fu
                    (can be used for docker linux system)
                    
 --limit 0          Maximum count of images to download per site. (0: infinite)
+
+--no_driver false Whether a driver should be used
+
+--keyword_list ['Brandenburger Tor'] The list of keyowrds that the crawler will extract.
 ```
 
 
@@ -61,24 +62,3 @@ Detects data imbalance based on number of files.
 When crawling ends, the message show you what directory has under 50% of average files.
 
 I recommend you to remove those directories and re-download.
-
-
-### Remote crawling through SSH on your server
-
-```
-sudo apt-get install xvfb <- This is virtual display
-
-sudo apt-get install screen <- This will allow you to close SSH terminal while running.
-
-screen -S s1
-
-Xvfb :99 -ac & DISPLAY=:99 python3 main.py
-```
-
-### Customize
-
-You can make your own crawler by changing collect_links.py
-
-### Issues
-
-As google site consistently changes, please make issues if it doesn't work.
