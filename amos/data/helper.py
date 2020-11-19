@@ -1,5 +1,7 @@
-import psycopg2
 import json
+
+import psycopg2
+
 from config import config
 
 
@@ -8,6 +10,8 @@ def helper():
 
 
 def insert_image():
+    sql = """INSERT INTO load_layer.sight_images (sight_name, sight_image,sight_city, sight_image_resolution, 
+    sight_image_data_source) VALUES (%s,%s,%s,%s,%s) RETURNING id"""
     connection = None
     try:
         params = config()
@@ -15,7 +19,6 @@ def insert_image():
         connection.autocommit = True
         cursor = connection.cursor()
 
-        sql = """ INSERT INTO load_layer.sight_images (sight_name, sight_image, sight_city, sight_image_resolution, sight_image_data_source) VALUES (%s,%s,%s,%s,%s) RETURNING id"""
         record_to_insert = getRecordData()
         cursor.execute(sql, record_to_insert)
         connection.commit()
@@ -25,21 +28,26 @@ def insert_image():
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL", error)
     finally:
-        if(connection):
+        if connection:
             cursor.close()
             connection.close()
             print("PostgreSQL connection is closed")
 
 
 def getRecordData():
-    with open('./amos/tests/fixtures/data.json') as f:
+    with open("./amos/tests/fixtures/data.json") as f:
         data = json.load(f)
-        f = open(data["sightImage"], 'rb')
+        f = open(data["sightImage"], "rb")
         filedata = f.read()
-        data_record = (data["sightName"], filedata,
-                       data["sightCity"], data["sightImageResolution"], data["sightImageDataSource"])
+        data_record = (
+            data["sightName"],
+            filedata,
+            data["sightCity"],
+            data["sightImageResolution"],
+            data["sightImageDataSource"],
+        )
         return data_record
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     insert_image()

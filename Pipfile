@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 psycopg2 = "*"
+black = "*"
 
 [dev-packages]
 flake8 = "*"

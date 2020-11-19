@@ -1,0 +1,16 @@
+{
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true
+  },
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true,
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": ["--max-line-length", "120"],
+  "python.pythonPath": "~/.local/share/virtualenvs/amos-pj-ws20-21-computer-vision-for-sights-uuKEXR7g/bin/python",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-python.python",
+  "editor.formatOnSaveTimeout": 3000,  
+  "python.languageServer": "Pylance"
+}
