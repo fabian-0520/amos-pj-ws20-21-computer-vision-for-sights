@@ -18,7 +18,9 @@ create table if not exists load_layer.sight_images (
 	sight_image bytea not null,
 	sight_city VARCHAR(100) not null,			
 	sight_image_width INT not null,  
-	sight_image_height INT not null,  
+	sight_image_height INT not null, 
+	sight_image_bounding_box_x1y1 point not null,
+	sight_image_bounding_box_x2y2 point not null,
 	sight_image_data_source VARCHAR(300) not null,
 	primary key (id)
 );
@@ -56,6 +58,8 @@ create table if not exists integration_layer.dim_sights_images(
 	image_id serial not null,
 	image_file BYTEA not null,
 	image_source VARCHAR(300) not null,
+	image_bounding_box_x1y1 point not null,
+	image_bounding_box_x2y2 point not null,
 	primary key (image_id)
 );
 
@@ -158,7 +162,7 @@ begin
 	end if;
 
 	-- foreign keys for model entities
-  	if not exists (SELECT 1 FROM pg_constraint WHERE conname = 'models_city_id_fk') THEN
+  if not exists (SELECT 1 FROM pg_constraint WHERE conname = 'models_city_id_fk') THEN
 		alter table integration_layer.fact_models 
 		add constraint models_city_id_fk 
 		foreign key (city_id) 
@@ -184,7 +188,7 @@ $$;
 -- create automated load job for image pushes
 CREATE OR REPLACE FUNCTION load_images_into_dwh()
   RETURNS trigger as $$
-  	declare formatted_city VARCHAR(100) := NULL;
+  declare formatted_city VARCHAR(100) := NULL;
 	declare temp_city_key INTEGER := NULL;   
 	declare temp_image_key INTEGER := NULL; 
 	declare temp_fact_key INTEGER := NULL; 
@@ -215,7 +219,8 @@ begin
 	-- get sights images dimension table key
 	temp_image_key := (select image_id from integration_layer.dim_sights_images where image_source = new.sight_image_data_source limit 1);
 	if temp_image_key is null then
-		INSERT INTO integration_layer.dim_sights_images(image_file, image_source) values (new.sight_image, new.sight_image_data_source);
+		INSERT INTO integration_layer.dim_sights_images(image_file, image_source, image_bounding_box_x1y1, image_bounding_box_x2y2) 
+		values (new.sight_image, new.sight_image_data_source, new.sight_image_bounding_box_x1y1, new.sight_image_bounding_box_x2y2);
 		temp_image_key := (select image_id from integration_layer.dim_sights_images where image_source = new.sight_image_data_source limit 1);
 	end if;
 
@@ -285,7 +290,7 @@ create sequence if not exists trained_model_surrogate_key_sequuence;
 -- create load job for model pushes
 CREATE OR REPLACE FUNCTION load_models_into_dwh()
   RETURNS trigger as $$
-  	declare formatted_city VARCHAR(100) := (select UPPER(regexp_replace(NEW.city,'[^-0-9A-Za-zÖÜÄßöüä ]','')));
+  declare formatted_city VARCHAR(100) := (select UPPER(regexp_replace(NEW.city,'[^-0-9A-Za-zÖÜÄßöüä ]','')));
 	declare temp_city_key INTEGER := NULL;   
 	declare temp_trained_model_key INTEGER := NULL;   
 	declare temp_timestamp_key INTEGER := NULL;   
