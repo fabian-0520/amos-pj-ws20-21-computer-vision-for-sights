@@ -70,7 +70,7 @@ class AutoCrawler:
         self.no_gui = no_gui
         self.limit = limit
         self.no_driver = no_driver
-        self.keyword_list = ast.literal_eval(keyword_list)
+        self.keyword_list = keyword_list
 
         os.makedirs('./{}'.format(self.download_path), exist_ok=True)
 
@@ -340,10 +340,11 @@ if __name__ == '__main__':
         'no_driver:{}, apikey:{} '.format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _coordinates,
                                           _no_driver, _apikey))
 
-    lat = _coordinates[0]
-    lng = _coordinates[1]
-    sights = get_sights(lat=lat, lng=lng, apikey=_apikey)
-
+    parsed_coordinates = ast.literal_eval(_coordinates)
+    lat = parsed_coordinates[0]
+    lng = parsed_coordinates[1]
+    sights = get_sights(lat=lat, lng=lng)
+    print(f"Sights: {sights}")
     crawler = AutoCrawler(skip_already_exist=_skip, n_threads=_threads,
                           do_google=_google, full_resolution=_full,
                           face=_face, no_gui=_no_gui, limit=_limit, keyword_list=sights, no_driver=_no_driver)
