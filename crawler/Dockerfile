@@ -17,6 +17,6 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # run crawler with no gui (important, this only works if this is the case)
-ENTRYPOINT ["python3", "main.py","--no_gui","true","--full", "true","--limit", "10","--no_driver","true","--coordinates"]
-CMD ["[52.520008, 13.404954]"]
-# To run: docker run --name crawler image_name "['keyword','list','here']"
+ENTRYPOINT ["python3", "main.py","--no_gui","true","--full", "true","--limit", "10","--no_driver","true","--region"]
+CMD ["Berlin"]
+# To run: docker run --name crawler image_name "location_name"

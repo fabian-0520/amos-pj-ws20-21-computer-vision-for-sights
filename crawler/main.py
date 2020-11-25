@@ -312,9 +312,10 @@ if __name__ == '__main__':
                         help='Maximum count of images to download per site. (0: infinite)')
     parser.add_argument('--no_driver', type=str, default='false',
                         help='Whether a preconfigured driver should not be used (by default false, meaning it will)')
-    parser.add_argument('--coordinates', type=str, default="['52.520008, '13.404954']",
-                        help='List of coordinates (lat, lng) that will be used to find sights')
-    parser.add_argument('--apikey', type=str, default="", help="The api key used for accessing the OpenTripMap API")
+    parser.add_argument('--region', type=str, default="Berlin",
+                        help='The region sights need to be found for')
+    parser.add_argument('--sights_limit', type=int, default=10,
+                        help="The limit of sights to be found by the collector api")
     args = parser.parse_args()
 
     _skip = False if str(args.skip).lower() == 'false' else True
@@ -324,8 +325,8 @@ if __name__ == '__main__':
     _no_driver = True if str(args.no_driver).lower() == 'true' else False
     _face = False if str(args.face).lower() == 'false' else True
     _limit = int(args.limit)
-    _coordinates = args.coordinates
-    _apikey = args.apikey
+    _region = args.region
+    _sights_limit = args.sights_limit
 
     no_gui_input = str(args.no_gui).lower()
     if no_gui_input == 'auto':
@@ -336,14 +337,11 @@ if __name__ == '__main__':
         _no_gui = False
 
     print(
-        'Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, coordinates:{}, '
-        'no_driver:{}, apikey:{} '.format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _coordinates,
-                                          _no_driver, _apikey))
+        'Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, region:{}, '
+        'no_driver:{}, sights_limit:{} '.format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _region,
+                                                _no_driver, _sights_limit))
 
-    parsed_coordinates = ast.literal_eval(_coordinates)
-    lat = parsed_coordinates[0]
-    lng = parsed_coordinates[1]
-    sights = get_sights(lat=lat, lng=lng)
+    sights = get_sights(region=_region, sights_limit=_sights_limit)
     print(f"Sights: {sights}")
     crawler = AutoCrawler(skip_already_exist=_skip, n_threads=_threads,
                           do_google=_google, full_resolution=_full,
