@@ -50,7 +50,6 @@ def getImageData():
             try:
                 cursor.execute(sql)
                 row = cursor.fetchone()
-                print(row)
                 file = open("test.png", "wb")
                 file.write(row[1])
 

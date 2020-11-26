@@ -141,8 +141,7 @@ class AutoCrawler:
                 else:
                     shutil.copyfileobj(object.raw, file)
             with open("{}".format(file_path), "rb") as file:
-                print(site_name)
-                db.insert(keyword + file_path, file.read(), "10", "10", file_path)
+                db.insert(file.read(), "10", "10", file_path)
         except Exception as e:
             print("Save failed - {}".format(e))
 
