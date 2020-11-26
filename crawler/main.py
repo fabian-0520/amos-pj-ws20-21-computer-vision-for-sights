@@ -24,6 +24,8 @@ import imghdr
 import base64
 import ast
 
+from sight_collector import get_sights
+
 
 class Sites:
     GOOGLE = 1
@@ -68,7 +70,7 @@ class AutoCrawler:
         self.no_gui = no_gui
         self.limit = limit
         self.no_driver = no_driver
-        self.keyword_list = ast.literal_eval(keyword_list)
+        self.keyword_list = keyword_list
 
         os.makedirs('./{}'.format(self.download_path), exist_ok=True)
 
@@ -310,8 +312,10 @@ if __name__ == '__main__':
                         help='Maximum count of images to download per site. (0: infinite)')
     parser.add_argument('--no_driver', type=str, default='false',
                         help='Whether a preconfigured driver should not be used (by default false, meaning it will)')
-    parser.add_argument('--keyword_list', type=str, default="['Brandenburger Tor', 'Alexanderplatz']",
-                        help='List of keywords that will be downloaded')
+    parser.add_argument('--region', type=str, default="Berlin",
+                        help='The region sights need to be found for')
+    parser.add_argument('--sights_limit', type=int, default=10,
+                        help="The limit of sights to be found by the collector api")
     args = parser.parse_args()
 
     _skip = False if str(args.skip).lower() == 'false' else True
@@ -321,7 +325,8 @@ if __name__ == '__main__':
     _no_driver = True if str(args.no_driver).lower() == 'true' else False
     _face = False if str(args.face).lower() == 'false' else True
     _limit = int(args.limit)
-    _keywords = args.keyword_list
+    _region = args.region
+    _sights_limit = args.sights_limit
 
     no_gui_input = str(args.no_gui).lower()
     if no_gui_input == 'auto':
@@ -332,11 +337,13 @@ if __name__ == '__main__':
         _no_gui = False
 
     print(
-        'Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, keyword_list:{}, '
-        'no_driver:{} '
-        .format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _keywords, _no_driver))
+        'Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, region:{}, '
+        'no_driver:{}, sights_limit:{} '.format(_skip, _threads, _google, _full, _face, _no_gui, _limit, _region,
+                                                _no_driver, _sights_limit))
 
+    sights = get_sights(region=_region, sights_limit=_sights_limit)
+    print(f"Sights: {sights}")
     crawler = AutoCrawler(skip_already_exist=_skip, n_threads=_threads,
                           do_google=_google, full_resolution=_full,
-                          face=_face, no_gui=_no_gui, limit=_limit, keyword_list=_keywords, no_driver=_no_driver)
+                          face=_face, no_gui=_no_gui, limit=_limit, keyword_list=sights, no_driver=_no_driver)
     crawler.do_crawling()
