@@ -2,8 +2,10 @@
 
 Either run locally (by following steps below) or in docker container (Dockerfile)
 
-With docker: `docker run --name crawler image_name "['keyword','list','here']"` where the image name is the image tag 
+With docker: `docker run --name crawler image_name "location_here"` where the image name is the image tag 
 you set for the configuration.
+
+This only works if you also have your api keys in .env in the same directory as this README.
 
 ## AutoCrawler library
 Google multiprocess image crawler (High Quality & Speed & Customizable)
@@ -14,7 +16,7 @@ Google multiprocess image crawler (High Quality & Speed & Customizable)
 
 2. pip install -r requirements.txt
 
-3. Write search keywords in keywords.txt
+3. Write relevant runtime args
 
 4. **Run "main.py"**
 
@@ -22,10 +24,6 @@ Google multiprocess image crawler (High Quality & Speed & Customizable)
 
 
 ### Arguments
-usage:
-```
-python3 main.py [--skip true] [--threads 4] [--google true] [--naver true] [--full false] [--face false] [--no_gui auto] [--limit 0]
-```
 
 ```
 --skip true        Skips keyword if downloaded directory already exists. This is needed when re-downloading.
@@ -46,7 +44,9 @@ python3 main.py [--skip true] [--threads 4] [--google true] [--naver true] [--fu
 
 --no_driver false Whether a driver should be used
 
---keyword_list ['Brandenburger Tor'] The list of keyowrds that the crawler will extract.
+--location 'Berlin' The location keywords need to be found for.
+
+--sights_limit The limit of sights to be found by the collector api
 ```
 
 

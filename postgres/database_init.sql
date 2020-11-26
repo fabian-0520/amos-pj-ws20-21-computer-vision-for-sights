@@ -27,9 +27,7 @@ create table if not exists load_layer.sight_images (
 	sight_image bytea not null,
 	sight_city VARCHAR(100) not null,			
 	sight_image_width INT not null,  
-	sight_image_height INT not null, 
-	sight_image_bounding_box_x1y1 point not null,
-	sight_image_bounding_box_x2y2 point not null,
+	sight_image_height INT not null,  
 	sight_image_data_source VARCHAR(300) not null,
 	primary key (id)
 );
@@ -165,7 +163,7 @@ begin
 	end if;
 
 	-- foreign keys for model entities
-  if not exists (SELECT 1 FROM pg_constraint WHERE conname = 'models_city_id_fk') THEN
+  	if not exists (SELECT 1 FROM pg_constraint WHERE conname = 'models_city_id_fk') THEN
 		alter table integration_layer.fact_models 
 		add constraint models_city_id_fk 
 		foreign key (city_id) 
@@ -191,7 +189,7 @@ $$;
 -- create automated load job for image pushes
 CREATE OR REPLACE FUNCTION load_images_into_dwh()
   RETURNS trigger as $$
-  declare formatted_city VARCHAR(100) := NULL;
+  	declare formatted_city VARCHAR(100) := NULL;
 	declare temp_city_key INTEGER := NULL;   
 	declare temp_image_key INTEGER := NULL; 
 	declare temp_fact_key INTEGER := NULL; 
@@ -295,7 +293,7 @@ create sequence if not exists trained_model_surrogate_key_sequuence;
 -- create load job for model pushes
 CREATE OR REPLACE FUNCTION load_models_into_dwh()
   RETURNS trigger as $$
-  declare formatted_city VARCHAR(100) := (select UPPER(regexp_replace(NEW.city,'[^-0-9A-Za-zÖÜÄßöüä ]','')));
+  	declare formatted_city VARCHAR(100) := (select UPPER(regexp_replace(NEW.city,'[^-0-9A-Za-zÖÜÄßöüä ]','')));
 	declare temp_city_key INTEGER := NULL;   
 	declare temp_trained_model_key INTEGER := NULL;   
 	declare temp_timestamp_key INTEGER := NULL;   
@@ -398,3 +396,34 @@ RETURNS INT AS $$
 $$ LANGUAGE plpgsql;
 
 select RefreshAllMaterializedViews('data_mart_layer');
+
+
+
+
+
+
+-- demonstration
+-- insert images without labels into load layer
+insert into load_layer.sight_images(sight_image, sight_city, sight_image_height, sight_image_width, sight_image_data_source) 
+values 
+('image_file1', 'city1', 1080, 1920, 'https://xd.com/1621401'),
+('image_file2', 'city2', 1080, 1920, 'https://xd.com/1621402'),
+('image_file3', 'city3', 1080, 1920, 'https://xd.com/1621403'),
+('image_file4', 'city4', 1080, 1920, 'https://xd.com/1621404');
+
+-- see that images are transferred, but without labels
+select * from integration_layer.dim_sights_images;
+
+-- insert labels for inserted images
+insert into load_layer.sight_image_labels (sight_image_data_source, sight_labels) 
+values 
+('https://xd.com/1621401', '{"(11, 11, 21, 21, sight0)", "(15, 15, 25, 25, sight1)"}'),
+('https://xd.com/1621402', '{"(12, 12, 22, 22, sight0)", "(15, 15, 25, 25, sight1)"}'),
+('https://xd.com/1621403', '{"(13, 13, 23, 23, sight0)", "(15, 15, 25, 25, sight1)"}'),
+('https://xd.com/1621404', '{"(14, 14, 24, 24, sight0)", "(15, 15, 25, 25, sight1)"}');
+
+-- see that label merges into integration layer are completed
+SELECT a.image_source , c.ul_x, c.ul_y, c.lr_x, c.lr_y, c.box_label
+FROM   integration_layer.dim_sights_images as a, unnest(a.image_labels) c
+	
+							
