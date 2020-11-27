@@ -43,6 +43,7 @@ create table if not exists load_layer.trained_models (
 	id serial not null,
 	city VARCHAR(100) not null,
 	trained_model bytea not null,
+	n_considered_images int not null,
 	mapping_table json not null,
 	primary key (id)
 );
@@ -88,6 +89,7 @@ create table if not exists integration_layer.dim_models_trained_models (
 	trained_model_id serial not null,
 	trained_model_model BYTEA not null,
 	output_sight_mapping json not null,
+	n_considered_images int not null,
 	surrogate_key INT not null,
 	primary key (trained_model_id)
 );
@@ -316,8 +318,8 @@ begin
 	end if;
 
 	-- get trained models dimension table key
-	INSERT INTO integration_layer.dim_models_trained_models(trained_model_model, output_sight_mapping, surrogate_key) 
-		values (new.trained_model, new.mapping_table, temp_trained_model_surrogate_key);
+	INSERT INTO integration_layer.dim_models_trained_models(trained_model_model, output_sight_mapping, surrogate_key, n_considered_images) 
+		values (new.trained_model, new.mapping_table, temp_trained_model_surrogate_key, NEW.n_considered_images);
 	temp_trained_model_key := (select trained_model_id from integration_layer.dim_models_trained_models 
 								where surrogate_key = temp_trained_model_surrogate_key limit 1);
 
@@ -396,34 +398,3 @@ RETURNS INT AS $$
 $$ LANGUAGE plpgsql;
 
 select RefreshAllMaterializedViews('data_mart_layer');
-
-
-
-
-
-
--- demonstration
--- insert images without labels into load layer
-insert into load_layer.sight_images(sight_image, sight_city, sight_image_height, sight_image_width, sight_image_data_source) 
-values 
-('image_file1', 'city1', 1080, 1920, 'https://xd.com/1621401'),
-('image_file2', 'city2', 1080, 1920, 'https://xd.com/1621402'),
-('image_file3', 'city3', 1080, 1920, 'https://xd.com/1621403'),
-('image_file4', 'city4', 1080, 1920, 'https://xd.com/1621404');
-
--- see that images are transferred, but without labels
-select * from integration_layer.dim_sights_images;
-
--- insert labels for inserted images
-insert into load_layer.sight_image_labels (sight_image_data_source, sight_labels) 
-values 
-('https://xd.com/1621401', '{"(11, 11, 21, 21, sight0)", "(15, 15, 25, 25, sight1)"}'),
-('https://xd.com/1621402', '{"(12, 12, 22, 22, sight0)", "(15, 15, 25, 25, sight1)"}'),
-('https://xd.com/1621403', '{"(13, 13, 23, 23, sight0)", "(15, 15, 25, 25, sight1)"}'),
-('https://xd.com/1621404', '{"(14, 14, 24, 24, sight0)", "(15, 15, 25, 25, sight1)"}');
-
--- see that label merges into integration layer are completed
-SELECT a.image_source , c.ul_x, c.ul_y, c.lr_x, c.lr_y, c.box_label
-FROM   integration_layer.dim_sights_images as a, unnest(a.image_labels) c
-	
-							
