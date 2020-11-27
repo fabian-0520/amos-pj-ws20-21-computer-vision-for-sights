@@ -11,6 +11,7 @@ docker run  -e MTS_ENDPOINT_URL=<MTS_ENDPOINT_URL>
             -e ILS_ENDPOINT_URL=<ILS_ENDPOINT_URL>
             -e REFRESH_DATA_MARTS_EVERY_SECONDS=5 
             -e ENABLE_MODEL_TRAINING_EVERY_SECONDS=10 
+            -e ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=10
             -it data_mart_refresher
             
             
