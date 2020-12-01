@@ -24,7 +24,9 @@ def trigger_city_image_labelling() -> None:
     POST request with the city name as a path parameter.
     """
     ils_training_service_url = (
-        environ["ILS_ENDPOINT_URL"][:-1] if environ["ILS_ENDPOINT_URL"][-1] == "/" else environ["ILS_ENDPOINT_URL"]
+        environ["DATA_MART_MTS_ENDPOINT_URL"][:-1]
+        if environ["DATA_MART_MTS_ENDPOINT_URL"][-1] == "/"
+        else environ["DATA_MART_MTS_ENDPOINT_URL"]
     )
     city_without_image_labels_query = """
         SELECT dim_cities.city_name AS city_name
@@ -61,7 +63,9 @@ def trigger_city_model_training() -> None:
     POST request with the city name as a path parameter.
     """
     mts_training_service_url = (
-        environ["MTS_ENDPOINT_URL"][:-1] if environ["MTS_ENDPOINT_URL"][-1] == "/" else environ["MTS_ENDPOINT_URL"]
+        environ["DATA_MART_MTS_ENDPOINT_URL"][:-1]
+        if environ["DATA_MART_MTS_ENDPOINT_URL"][-1] == "/"
+        else environ["DATA_MART_MTS_ENDPOINT_URL"]
     )
     city_without_model_query = """
         SELECT city_dim.city_name AS city_name

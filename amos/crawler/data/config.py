@@ -1,5 +1,8 @@
 """This module yields the configuration parameters to the external DWH."""
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def config():

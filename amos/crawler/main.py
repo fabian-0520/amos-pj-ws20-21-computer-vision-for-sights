@@ -23,7 +23,7 @@ from collect_links import CollectLinks
 import imghdr
 import base64
 
-from data.sql_exec import exec_sql
+from data.image import insert_image
 from sight_collector import get_sights
 
 
@@ -141,7 +141,7 @@ class AutoCrawler:
                 else:
                     shutil.copyfileobj(object.raw, file)
             with open("{}".format(file_path), "rb") as file:
-                db.insert(file.read(), "10", "10", file_path)
+                insert_image(file.read(), "10", "10", file_path)
         except Exception as e:
             print("Save failed - {}".format(e))
 
@@ -371,7 +371,7 @@ if __name__ == "__main__":
     )
 
     sights = get_sights(region=_region, sights_limit=_sights_limit)
-    print(f"Sights: {sights}")
+    print("Sights: {0}".format(sights))
     crawler = AutoCrawler(
         skip_already_exist=_skip,
         n_threads=_threads,

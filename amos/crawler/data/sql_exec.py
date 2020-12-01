@@ -4,7 +4,7 @@ from data.config import config
 from psycopg2 import connect
 
 
-def exec_sql(postgres_sql_string: str, return_result=False) -> Optional[object]:
+def exec_sql(postgres_sql_string: str, postgres_sql_values=None, return_result=False) -> Optional[object]:
     """Executes a given PostgreSQL string on the DWH and potentially returns the query result.
 
     Parameters
@@ -26,7 +26,10 @@ def exec_sql(postgres_sql_string: str, return_result=False) -> Optional[object]:
         with connection.cursor() as cursor:
 
             try:
-                cursor.execute(postgres_sql_string)
+                if postgres_sql_values is None:
+                    cursor.execute(postgres_sql_string)
+                else:
+                    cursor.execute(postgres_sql_string, postgres_sql_values)
                 connection.commit()
                 cursor_result = cursor.fetchone()
                 result = cursor_result[0] if (return_result and cursor_result is not None) else return_result

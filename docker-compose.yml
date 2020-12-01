@@ -4,10 +4,21 @@ services:
     image: postgres:v1
     build: ./postgres
     ports:
-      - "5432:5432"
+    - "5432:5432"
   crawler:
     image: crawler:v1
     build: ./amos/crawler
+    environment:
+    - apikey=5ae2e3f221c38a28845f05b657103b8ad7a5a87a5a05a7d8123341a3
+    - maps_key=AIzaSyBVHy7kHw6zDfNowu2CVhmEPDwnZoMhvyw
+    - PGHOST=postgres
+    - PGDATABASE=docker
+    - PGPORT=5432
+    - PGUSER=docker
+    - PGPASSWORD=docker
+
   data_mart_refresher:
     image: data_mart_refresher:v1
     build: ./amos/data_mart_refresher
+    env_file:
+    - .env
