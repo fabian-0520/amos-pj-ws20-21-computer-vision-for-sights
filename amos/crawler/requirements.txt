@@ -1,6 +1,10 @@
+psycopg2
 certifi
 chardet
 idna
 requests
 selenium
 python-dotenv
+coverage
+mock
+pytest

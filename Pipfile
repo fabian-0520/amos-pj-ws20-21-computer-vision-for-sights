@@ -5,7 +5,15 @@ name = "pypi"
 
 [packages]
 psycopg2 = "*"
+psycopg2-binary = "*"
 schedule = "*"
+certifi = "*"
+chardet = "*"
+idna = "*"
+requests = "*"
+selenium = "*"
+python-dotenv = "*"
+
 
 [dev-packages]
 flake8 = "*"

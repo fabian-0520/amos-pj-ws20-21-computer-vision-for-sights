@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:v1
+    build: ./postgres
+    ports:
+      - "5432:5432"
+  crawler:
+    image: crawler:v1
+    build: ./amos/crawler
+  data_mart_refresher:
+    image: data_mart_refresher:v1
+    build: ./amos/data_mart_refresher

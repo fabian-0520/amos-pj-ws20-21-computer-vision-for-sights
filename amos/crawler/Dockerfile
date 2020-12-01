@@ -14,7 +14,7 @@ WORKDIR /crawler
 COPY . .
 
 # Install selenium & co
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # run crawler with no gui (important, this only works if this is the case)
 ENTRYPOINT ["python3", "main.py","--no_gui","true","--full", "true","--limit", "10","--no_driver","true","--region"]
