@@ -5,11 +5,14 @@ name = "pypi"
 
 [packages]
 psycopg2 = "*"
+schedule = "*"
 
 [dev-packages]
 flake8 = "*"
 pytest = "*"
 pytest-cov = "*"
+coverage = "*"
+mock = "*"
 
 [requires]
 python_version = "3.9"
