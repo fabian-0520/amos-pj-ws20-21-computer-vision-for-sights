@@ -1,0 +1,6 @@
+coverage
+mock
+psycopg2-binary
+pytest
+requests
+schedule
