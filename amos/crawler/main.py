@@ -19,12 +19,12 @@ import requests
 import shutil
 from multiprocessing import Pool
 import argparse
-from collect_links import CollectLinks
+from .collect_links import CollectLinks
 import imghdr
 import base64
 
 from data import helper as db
-from sight_collector import get_sights
+from .sight_collector import get_sights
 
 
 class Sites:

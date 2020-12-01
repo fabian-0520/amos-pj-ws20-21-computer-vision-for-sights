@@ -32,13 +32,13 @@ class CollectLinks:
 
         if platform.system() == 'Windows':
             print('Detected OS : Windows')
-            executable = './chromedriver/chromedriver_win.exe'
+            executable = './crawler/chromedriver/chromedriver_win.exe'
         elif platform.system() == 'Linux':
             print('Detected OS : Linux')
-            executable = './chromedriver/chromedriver_linux'
+            executable = './crawler/chromedriver/chromedriver_linux'
         elif platform.system() == 'Darwin':
             print('Detected OS : Mac')
-            executable = './chromedriver/chromedriver_mac'
+            executable = './crawler/chromedriver/chromedriver_mac'
         else:
             raise OSError('Unknown OS Type')
 
@@ -74,8 +74,8 @@ class CollectLinks:
         print('Current chrome-driver version:\t{}'.format(chromedriver_version))
         if major_version_different:
             print('warning: Version different')
-            print(
-                'Download correct version at "http://chromedriver.chromium.org/downloads" and place in "./chromedriver"')
+            print(""" Download correct version at "http://chromedriver.chromium.org/downloads"
+                      'and place in "./chromedriver """)
         print('_________________________________')
 
     def get_scroll(self):
@@ -89,7 +89,7 @@ class CollectLinks:
             elem = w.until(EC.element_to_be_clickable((By.XPATH, xpath)))
             elem.click()
             self.highlight(elem)
-        except Exception as e:
+        except Exception:
             print('Click time out - {}'.format(xpath))
             print('Refreshing browser...')
             self.browser.refresh()
