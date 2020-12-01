@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "silicon-topic-297315",
+  "private_key_id": "3bd53df7dc136b9f85d85a98f49eb15994849218",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCs1vgDV3qTq+Q8\nxN/jqaeSfVnojAyEHQaQqbQHEykVihu5SHppWNqhJtJY9XAD94mKJXfgLUnNAg9N\nygG7Q2xYZHNO9NQSRx0KlMHU4b8ssF/fizrCMWH9Uti3L6LsG1edEFwocJIArbQd\ndFVKkgWOCH8kSaTU9r6Giyemq+an8TSZRT5i/ZQptbwQeqbp8aq+CKawmU5AVrYA\n0vZIALIKq9kE+cL8VJvJuPmmYCqE+HxKM/j0dxahVLaizj1XeLUijPam8943pHfd\nXtQNcg+uXu507R5VlYww6tTTmfJSxdhUCIykzFFMbawJ60gcDrzHw7RIpuEPqBG6\ncaNjH1LXAgMBAAECggEAVMg4LU92ccSSNxrtpjvc1rdFaJR2OUIRq9mK1SOZdhbi\nhY8feNicmgs0iG2Qrml43rqFZIJinr0Ba8uI8OZgWbWgeF0RQAwBG2Uf9YBs6gt0\nY+/keUiHBB/k7WrhFMdOwV06j520iL+sR/x+MA+TyPmzAEZdpBeLGu1cnF3bTYpu\nJJbK4holUjqvMzaL5uTGMn6E+jsAx/s9uNu+8tVSWyQ4Xp7sazZoenV/TbinZ+fS\neH59aqkORQWsad75y88PYbV181Y0ij46jTU3ubeh9hv8zAaEBJ+ktsF1b+W2LnSg\n9LSOfGanV7QwliLxTK+lUqZ3lPM97UzWAlMzUSZb0QKBgQDZSbt5MpXBsTkCBflq\nb6ZC4m+LF0Hrp8OsfVtoZqtNw1LUn5kHAN5sBEJH5KG9nLXbJxBfGUBKaNPK2b7s\nWbvuhWprSjjR2JxPfpDMlpfWD6/DIbDUvozQQEYoi02YhORpy3VXStA5P1xXZ5UE\nqDNvbAqAjAlDA3ofSR8ghq295wKBgQDLof+jofIrSEPz9n6+KRJP5/OPIehzzwwO\nxcL99oOGioN2IQjX1jf94+xm1h5HUOl9Q5sRKkgldfPrYwn5xFXMBtZERogfwRkC\neTiL9URSljtLzKIoVYruaok40uHca7sDeOlAEggCUwdp+yrTAHoXFw7A/5GIt7He\nVYVR4UzFkQKBgQC2qTINZ4XXJxlqZwVOAX++GEZ2od2LsiNfPJ57/FsjawCVt3jY\nF1Xjbg0eDMge8r859PPhTgPqyYbJrxS98Y13rPZSLTnoxnRYq2gkZLBNhjBWFFtn\n7KvJYU7ZRIm9nnG5sgz5je3PQkFpRK1UFeXvU97cQ1yB1klyRXECUdV6nwKBgEBc\ngZpMk2hOvPudC047WQhcfcTdqMUBygPZSdpPUh7yJL7vjgX6NVRP9+ZBAuzzi/kF\npztzq737XA8oDH0fKycDejG2QUwYEjmP6umBqgiYZ0F7+jzZXMIidiC5tp2eh0t/\nqemQSWvCpnM+6bgrTGuD5CvoGy2lMdjeGvdYSJWhAoGAYXsCfR5geztziPkkJ1mM\nAFJbbu4zymSeFiWmGPWgu8gRhzWEi/CSOsiw4SKnvrx5gXXTTc9RMWk/q6tirhW7\n20CeiP6iPNcx0Hmc/8MQwe8kGM3eRAw5Oe5y+qRMH6V+jlT+UoAwQRRWYypCDk4+\ns1Gs69ONgHPBB4nAcRo8oYo=\n-----END PRIVATE KEY-----\n",
+  "client_email": "image-labelling@silicon-topic-297315.iam.gserviceaccount.com",
+  "client_id": "105337841379094415696",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/image-labelling%40silicon-topic-297315.iam.gserviceaccount.com"
+}
