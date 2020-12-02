@@ -1,4 +1,4 @@
-from data.sql_exec import exec_sql
+from data_crawler.sql_exec import exec_sql
 from typing import BinaryIO
 
 

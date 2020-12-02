@@ -9,16 +9,29 @@ services:
     image: crawler:v1
     build: ./amos/crawler
     environment:
-    - apikey=5ae2e3f221c38a28845f05b657103b8ad7a5a87a5a05a7d8123341a3
-    - maps_key=AIzaSyBVHy7kHw6zDfNowu2CVhmEPDwnZoMhvyw
+    - apikey=${apikey}
+    - maps_key=${maps_key}
     - PGHOST=postgres
-    - PGDATABASE=docker
-    - PGPORT=5432
-    - PGUSER=docker
-    - PGPASSWORD=docker
+    - PGDATABASE=${PGDATABASE}
+    - PGPORT=${PGPORT}
+    - PGUSER=${PGUSER}
+    - PGPASSWORD=${PGPASSWORD}
+    depends_on:
+    - postgres
 
   data_mart_refresher:
     image: data_mart_refresher:v1
     build: ./amos/data_mart_refresher
-    env_file:
-    - .env
+    environment:
+    - PGHOST=postgres
+    - PGDATABASE=${PGDATABASE}
+    - PGPORT=${PGPORT}
+    - PGUSER=${PGUSER}
+    - PGPASSWORD=${PGPASSWORD}
+    - DATA_MART_MTS_ENDPOINT_URL=${DATA_MART_MTS_ENDPOINT_URL}
+    - DATA_MART_ILS_ENDPOINT_URL=${DATA_MART_ILS_ENDPOINT_URL}
+    - DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=${DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS}
+    - DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=${DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS}
+    - DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=${DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS}
+    depends_on:
+    - postgres

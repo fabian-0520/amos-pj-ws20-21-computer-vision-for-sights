@@ -1,4 +1,4 @@
-from data.config import config
+from data_crawler.config import config
 from pytest import raises
 
 

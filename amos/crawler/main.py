@@ -23,7 +23,7 @@ from collect_links import CollectLinks
 import imghdr
 import base64
 
-from data.image import insert_image
+from data_crawler.image import insert_image
 from sight_collector import get_sights
 
 

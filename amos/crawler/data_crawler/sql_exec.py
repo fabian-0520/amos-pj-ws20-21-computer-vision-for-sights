@@ -1,6 +1,6 @@
 """This module contains the psycopg2 database programming interface that is used across the application."""
 from typing import Optional
-from data.config import config
+from data_crawler.config import config
 from psycopg2 import connect
 
 
