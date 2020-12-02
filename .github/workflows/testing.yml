@@ -7,9 +7,10 @@ name: Code Testing
 
 on:
   push:
-    branches: [ main, develop, feature/29-setting_up_ci_cd ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop, feature/29-setting_up_ci_cd ]
+    branches:
+      - "**"
 
 jobs:
   build:
@@ -38,7 +39,7 @@ jobs:
         pytest
     - name: Test crawler code coverage
       run: |
-        pytest --cov=amos/data_mart_refresher
+        pytest --cov=amos/crawler
     - name: Test data_mart_refresher code coverage
       run: |
         pytest --cov=amos/data_mart_refresher
