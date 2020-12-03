@@ -5,9 +5,21 @@ name = "pypi"
 
 [packages]
 psycopg2 = "*"
+schedule = "*"
+certifi = "*"
+chardet = "*"
+idna = "*"
+requests = "*"
+selenium = "*"
+python-dotenv = "*"
+
 
 [dev-packages]
 flake8 = "*"
+pytest = "*"
+pytest-cov = "*"
+coverage = "*"
+mock = "*"
 
 [requires]
 python_version = "3.9"

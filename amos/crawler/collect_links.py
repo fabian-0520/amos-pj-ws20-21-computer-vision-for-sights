@@ -28,55 +28,57 @@ import os.path as osp
 
 class CollectLinks:
     def __init__(self, no_gui=False, no_driver=False):
-        executable = ''
+        executable = ""
 
-        if platform.system() == 'Windows':
-            print('Detected OS : Windows')
-            executable = './chromedriver/chromedriver_win.exe'
-        elif platform.system() == 'Linux':
-            print('Detected OS : Linux')
-            executable = './chromedriver/chromedriver_linux'
-        elif platform.system() == 'Darwin':
-            print('Detected OS : Mac')
-            executable = './chromedriver/chromedriver_mac'
+        if platform.system() == "Windows":
+            print("Detected OS : Windows")
+            executable = "./chromedriver/chromedriver_win.exe"
+        elif platform.system() == "Linux":
+            print("Detected OS : Linux")
+            executable = "./chromedriver/chromedriver_linux"
+        elif platform.system() == "Darwin":
+            print("Detected OS : Mac")
+            executable = "./chromedriver/chromedriver_mac"
         else:
-            raise OSError('Unknown OS Type')
+            raise OSError("Unknown OS Type")
 
         if not osp.exists(executable):
-            raise FileNotFoundError('Chromedriver file should be placed at {}'.format(executable))
+            raise FileNotFoundError("Chromedriver file should be placed at {}".format(executable))
 
         chrome_options = Options()
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
         if no_gui:
-            chrome_options.add_argument('--headless')
+            chrome_options.add_argument("--headless")
         if no_driver:
             self.browser = webdriver.Chrome(chrome_options=chrome_options)
         else:
             self.browser = webdriver.Chrome(executable, chrome_options=chrome_options)
 
-        browser_version = 'Failed to detect version'
-        chromedriver_version = 'Failed to detect version'
+        browser_version = "Failed to detect version"
+        chromedriver_version = "Failed to detect version"
         major_version_different = False
 
-        if 'browserVersion' in self.browser.capabilities:
-            browser_version = str(self.browser.capabilities['browserVersion'])
+        if "browserVersion" in self.browser.capabilities:
+            browser_version = str(self.browser.capabilities["browserVersion"])
 
-        if 'chrome' in self.browser.capabilities:
-            if 'chromedriverVersion' in self.browser.capabilities['chrome']:
-                chromedriver_version = str(self.browser.capabilities['chrome']['chromedriverVersion']).split(' ')[0]
+        if "chrome" in self.browser.capabilities:
+            if "chromedriverVersion" in self.browser.capabilities["chrome"]:
+                chromedriver_version = str(self.browser.capabilities["chrome"]["chromedriverVersion"]).split(" ")[0]
 
-        if browser_version.split('.')[0] != chromedriver_version.split('.')[0]:
+        if browser_version.split(".")[0] != chromedriver_version.split(".")[0]:
             major_version_different = True
 
-        print('_________________________________')
-        print('Current web-browser version:\t{}'.format(browser_version))
-        print('Current chrome-driver version:\t{}'.format(chromedriver_version))
+        print("_________________________________")
+        print("Current web-browser version:\t{}".format(browser_version))
+        print("Current chrome-driver version:\t{}".format(chromedriver_version))
         if major_version_different:
-            print('warning: Version different')
+            print("warning: Version different")
             print(
-                'Download correct version at "http://chromedriver.chromium.org/downloads" and place in "./chromedriver"')
-        print('_________________________________')
+                """ Download correct version at "http://chromedriver.chromium.org/downloads"
+                      'and place in "./chromedriver """
+            )
+        print("_________________________________")
 
     def get_scroll(self):
         pos = self.browser.execute_script("return window.pageYOffset;")
@@ -89,9 +91,9 @@ class CollectLinks:
             elem = w.until(EC.element_to_be_clickable((By.XPATH, xpath)))
             elem.click()
             self.highlight(elem)
-        except Exception as e:
-            print('Click time out - {}'.format(xpath))
-            print('Refreshing browser...')
+        except Exception:
+            print("Click time out - {}".format(xpath))
+            print("Refreshing browser...")
             self.browser.refresh()
             time.sleep(2)
             return self.wait_and_click(xpath)
@@ -99,8 +101,9 @@ class CollectLinks:
         return elem
 
     def highlight(self, element):
-        self.browser.execute_script("arguments[0].setAttribute('style', arguments[1]);", element,
-                                    "background: yellow; border: 2px solid red;")
+        self.browser.execute_script(
+            "arguments[0].setAttribute('style', arguments[1]);", element, "background: yellow; border: 2px solid red;"
+        )
 
     @staticmethod
     def remove_duplicates(_list):
@@ -111,7 +114,7 @@ class CollectLinks:
 
         time.sleep(1)
 
-        print('Scrolling down')
+        print("Scrolling down")
 
         elem = self.browser.find_element_by_tag_name("body")
 
@@ -134,42 +137,42 @@ class CollectLinks:
 
         photo_grid_boxes = self.browser.find_elements(By.XPATH, '//div[@class="bRMDJf islir"]')
 
-        print('Scraping links')
+        print("Scraping links")
 
         links = []
 
         for box in photo_grid_boxes:
             try:
-                imgs = box.find_elements(By.TAG_NAME, 'img')
+                imgs = box.find_elements(By.TAG_NAME, "img")
 
                 for img in imgs:
                     # self.highlight(img)
                     src = img.get_attribute("src")
 
                     # Google seems to preload 20 images as base64
-                    if str(src).startswith('data:'):
+                    if str(src).startswith("data:"):
                         src = img.get_attribute("data-iurl")
                     links.append(src)
 
             except Exception as e:
-                print('[Exception occurred while collecting links from google] {}'.format(e))
+                print("[Exception occurred while collecting links from google] {}".format(e))
 
         links = self.remove_duplicates(links)
 
-        print('Collect links done. Site: {}, Keyword: {}, Total: {}'.format('google', keyword, len(links)))
+        print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("google", keyword, len(links)))
         self.browser.close()
 
         return links
 
     def google_full(self, keyword, add_url="", limit=5000):
-        print('[Full Resolution Mode]')
+        print("[Full Resolution Mode]")
 
         self.browser.get("https://www.google.com/search?q={}&tbm=isch{}".format(keyword, add_url))
         time.sleep(1)
 
         elem = self.browser.find_element_by_tag_name("body")
 
-        print('Scraping links')
+        print("Scraping links")
 
         self.wait_and_click('//div[@data-ri="0"]')
         time.sleep(1)
@@ -194,21 +197,21 @@ class CollectLinks:
                 loading_bar = div_box.find_element(By.XPATH, xpath)
 
                 # Wait for image to load. If not it will display base64 code.
-                while str(loading_bar.get_attribute('style')) != 'display: none;':
+                while str(loading_bar.get_attribute("style")) != "display: none;":
                     time.sleep(0.1)
 
-                src = img.get_attribute('src')
+                src = img.get_attribute("src")
 
                 if src is not None:
                     links.append(src)
-                    print('%d: %s' % (count, src))
+                    print("%d: %s" % (count, src))
                     count += 1
 
             except StaleElementReferenceException:
                 # print('[Expected Exception - StaleElementReferenceException]')
                 pass
             except Exception as e:
-                print('[Exception occurred while collecting links from google_full] {}'.format(e))
+                print("[Exception occurred while collecting links from google_full] {}".format(e))
 
             scroll = self.get_scroll()
             if scroll == last_scroll:
@@ -224,11 +227,11 @@ class CollectLinks:
 
         links = self.remove_duplicates(links)
 
-        print('Collect links done. Site: {}, Keyword: {}, Total: {}'.format('google_full', keyword, len(links)))
+        print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("google_full", keyword, len(links)))
         self.browser.close()
 
         return links
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     collect = CollectLinks()

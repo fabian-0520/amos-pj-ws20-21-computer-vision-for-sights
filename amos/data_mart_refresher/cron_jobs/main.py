@@ -13,15 +13,15 @@ from cron_jobs.jobs import start_cron_job
 import schedule
 
 # read endpoint URLs of external services from environment variables
-REFRESH_DATA_MARTS_EVERY_SECONDS = int(environ['REFRESH_DATA_MARTS_EVERY_SECONDS'])
-ENABLE_MODEL_TRAINING_EVERY_SECONDS = int(environ['ENABLE_MODEL_TRAINING_EVERY_SECONDS'])
-ENABLE_LABELLING_REQUESTS_EVERY_SECONDS = int(environ['ENABLE_LABELLING_REQUESTS_EVERY_SECONDS'])
+DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS = int(environ["DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS"])
+DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS = int(environ["DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS"])
+DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS = int(environ["DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS"])
 SAFE_DELAY_IN_SECONDS = 1  # generously account for internal scheduling tasks
 
 
-start_cron_job(trigger_data_marts_refresh, REFRESH_DATA_MARTS_EVERY_SECONDS)
-start_cron_job(trigger_city_model_training, ENABLE_MODEL_TRAINING_EVERY_SECONDS)
-start_cron_job(trigger_city_image_labelling, ENABLE_LABELLING_REQUESTS_EVERY_SECONDS)
+start_cron_job(trigger_data_marts_refresh, DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS)
+start_cron_job(trigger_city_model_training, DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS)
+start_cron_job(trigger_city_image_labelling, DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS)
 
 
 while True:

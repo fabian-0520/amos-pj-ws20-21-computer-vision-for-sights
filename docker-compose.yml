@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:v1
+    build: ./postgres
+    ports:
+    - "5432:5432"
+  crawler:
+    image: crawler:v1
+    build: ./amos/crawler
+    environment:
+    - apikey=${apikey}
+    - maps_key=${maps_key}
+    - PGHOST=postgres
+    - PGDATABASE=${PGDATABASE}
+    - PGPORT=${PGPORT}
+    - PGUSER=${PGUSER}
+    - PGPASSWORD=${PGPASSWORD}
+    depends_on:
+    - postgres
+
+  data_mart_refresher:
+    image: data_mart_refresher:v1
+    build: ./amos/data_mart_refresher
+    environment:
+    - PGHOST=postgres
+    - PGDATABASE=${PGDATABASE}
+    - PGPORT=${PGPORT}
+    - PGUSER=${PGUSER}
+    - PGPASSWORD=${PGPASSWORD}
+    - DATA_MART_MTS_ENDPOINT_URL=${DATA_MART_MTS_ENDPOINT_URL}
+    - DATA_MART_ILS_ENDPOINT_URL=${DATA_MART_ILS_ENDPOINT_URL}
+    - DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=${DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS}
+    - DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=${DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS}
+    - DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=${DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS}
+    depends_on:
+    - postgres
