@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtWidgets import QMessageBox
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -46,13 +46,38 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.Box_Stadt.activated.connect(self.show_popup)
+        self.Button_Detection.clicked.connect(self.start_detection)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.Box_Stadt.setItemText(0, _translate("MainWindow", "Stadt auswählen"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "SightScan"))
+        self.Box_Stadt.setItemText(0, _translate("MainWindow", "Choose City"))
         self.Box_Stadt.setItemText(1, _translate("MainWindow", "Berlin"))
-        self.Button_Detection.setText(_translate("MainWindow", "Detection starten"))
-        self.Button_Bild.setText(_translate("MainWindow", "Bild laden "))
+        self.Button_Detection.setText(_translate("MainWindow", "Start Detection"))
+        self.Button_Bild.setText(_translate("MainWindow", "Load Image"))
+
+    def show_popup(self):
+        if self.Box_Stadt.currentIndex() > 0:
+            msg = QMessageBox()
+            msg.setWindowTitle("Download City")
+            msg.setText("Do you want to download " + self.Box_Stadt.currentText() + "?")
+            msg.setIcon(QMessageBox.Question)
+            msg.setStandardButtons(QMessageBox.Cancel|QMessageBox.Ok)
+            msg.setDefaultButton(QMessageBox.Ok)
+            msg.setInformativeText("When downloaded sights of " + self.Box_Stadt.currentText() + " can be detected.")
+
+            msg.buttonClicked.connect(self.handover_city)
+
+            x = msg.exec_()
+
+    def handover_city(self, i):
+        if i.text() == "OK":
+            city = self.Box_Stadt.currentText()
+
+    def start_detection (self):
+        
+           
 
 
 if __name__ == "__main__":
