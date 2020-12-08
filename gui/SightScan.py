@@ -16,6 +16,7 @@ from PyQt5.QtCore import Qt, QCoreApplication, QRect, QMetaObject
 class Image_Label(QLabel):
 
     image_name = "background.jpg"
+
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -49,8 +50,6 @@ class Image_Label(QLabel):
             event.ignore()
 
 class UI_MainWindow(QWidget):
-
-    image_name = "background.jpg"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -119,8 +118,8 @@ class UI_MainWindow(QWidget):
             city = self.Box_Stadt.currentText()
 
     def start_detection (self):
-        print('start detection of ' + self.image_name)
-        #start detection with image_name
+        print('start detection of ' + self.Label_Bild.image_name)
+        #start detection with self.Label_Bild.image_name
 
     def dragdrop(self):
         if(self.Button_Bild.text() == "Enable File Drop"):
@@ -137,6 +136,7 @@ class UI_MainWindow(QWidget):
             self.Label_Bild.setText("")
             self.Label_Bild.setStyleSheet('')
             self.Label_Bild.setPixmap(QPixmap("background.jpg"))
+            self.Label_Bild.image_name = ""
             self.Button_Bild.setText(QCoreApplication.translate("MainWindow", "Enable File Drop"))
 
 if __name__ == "__main__":
