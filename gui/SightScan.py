@@ -9,52 +9,57 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox, QMainWindow
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
-class UI_MainWindow(QtWidgets.QWidget):
+class UI_MainWindow(QWidget):
+    image_name = "background.jpg"
+
     def setupUI(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(678, 527)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
-        self.Box_Stadt = QtWidgets.QComboBox(self.centralwidget)
+        self.Box_Stadt = QComboBox(self.centralwidget)
         self.Box_Stadt.setGeometry(QtCore.QRect(10, 10, 181, 51))
         self.Box_Stadt.setObjectName("Box_Stadt")
         self.Box_Stadt.addItem("")
         self.Box_Stadt.addItem("")
         self.Box_Stadt.activated.connect(self.show_popup)
 
-        self.Button_Detection = QtWidgets.QPushButton(self.centralwidget)
+        self.Button_Detection = QPushButton(self.centralwidget)
         self.Button_Detection.setGeometry(QtCore.QRect(430, 400, 141, 51))
         self.Button_Detection.setObjectName("Button_Detection")
         self.Button_Detection.clicked.connect(self.start_detection)
 
-        self.Button_Bild = QtWidgets.QPushButton(self.centralwidget)
+        self.Button_Bild = QPushButton(self.centralwidget)
         self.Button_Bild.setGeometry(QtCore.QRect(50, 400, 161, 51))
         self.Button_Bild.setObjectName("Button_Bild")
         self.Button_Bild.clicked.connect(self.dragdrop)
 
-        self.Label_Bild = QtWidgets.QLabel(self.centralwidget)
+        self.Label_Bild = QLabel(self.centralwidget)
         self.Label_Bild.setGeometry(QtCore.QRect(20, 110, 621, 271))
         self.Label_Bild.setText("")
-        self.Label_Bild.setPixmap(QtGui.QPixmap("background.jpg"))
+        self.Label_Bild.setPixmap(QPixmap("background.jpg"))
         self.Label_Bild.setScaledContents(True)
         self.Label_Bild.setObjectName("Label_Bild")
-        self.Label_Bild.setAlignment(QtCore.Qt.AlignCenter)
+        self.Label_Bild.setAlignment(Qt.AlignCenter)
+        self.Label_Bild.setAcceptDrops(True)
 
-        ### wichtig für Drag'n Drop ?
-        #self.Main_Layout = QtWidgets.QVBoxLayout(self.centralwidget)
-        #self.Main_Layout.addWidget(self.Label_Bild)
-        #self.setLayout(self.Main_Layout)
+        self.setAcceptDrops(True)
+        self.Main_Layout = QVBoxLayout(self.Label_Bild)
+        self.Main_Layout.addWidget(self.Label_Bild)
+        self.setLayout(self.Main_Layout)
 
         MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar = QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 678, 21))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
 
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
@@ -88,52 +93,55 @@ class UI_MainWindow(QtWidgets.QWidget):
             city = self.Box_Stadt.currentText()
 
     def start_detection (self):
-        return
+        print('start detection of ' + self.image_name)
+        #start detection with image_name
 
     def dragdrop(self):
         if(self.Button_Bild.text() == "Enable File Drop"):
             self.Label_Bild.setAcceptDrops(True)
-            self.setAcceptDrops(True)
             self.Label_Bild.setText('\n\n Drop Image here \n\n')
             self.Label_Bild.setStyleSheet('''
                 QLabel{
-                    border: 4px dashed #aaa
+                    border: 4px dashed 
                 }
             ''')
-            self.Button_Bild.setText(QtCore.QCoreApplication.translate("MainWindow", "Disable File Drop"))
+            self.Button_Bild.setText(QCoreApplication.translate("MainWindow", "Disable File Drop"))
         elif(self.Button_Bild.text() == "Disable File Drop"):
             self.Label_Bild.setAcceptDrops(False)
-            self.setAcceptDrops(False)
             self.Label_Bild.setText("")
             self.Label_Bild.setStyleSheet('')
-            self.Label_Bild.setPixmap(QtGui.QPixmap("background.jpg"))
-            self.Button_Bild.setText(QtCore.QCoreApplication.translate("MainWindow", "Enable File Drop"))
+            self.Label_Bild.setPixmap(QPixmap("background.jpg"))
+            self.Button_Bild.setText(QCoreApplication.translate("MainWindow", "Enable File Drop"))
 
     def dragEnterEvent(self, event):
-        if(event.mimeData().hasImage):
+        print('dragEnter')
+        if event.mimeData().hasFormat('image/*'):
             event.accept()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
-        if(event.mimeData().hasImage):
+        print('dragMove')
+        if event.mimeData().hasFormat('image/*'):
             event.accept()
         else:
             event.ignore()
 
     def dropEvent(self, event):
-        if(event.mimeData().hasImage):
-            event.setDropAction(QtCore.Qt.CopyAction)
-            file_path = event.mimeData().urls()[0].toLocalFile()
-            self.Label_Bild.setPixmap(QtGui.QPixmap(file_path))
+        print('drop')
+        if event.mimeData().hasFormat('image/*'):
+            print('drop event')
+            event.setDropAction(Qt.CopyAction)
+            self.image_name = event.mimeData().urls()[0].toLocalFile()
+            self.Label_Bild.setPixmap(QPixmap(self.image))
 
             event.accept()
         else:
             event.ignore()
 
 if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
+    import sys, os
+    app = QApplication(sys.argv)
     MainWindow = QMainWindow()
     ui = UI_MainWindow()
     ui.setupUI(MainWindow)
