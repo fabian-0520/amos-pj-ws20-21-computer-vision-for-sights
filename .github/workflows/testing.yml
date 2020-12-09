@@ -45,7 +45,7 @@ jobs:
         echo $result;
         percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//');
         if [ $percentage -lt 70 ]; then
-          echo "Current code coverage is: $percentage. Code coverage should be above 70%!";
+          echo "Current code coverage is under 70%";
           exit 1;
         fi
       done
