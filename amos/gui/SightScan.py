@@ -20,7 +20,6 @@ class Image_Label(QLabel):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.setGeometry(QRect(20, 110, 621, 271))
         self.setText("")
         self.setPixmap(QPixmap("background.jpg"))
         self.setScaledContents(True)
@@ -50,33 +49,41 @@ class Image_Label(QLabel):
             event.ignore()
 
 class UI_MainWindow(QWidget):
+    window_width = 800
+    window_height = 650
+    button_width = 180
+    button_height = 50
+    dist = 30
 
     def __init__(self, parent):
         super().__init__(parent)
 
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(678, 527)
+        MainWindow.resize(self.window_width, self.window_height)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
         self.Box_Stadt = QComboBox(self.centralwidget)
-        self.Box_Stadt.setGeometry(QRect(10, 10, 181, 51))
+        self.Box_Stadt.setGeometry(QRect(self.dist, self.dist, self.button_width, self.button_height))
         self.Box_Stadt.setObjectName("Box_Stadt")
         self.Box_Stadt.addItem("")
         self.Box_Stadt.addItem("")
         self.Box_Stadt.activated.connect(self.show_popup)
 
         self.Button_Detection = QPushButton(self.centralwidget)
-        self.Button_Detection.setGeometry(QRect(430, 400, 141, 51))
+        self.Button_Detection.setGeometry(QRect(self.window_width-(self.dist+self.button_width), self.window_height-(self.dist+self.button_height), self.button_width, self.button_height))
         self.Button_Detection.setObjectName("Button_Detection")
         self.Button_Detection.clicked.connect(self.start_detection)
 
         self.Button_Bild = QPushButton(self.centralwidget)
-        self.Button_Bild.setGeometry(QRect(50, 400, 161, 51))
+        self.Button_Bild.setGeometry(QRect(self.dist, self.window_height-(self.dist+self.button_height), self.button_width, self.button_height))
         self.Button_Bild.setObjectName("Button_Bild")
         self.Button_Bild.clicked.connect(self.dragdrop)
 
         self.Label_Bild = Image_Label(self.centralwidget)
+        label_height = (self.window_height - self.dist - self.button_height - self.dist) - (self.dist + self.button_height + self.dist)
+        label_startY = self.dist + self.button_height + self.dist
+        self.Label_Bild.setGeometry(QRect(self.dist, label_startY, self.window_width-(self.dist*2), label_height))
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -116,6 +123,8 @@ class UI_MainWindow(QWidget):
     def handover_city(self, i):
         if i.text() == "OK":
             city = self.Box_Stadt.currentText()
+            print(city)
+            #start download of model with city
 
     def start_detection (self):
         print('start detection of ' + self.Label_Bild.image_name)
@@ -135,7 +144,7 @@ class UI_MainWindow(QWidget):
             self.Label_Bild.setAcceptDrops(False)
             self.Label_Bild.setText("")
             self.Label_Bild.setStyleSheet('')
-            self.Label_Bild.setPixmap(QPixmap("background.jpg"))
+            #self.Label_Bild.setPixmap(QPixmap("background.jpg"))
             self.Label_Bild.image_name = ""
             self.Button_Bild.setText(QCoreApplication.translate("MainWindow", "Enable File Drop"))
 
