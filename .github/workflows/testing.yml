@@ -41,9 +41,9 @@ jobs:
     - name: Test Code Coverage
       run: |
       for entry in ./amos/* do
-        result=$(pytest --cov=$entry)
-        echo $result
-        percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//')
+        result=$(pytest --cov=$entry);
+        echo $result;
+        percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//');
         if [ $percentage -lt 70 ]; then
           echo "Current code coverage is: $percentage. Code coverage should be above 70%!";
           exit 1;
