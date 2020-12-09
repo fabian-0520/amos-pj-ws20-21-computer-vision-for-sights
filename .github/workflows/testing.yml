@@ -7,7 +7,7 @@ name: Code Testing
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, feature/50-rework_ci ]
   pull_request:
     branches:
       - "**"
@@ -40,8 +40,7 @@ jobs:
 
     - name: Test Code Coverage
       run: |
-      for entry in ./amos/*
-      do
+      for entry in ./amos/* do
         result=$(pytest --cov=$entry)
         echo $result
         percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//')
