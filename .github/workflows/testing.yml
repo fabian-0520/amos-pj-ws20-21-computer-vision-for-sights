@@ -37,9 +37,17 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-    - name: Test crawler code coverage
+
+    - name: Test Code Coverage
       run: |
-        pytest --cov=amos/crawler
-    - name: Test data_mart_refresher code coverage
-      run: |
-        pytest --cov=amos/data_mart_refresher
+      for entry in ./amos/*
+      do
+        result=$(pytest --cov=$entry)
+        echo $result
+        percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//')
+        if [ $percentage -lt 70 ]
+        then
+          echo "Current code coverage is: $percentage. Code coverage should be above 70%!"
+          exit 1
+        fi
+      done
