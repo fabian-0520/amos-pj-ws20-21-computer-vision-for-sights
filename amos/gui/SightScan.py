@@ -10,18 +10,18 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QStatusBar, QMenuBar, QMessageBox, QComboBox, QApplication, QMainWindow
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt, QCoreApplication, QRect, QMetaObject
 
 class Image_Label(QLabel):
 
-    image_name = "background.jpg"
+    image_name = "logo.png"
 
     def __init__(self, parent):
         super().__init__(parent)
 
         self.setText("")
-        self.setPixmap(QPixmap("background.jpg"))
+        self.setPixmap(QPixmap("logo.png"))
         self.setScaledContents(True)
         self.setObjectName("Label_Bild")
         self.setAlignment(QtCore.Qt.AlignCenter)
@@ -57,12 +57,12 @@ class UI_MainWindow(QWidget):
 
     def __init__(self, parent):
         super().__init__(parent)
-
+  
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(self.window_width, self.window_height)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-
+       
         self.Box_Stadt = QComboBox(self.centralwidget)
         self.Box_Stadt.setGeometry(QRect(self.dist, self.dist, self.button_width, self.button_height))
         self.Box_Stadt.setObjectName("Box_Stadt")
@@ -94,6 +94,8 @@ class UI_MainWindow(QWidget):
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+
+        MainWindow.setWindowIcon(QIcon("icon_logo.png"))
 
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
@@ -144,8 +146,8 @@ class UI_MainWindow(QWidget):
             self.Label_Bild.setAcceptDrops(False)
             self.Label_Bild.setText("")
             self.Label_Bild.setStyleSheet('')
-            #self.Label_Bild.setPixmap(QPixmap("background.jpg"))
-            self.Label_Bild.image_name = ""
+            self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image_name))
+            self.Label_Bild.image_name = "logo.png"
             self.Button_Bild.setText(QCoreApplication.translate("MainWindow", "Enable File Drop"))
 
 if __name__ == "__main__":
