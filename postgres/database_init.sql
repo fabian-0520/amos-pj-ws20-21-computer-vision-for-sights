@@ -14,10 +14,10 @@ create schema if not exists data_mart_layer;
 
 drop type if exists bounding_box;
 create type bounding_box as (
-	ul_x smallint,
-	ul_y smallint,
-	lr_x smallint,
-	lr_y smallint,
+	ul_x double precision,
+	ul_y double precision,
+	lr_x double precision,
+	lr_y double precision,
 	box_label VARCHAR(100)
 );
 
