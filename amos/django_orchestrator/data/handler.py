@@ -1,16 +1,19 @@
+"""This module contains necessary business logic in order to communicate with the data warehouse."""
+from data.exec_sql import exec_dql_query, exec_dml_query
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from hashlib import md5
-from db.exec_sql import exec_dql_query, exec_dml_query
+from json import loads
 from PIL import Image
 from psycopg2 import Binary
-from json import loads
+from typing import Optional
 
 
-def upload_image(image: Image, city: str) -> str:
+def upload_image(image: InMemoryUploadedFile, city: str) -> str:
     """Uploads an image for the specified city and returns the respective lookup hash.
 
     Parameters
     ----------
-    image: Image
+    image: InMemoryUploadedFile
         Image to insert.
     city: str
         City the image belongs to.
@@ -27,7 +30,8 @@ def upload_image(image: Image, city: str) -> str:
     img = Image.open(image)
     img_bytes = img.tobytes()
     source_hash = md5(img_bytes).hexdigest()  # hash image to guarantee unique user input to DWH
-    width, height = img.size
+    width = img.size[0]
+    height = img.size[1]
 
     query_filling_params = (Binary(img_bytes), city, height, width, source_hash)
     exec_dml_query(empty_dml_query, query_filling_params)
@@ -49,7 +53,7 @@ def upload_image_labels(labels: str, source_hash: str) -> None:
     exec_dml_query(filled_dml_query, None)
 
 
-def _get_image_label_dml_query(labels, source_hash):
+def _get_image_label_dml_query(labels: str, source_hash: str) -> str:
     """Returns the prepared DML query necessary to insert the passed labels
     for the image corresponding to the passed lookup key.
 
@@ -83,8 +87,23 @@ def _get_image_label_dml_query(labels, source_hash):
            f"VALUES ('{source_hash}', '{bounding_boxes_postgres_output_string}')"
 
 
-def get_downloaded_model(city):
-    trained_model_query = f'SELECT trained_model FROM data_mart_layer.current_trained_models WHERE city_name={city}'
-    result = exec_dql_query(trained_model_query)
-    # TODO
-    pass
+def get_downloaded_model(city: str) -> Optional[bytes]:
+    """Returns the downloaded and trained model for the specified city if it is available in the data warehouse.
+
+    Parameters
+    ----------
+    city: str
+        Name of the city.
+
+    Returns
+    -------
+    found_model: bytes or None
+        Retrieved .pt model file.
+    """
+    trained_model_query = f"SELECT trained_model FROM data_mart_layer.current_trained_models " \
+                          f"WHERE city_name = '{city.upper()}'"
+    found_model = exec_dql_query(trained_model_query, return_result=True)
+    if found_model:
+        return found_model[0][0].tobytes()
+
+    return None

@@ -5,7 +5,7 @@ from psycopg2 import connect
 
 
 def exec_dql_query(postgres_sql_string: str, return_result=False) -> Optional[object]:
-    """Executes a given PostgreSQL string on the DWH and potentially returns the query result.
+    """Executes a given PostgreSQL string on the data warehouse and potentially returns the query result.
 
     Parameters
     ----------
@@ -32,7 +32,7 @@ def exec_dql_query(postgres_sql_string: str, return_result=False) -> Optional[ob
                 result = cursor_result if (return_result and cursor_result is not None) else return_result
 
             except Exception as exc:
-                print("Error executing SQL: %s" % exc)
+                print('Error executing SQL: %s' % exc)
 
             finally:
                 cursor.close()
@@ -63,7 +63,7 @@ def exec_dml_query(dml_query: str, filling_parameters: Optional[Tuple[object]]) 
                 connection.commit()
 
             except Exception as exc:
-                print("Error executing SQL: %s" % exc)
+                print('Error executing SQL: %s' % exc)
 
             finally:
                 cursor.close()

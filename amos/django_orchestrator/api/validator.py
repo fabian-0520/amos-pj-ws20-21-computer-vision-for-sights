@@ -1,18 +1,20 @@
+"""This module contains various validation functions for passed
+user input like uploaded files or bounding box labels."""
+from data.exec_sql import exec_dql_query
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from db.exec_sql import exec_dql_query
-import json
+from json import JSONDecodeError, loads
 
 
-def is_valid_image_upload(city: str, image: InMemoryUploadedFile, labels: InMemoryUploadedFile) -> bool:
+def is_valid_image_upload(city: str, image: InMemoryUploadedFile, labels: str) -> bool:
     """Returns whether the passed request is a valid image upload request.
 
     Parameters
     ----------
     city: str
         City name.
-    image: bytes or None
+    image: InMemoryUploadedFile
         Read image.
-    labels: bytes or None
+    labels: str
         Read bounding box labels.
 
     Returns
@@ -44,11 +46,11 @@ def is_valid_city(city: str, must_be_supported: bool = False) -> bool:
         city is not None
         and isinstance(city, str)
         and len(city) > 3
-        and ((must_be_supported and _is_city_existing(city)) or not must_be_supported)
+        and ((must_be_supported and is_city_existing(city)) or not must_be_supported)
     )
 
 
-def _is_city_existing(city: str) -> bool:
+def is_city_existing(city: str) -> bool:
     """Returns whether the passed city exists.
 
     Parameters
@@ -89,13 +91,13 @@ def _is_valid_image_file(image: InMemoryUploadedFile) -> bool:
     return False
 
 
-def _is_valid_labels_file(labels: InMemoryUploadedFile) -> bool:
+def _is_valid_labels_file(labels: str) -> bool:
     """Returns whether the uploaded labels file is valid.
 
     Parameters
     ----------
-    labels: InMemoryUploadedFile
-        Uploaded labels file.
+    labels: str
+        Uploaded labels file as a string.
 
     Returns
     -------
@@ -103,10 +105,13 @@ def _is_valid_labels_file(labels: InMemoryUploadedFile) -> bool:
         Whether the uploaded labels file is valid.
     """
     try:
-        labels_dict = json.loads(labels)
+        labels_dict = loads(labels)
         if 'boundingBoxes' in labels_dict:
-            return all(map(lambda bounding_box: _is_valid_bounding_box_label(bounding_box), labels_dict['boundingBoxes']))
-    except Exception:
+            return all(
+                map(lambda bounding_box: _is_valid_bounding_box_label(bounding_box),
+                    labels_dict['boundingBoxes'])
+            )
+    except JSONDecodeError:
         pass
 
     return False

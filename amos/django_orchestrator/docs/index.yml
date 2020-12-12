@@ -11,17 +11,28 @@ info:
 host: "localhost:1337"
 basePath: "/api"
 tags:
-- name: "image"
-  description: "Image-related operations."
-- name: "model"
-  description: "Model-related operations."
+- name: "cities"
+  description: "City-related operations."
 schemes:
 - "http"
 paths:
-  /image/{cityName}:
+  /cities:
+    get:
+      tags:
+        - "cities"
+      summary: "Returns a list of currently supported cities."
+      operationId: "getCities"
+      responses:
+        "200":
+          description: "City names successfully retrieved."
+          schema:
+            $ref: "#/definitions/Cities"
+        "500":
+          description: "Unexpected server error."
+  /cities/{cityName}/image:
     post:
       tags:
-      - "image"
+      - "cities"
       summary: "Inserts a given image including labels into the data warehouse to extend the overall training set."
       operationId: "insertImage"
       parameters:
@@ -48,10 +59,10 @@ paths:
           description: "Invalid request format."
         "500":
           description: "Unexpected server error."
-  /model/{cityName}:
+  /cities/{cityName}/model:
     get:
       tags:
-        - "model"
+        - "cities"
       summary: "Fetches an already trained city model from the data warehouse."
       operationId: "getModel"
       parameters:
@@ -72,6 +83,15 @@ paths:
         "500":
           description: "Unexpected server error."
 definitions:
+  Cities:
+    type: "object"
+    properties:
+      cities:
+        type: "array"
+        description: "Supported city list."
+        items:
+          type: "string"
+          description: "Supported city."
   BoundingBoxLabels:
     type: "object"
     properties:

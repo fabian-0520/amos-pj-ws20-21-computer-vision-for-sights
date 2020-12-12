@@ -1,14 +1,15 @@
-"""This module yields the configuration parameters to the external DWH."""
+"""This module yields the configuration parameters to the external data warehouse."""
 import os
 
 
 def config():
-    """Reads environment variables needed for the DWH access parameters and returns them as a parsed dictionary.
+    """Reads environment variables needed for the data warehouse access parameters and
+    returns them as a parsed dictionary.
 
     Returns
     -------
-    db: dict
-        Parsed dictionary containing the DWH connection parameters.
+    data: dict
+        Parsed dictionary containing the data warehouse connection parameters.
     """
 
     db = {}

@@ -1,6 +1,9 @@
 django
 djangorestframework
 django-swagger-render
+Image
+mock
 requests
 psycopg2-binary
-Image
+pytest
+pytest-cov
