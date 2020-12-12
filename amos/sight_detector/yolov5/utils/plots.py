@@ -79,7 +79,8 @@ def plot_one_point(x, img, color=None, label=None, point_thickness=None, r=0):
         #c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
         #cv2.rectangle(img, c1, c2, color, -1, cv2.LINE_AA)  # filled
         cv2.circle(img, middle, r, color=color, thickness=tl)
-        cv2.putText(img, label, (middle[0]+r, middle[1]-r), 0, 1, color=color, thickness=tf*2, lineType=cv2.LINE_AA, bottomLeftOrigin = False)
+        cv2.putText(img, label, (middle[0] + r + 2, middle[1] - r - 2), 0, 1, color=[255,255,255], thickness=tf * 2, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
+        cv2.putText(img, label, (middle[0]+r, middle[1]-r), 0, 1, color=[0,0,0], thickness=tf*2, lineType=cv2.LINE_AA, bottomLeftOrigin = False)
 
 def plot_wh_methods():  # from utils.plots import *; plot_wh_methods()
     # Compares the two methods for width-height anchor multiplication

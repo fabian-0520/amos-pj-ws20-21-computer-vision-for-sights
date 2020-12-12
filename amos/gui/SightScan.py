@@ -155,9 +155,8 @@ class UI_MainWindow(QWidget):
         # set image in label from most recent exp-dir in yolo
         dirs = [(yoloPath + '/runs/detect/' + d) for d in os.listdir(yoloPath + '/runs/detect/')]
         newestDir = max(dirs, key=os.path.getmtime)
-        self.Label_Bild.image_name = newestDir + '/' + image
-        self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image_name))
-        # fix the text problem
+        image = newestDir + '/' + image
+        self.Label_Bild.setPixmap(QPixmap(image))
 
     def dragdrop(self):
         if(self.Button_Bild.text() == "Enable File Drop"):
