@@ -392,6 +392,9 @@ RETURNS INT AS $$
 			RAISE NOTICE 'Refreshing %.%', schema_arg, r.matviewname;
 			EXECUTE 'REFRESH MATERIALIZED VIEW ' || schema_arg || '.' || r.matviewname; 
 		END LOOP;
+
+		-- additionally needed, since not located inside of previous loop
+		EXECUTE 'REFRESH MATERIALIZED VIEW data_mart_layer.current_trained_models';
 		
 		RETURN 1;
 	END 
