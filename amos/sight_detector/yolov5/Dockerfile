@@ -12,11 +12,11 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 # Copy contents
-COPY . /usr/src/app
+COPY yolov5 /usr/src/app
 
 # Copy weights
-#RUN python3 -c "from models import *; \
-#attempt_download('weights/yolov5s.pt'); \
+RUN python3 -c "from models import *; \
+attempt_download('weights/yolov5s.pt');
 #attempt_download('weights/yolov5m.pt'); \
 #attempt_download('weights/yolov5l.pt')"
 
@@ -31,7 +31,7 @@ COPY . /usr/src/app
 # t=ultralytics/yolov5:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all $t
 
 # Pull and Run with local directory access
-# t=ultralytics/yolov5:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all -v "$(pwd)"/coco:/usr/src/coco $t
+t=ultralytics/yolov5:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all -v "$(pwd)"/coco:/usr/src/coco $t
 
 # Kill all
 # sudo docker kill $(sudo docker ps -q)
@@ -46,7 +46,7 @@ COPY . /usr/src/app
 # sudo docker commit 092b16b25c5b usr/resume && sudo docker run -it --gpus all --ipc=host -v "$(pwd)"/coco:/usr/src/coco --entrypoint=sh usr/resume
 
 # Send weights to GCP
-# python -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')" && gsutil cp tmp.pt gs://*.pt
+python -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')" && gsutil cp tmp.pt gs://*.pt
 
 # Clean up
 # docker system prune -a --volumes
