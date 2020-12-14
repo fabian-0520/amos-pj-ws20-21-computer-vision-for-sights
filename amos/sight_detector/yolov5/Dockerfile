@@ -3,9 +3,8 @@ FROM nvcr.io/nvidia/pytorch:20.10-py3
 
 # Install dependencies
 RUN pip install --upgrade pip
-# COPY requirements.txt .
-# RUN pip install -r requirements.txt
-RUN pip install gsutil
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 # Create working directory
 RUN mkdir -p /usr/src/app

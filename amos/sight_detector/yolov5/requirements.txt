@@ -30,4 +30,4 @@ thop  # FLOPS computation
 pycocotools>=2.0  # COCO mAP
 
 # db connection
-psycopg2
+psycopg2-binary
