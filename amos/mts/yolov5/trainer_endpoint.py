@@ -4,35 +4,20 @@ from typing import Optional, Tuple, List
 from psycopg2 import connect
 from psycopg2._psycopg import Binary
 
-#from .utils.general import strip_optimizer
+from utils.general import strip_optimizer
 
 
-def generate_training_config_yaml(sights: List[str]) -> None:
+def perform_persist(city_name: str) -> None:
     """
-    Generates a .yaml configuration file which is used to generate classes and other information for model training.
+    Generic method to load images, store them and generate a config file for training
     Parameters
     ----------
-    sights: the list of sight classes used for training the model
+    city_name: str
+        name of the city to train for
     """
-    # TODO: Nico, file generation and saving
-    # nc -> len(sights)
-    # train -> sights mapped to path directories
-    # test -> same as train
-    # names -> just the sights list
-
-    train = []
-    val = []
-    yaml = open("./sight_training_config.yaml", "w")
-    yaml.write("# train and val data\n")
-    for sight in sights:
-        train.append("../training_data/" + sight + "/images/")
-        val.append("../training_data/" + sight + "/images/")
-    yaml.write("train: [" + ','.join(train) + "]\n")
-    yaml.write("val: [" + ','.join(val) + "]\n\n")
-    yaml.write("# number of classes\n")
-    yaml.write("nc: " + str(len(sights)) + "\n\n")
-    yaml.write("# class names\n")
-    yaml.write("names: [" + ','.join(sights) + "]")
+    images = load_images_for_city(city_name)
+    sight_names = save_images(images)
+    generate_training_config_yaml(sight_names)
 
 
 def load_images_for_city(city_name: str) -> Optional[List[Tuple[object]]]:
@@ -49,6 +34,46 @@ def load_images_for_city(city_name: str) -> Optional[List[Tuple[object]]]:
     """
     query = f"select image_file, image_labels from data_mart_layer.images_{city_name}"
     return exec_sql_query(query, True)
+
+
+def save_images(image_label_tuples: List[Tuple[object]]) -> List[str]:
+    """
+    Sorts fetched images according to their labels into correct directories and accordingly generates labels
+    Parameters
+    ----------
+    image_label_tuples: list of tuples of image, label file
+
+    Returns
+    -------
+    The list of labels
+    """
+    sight_list = []
+    for pair in image_label_tuples:
+        sight_list.append("sight_name")
+    return sight_list
+
+
+def generate_training_config_yaml(sights: List[str]) -> None:
+    """
+    Generates a .yaml configuration file which is used to generate classes and other information for model training.
+    Parameters
+    ----------
+    sights: the list of sight classes used for training the model
+    """
+    train = []
+    val = []
+    yaml = open("./sight_training_config.yaml", "w")
+    yaml.write("# train and val data\n")
+    for sight in sights:
+        train.append("../training_data/" + sight + "/images/")
+        val.append("../training_data/" + sight + "/images/")
+    yaml.write("train: [" + ",".join(train) + "]\n")
+    yaml.write("val: [" + ",".join(val) + "]\n\n")
+    yaml.write("# number of classes\n")
+    yaml.write("nc: " + str(len(sights)) + "\n\n")
+    yaml.write("# class names\n")
+    yaml.write("names: [" + ",".join(sights) + "]")
+    yaml.close()
 
 
 def upload_trained_model(city_name: str, image_count: int) -> None:
@@ -68,8 +93,10 @@ def upload_trained_model(city_name: str, image_count: int) -> None:
     data = in_file.read()
     in_file.close()
     # performing query
-    dml_query = "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images, mapping_table) " \
-                "VALUES (%s, %s, %s, %s)"
+    dml_query = (
+        "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images, mapping_table) "
+        "VALUES (%s, %s, %s, %s)"
+    )
     exec_dml_query(dml_query, (city_name, Binary(data), image_count, "{}"))
 
 
@@ -94,7 +121,11 @@ def exec_sql_query(postgres_sql_string: str, return_result=False) -> Optional[ob
                 cursor.execute(postgres_sql_string)
                 connection.commit()
                 cursor_result = cursor.fetchall()
-                result = cursor_result if (return_result and cursor_result is not None) else return_result
+                result = (
+                    cursor_result
+                    if (return_result and cursor_result is not None)
+                    else return_result
+                )
             except Exception as exc:
                 print("Error executing SQL: %s" % exc)
             finally:
