@@ -4,7 +4,7 @@ from typing import Optional, Tuple, List
 from psycopg2 import connect
 from psycopg2._psycopg import Binary
 
-from amos.sight_detector.yolov5.utils.general import strip_optimizer
+#from .utils.general import strip_optimizer
 
 
 def generate_training_config_yaml(sights: List[str]) -> None:
@@ -20,6 +20,19 @@ def generate_training_config_yaml(sights: List[str]) -> None:
     # test -> same as train
     # names -> just the sights list
 
+    train = []
+    val = []
+    yaml = open("./sights_config.yaml", "w")
+    yaml.write("# train and val data\n")
+    for sight in sights:
+        train.append("../training_data/" + sight + "/images/")
+        val.append("../training_data/" + sight + "/images/")
+    yaml.write("train: [" + ','.join(train) + "]\n")
+    yaml.write("val: [" + ','.join(val) + "]\n\n")
+    yaml.write("# number of classes\n")
+    yaml.write("nc: " + str(len(sights)) + "\n\n")
+    yaml.write("# class names\n")
+    yaml.write("names: [" + ','.join(sights) + "]")
 
 
 def load_images_for_city(city_name: str) -> Optional[List[Tuple[object]]]:
@@ -135,3 +148,6 @@ def config():
             raise ReferenceError(f"Environment Variable {env_variable_name} not found")
 
     return db
+
+input = ["bbt","fst","sgs"]
+generate_training_config_yaml(input)
