@@ -22,7 +22,7 @@ def generate_training_config_yaml(sights: List[str]) -> None:
 
     train = []
     val = []
-    yaml = open("./sights_config.yaml", "w")
+    yaml = open("./sight_training_config.yaml", "w")
     yaml.write("# train and val data\n")
     for sight in sights:
         train.append("../training_data/" + sight + "/images/")
@@ -148,6 +148,3 @@ def config():
             raise ReferenceError(f"Environment Variable {env_variable_name} not found")
 
     return db
-
-input = ["bbt","fst","sgs"]
-generate_training_config_yaml(input)
