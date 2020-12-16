@@ -1,6 +1,8 @@
-import os, glob
+import glob
 import imghdr
+import os
 import re
+import shutil
 from io import BytesIO
 from typing import Optional, Tuple, List
 
@@ -21,6 +23,13 @@ def persist_training_data(city_name: str) -> None:
     images = load_images_for_city(city_name)
     sight_names = save_images(images)
     generate_training_config_yaml(sight_names)
+
+
+def cleanup():
+    try:
+        shutil.rmtree("../training_data")
+    except OSError as e:
+        print("Error deleting training data: %s" % e.strerror)
 
 
 def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
@@ -55,9 +64,10 @@ def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
     for label in labels:
         elements = label.split(",")
         label = elements[-1]
-        label_string = label + " " + " ".join(elements[:-1]) + "\n"
+        re.sub(r'[^\x00-\x7F]+', '', label)  # replace non-ascii characters inside label
+        label_string = label.replace(" ", "") + " " + " ".join(elements[:-1]) + "\n"
         label_string = label_string.replace('"', "").replace("\\", "")
-        label = label.replace('"', "").replace("\\", "")
+        label = label.replace('"', "").replace("\\", "").replace(" ", "")
         label_list.append((label_string, label))
     return label_list
 
@@ -75,28 +85,42 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
     """
     sight_list = []
     # create directories for training and test data
-    os.mkdir("../training_data/images")
-    os.mkdir("../training_data/labels")
+    try:
+        os.makedirs("../training_data/images")
+        os.makedirs("../training_data/labels")
+    except FileExistsError:
+        print("Directories exist")
 
     for pair in image_label_tuples:
+        if pair[0] is None or pair[1] is None:
+            continue
         label_data = parse_label_string(pair[1])
         file_string = ""
         for label in label_data:
             sight_name = label[1]
-            file_string += ""
+            file_string += label[0]
             if sight_name not in sight_list:
                 sight_list.append(sight_name)
         # create image file
         index = len(glob.glob("../training_data/images/*")) + 1
         with BytesIO(pair[0]) as f:
             ext = imghdr.what(f)
-        image_file = open("../training_data/images/" + str(index) + ext, "wb")
-        image_file.write(pair[0])
-        image_file.close()
+        if ext is None:
+            print("Skipped image, couldn't read")
+            continue
+        try:
+            image_file = open("../training_data/images/" + str(index) + ext, "wb")
+            image_file.write(pair[0])
+            image_file.close()
+        except IOError as e:
+            print(e)
         # create label file
-        label_file = open("../training_data/labels/" + str(index) + ".txt", "w")
-        label_file.write(file_string)
-        label_file.close()
+        try:
+            label_file = open("../training_data/labels/" + str(index) + ".txt", "w")
+            label_file.write(file_string)
+            label_file.close()
+        except IOError as e:
+            print(e)
     return sight_list
 
 

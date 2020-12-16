@@ -5,7 +5,7 @@ import yaml
 
 from yolov5.trainer_endpoint import (
     generate_training_config_yaml,
-    parse_label_string,
+    parse_label_string, persist_training_data, cleanup,
 )
 
 
@@ -29,12 +29,17 @@ class MTSTestCase(unittest.TestCase):
         self.assertEqual(3, config_file["nc"])
         self.assertEqual("sight_a", config_file["names"][0])
 
+    @unittest.skip("only for testing endpoints")
+    def test_download(self):
+        persist_training_data("berlin")
+        cleanup()
+
     def test_string_parser(self):
         example_string = '{"(11,11,21,21,\\"Brandenburger Tor\\")","(15,15,25,25,\\"Siegessäule\\")"}'
         labels = parse_label_string(example_string)
         print(labels[0][0])
         self.assertEqual(2, len(labels))
-        self.assertEqual("Brandenburger Tor 11 11 21 21\n", labels[0][0])
+        self.assertEqual("BrandenburgerTor 11 11 21 21\n", labels[0][0])
         self.assertEqual("Siegessäule", labels[1][1])
 
 
