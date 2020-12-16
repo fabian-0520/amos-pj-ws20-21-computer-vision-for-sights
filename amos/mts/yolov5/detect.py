@@ -11,7 +11,7 @@ from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, non_max_suppression, apply_classifier, scale_coords, xyxy2xywh, \
     strip_optimizer, set_logging, increment_path
-from utils.plots import plot_one_point
+from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 
@@ -108,11 +108,8 @@ def detect(save_img=False):
                             f.write(str(line))
 
                     if save_img or view_img:  # Add bbox to image
-                        #Angabe mit Konfidenzintervall: label = '%s %.2f' % (names[int(cls)], conf)
-                        #Angabe ohne Konfidenzintervall
-                        label = names[int(cls)]
-                        #plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
-                        plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=-1, r=20)
+                        label = '%s %.2f' % (names[int(cls)], conf)
+                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
 
             # Print time (inference + NMS)
             print('%sDone. (%.3fs)' % (s, t2 - t1))

@@ -18,7 +18,17 @@ services:
     - PGPASSWORD=${PGPASSWORD}
     depends_on:
     - postgres
-
+  model_training_service:
+    image: mts:v1
+    build: amos/mts/yolov5
+    environment:
+      - PGHOST=postgres
+      - PGDATABASE=${PGDATABASE}
+      - PGPORT=${PGPORT}
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      depends_on:
+        - postgres
   data_mart_refresher:
     image: data_mart_refresher:v1
     build: ./amos/data_mart_refresher
