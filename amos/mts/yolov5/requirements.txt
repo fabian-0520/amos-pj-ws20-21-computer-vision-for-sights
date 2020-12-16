@@ -31,3 +31,7 @@ pycocotools>=2.0  # COCO mAP
 
 # db connection
 psycopg2-binary
+
+
+# testing
+pytest

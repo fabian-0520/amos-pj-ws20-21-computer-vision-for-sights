@@ -2,7 +2,9 @@ import os
 import unittest
 import yaml
 
-from trainer_endpoint import generate_training_config_yaml, save_images
+from yolov5.trainer_endpoint import generate_training_config_yaml, save_images
+
+from yolov5.trainer_endpoint import load_images_for_city
 
 
 class MTSTestCase(unittest.TestCase):
@@ -28,6 +30,10 @@ class MTSTestCase(unittest.TestCase):
     def test_image_saving(self):
         labels = save_images([])
         self.assertEqual(0, len(labels))
+
+    def test_temp(self):
+        load_images_for_city('berlin')
+        # returns e.g. '{"(11,11,21,21,\\" Brandenburger Tor\\")","(15,15,25,25,\\" Siegessäule\\")"}'
 
     # TODO: complete further tests for 100% code coverage
 

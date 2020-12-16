@@ -5,7 +5,7 @@ from typing import Optional, Tuple, List
 from psycopg2 import connect
 from psycopg2._psycopg import Binary
 
-from utils.general import strip_optimizer
+from .utils.general import strip_optimizer
 
 
 def perform_persist(city_name: str) -> None:
