@@ -1,10 +1,13 @@
 import os
 import unittest
+
 import yaml
 
-from yolov5.trainer_endpoint import generate_training_config_yaml, save_images
-
-from yolov5.trainer_endpoint import load_images_for_city
+from yolov5.trainer_endpoint import (
+    generate_training_config_yaml,
+    save_images,
+    parse_label_string,
+)
 
 
 class MTSTestCase(unittest.TestCase):
@@ -31,11 +34,13 @@ class MTSTestCase(unittest.TestCase):
         labels = save_images([])
         self.assertEqual(0, len(labels))
 
-    def test_temp(self):
-        load_images_for_city('berlin')
-        # returns e.g. '{"(11,11,21,21,\\" Brandenburger Tor\\")","(15,15,25,25,\\" Siegessäule\\")"}'
-
-    # TODO: complete further tests for 100% code coverage
+    def test_string_parser(self):
+        example_string = '{"(11,11,21,21,\\"Brandenburger Tor\\")","(15,15,25,25,\\"Siegessäule\\")"}'
+        labels = parse_label_string(example_string)
+        print(labels[0][0])
+        self.assertEqual(2, len(labels))
+        self.assertEqual("Brandenburger Tor 11 11 21 21\n", labels[0][0])
+        self.assertEqual("Siegessäule", labels[1][1])
 
 
 if __name__ == "__main__":

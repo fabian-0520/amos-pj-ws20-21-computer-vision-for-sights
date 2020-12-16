@@ -1,14 +1,16 @@
 import os, glob
 import imghdr
+import re
+from io import BytesIO
 from typing import Optional, Tuple, List
 
 from psycopg2 import connect
 from psycopg2._psycopg import Binary
 
-from .utils.general import strip_optimizer
+from yolov5.utils.general import strip_optimizer
 
 
-def perform_persist(city_name: str) -> None:
+def persist_training_data(city_name: str) -> None:
     """
     Generic method to load images, store them and generate a config file for training
     Parameters
@@ -21,7 +23,7 @@ def perform_persist(city_name: str) -> None:
     generate_training_config_yaml(sight_names)
 
 
-def load_images_for_city(city_name: str) -> Optional[List[Tuple[object]]]:
+def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
     """
     Loads all images with corresponding labels for a given city
     Parameters
@@ -37,7 +39,30 @@ def load_images_for_city(city_name: str) -> Optional[List[Tuple[object]]]:
     return exec_sql_query(query, True)
 
 
-def save_images(image_label_tuples: List[Tuple[object]]) -> List[str]:
+def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
+    """
+    parses a custom postgres label entity string into a tuple of label name and a label line in a label file
+    Parameters
+    ----------
+    labels_string
+
+    Returns
+    -------
+    List of tuples of [label_line (str), label_name (str)]
+    """
+    labels = re.findall("\\((.*?)\\)", labels_string)
+    label_list = []
+    for label in labels:
+        elements = label.split(",")
+        label = elements[-1]
+        label_string = label + " " + " ".join(elements[:-1]) + "\n"
+        label_string = label_string.replace('"', "").replace("\\", "")
+        label = label.replace('"', "").replace("\\", "")
+        label_list.append((label_string, label))
+    return label_list
+
+
+def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
     """
     Sorts fetched images according to their labels into correct directories and accordingly generates labels
     Parameters
@@ -49,22 +74,28 @@ def save_images(image_label_tuples: List[Tuple[object]]) -> List[str]:
     The list of labels
     """
     sight_list = []
+    # create directories for training and test data
+    os.mkdir("../training_data/images")
+    os.mkdir("../training_data/labels")
+
     for pair in image_label_tuples:
-        sight_name = pair[1][4]
-        if(sight_name in sight_list == False):
-            sight_list.append(sight_name)
-            # create directories for new class
-            os.mkdir("../training_data/" + sight_name + "/images")
-            os.mkdir("../training_data/" + sight_name + "/labels")
+        label_data = parse_label_string(pair[1])
+        file_string = ""
+        for label in label_data:
+            sight_name = label[1]
+            file_string += ""
+            if sight_name not in sight_list:
+                sight_list.append(sight_name)
         # create image file
-        index = len(glob.glob("../training_data/" + sight_name + "/images/*")) + 1
-        ext = imghdr.what(pair[0])
-        image_file = open( "../training_data/" + sight_name + "/images/" + str(index) + ext, "wb")
+        index = len(glob.glob("../training_data/images/*")) + 1
+        with BytesIO(pair[0]) as f:
+            ext = imghdr.what(f)
+        image_file = open("../training_data/images/" + str(index) + ext, "wb")
         image_file.write(pair[0])
         image_file.close()
         # create label file
-        label_file = open("../training_data/" + sight_name + "/labels/" + str(index) + ".txt", "w")
-        label_file.write(pair[1])
+        label_file = open("../training_data/labels/" + str(index) + ".txt", "w")
+        label_file.write(file_string)
         label_file.close()
     return sight_list
 
@@ -76,15 +107,10 @@ def generate_training_config_yaml(sights: List[str]) -> None:
     ----------
     sights: the list of sight classes used for training the model
     """
-    train = []
-    val = []
     yaml = open("./sight_training_config.yaml", "w")
     yaml.write("# train and val data\n")
-    for sight in sights:
-        train.append("../training_data/" + sight + "/images/")
-        val.append("../training_data/" + sight + "/images/")
-    yaml.write("train: [" + ",".join(train) + "]\n")
-    yaml.write("val: [" + ",".join(val) + "]\n\n")
+    yaml.write("train: ../training_data/images\n")
+    yaml.write("val: ../training_data/images\n\n")
     yaml.write("# number of classes\n")
     yaml.write("nc: " + str(len(sights)) + "\n\n")
     yaml.write("# class names\n")
