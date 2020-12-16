@@ -1,4 +1,5 @@
-import os
+import os, glob
+import imghdr
 from typing import Optional, Tuple, List
 
 from psycopg2 import connect
@@ -49,7 +50,22 @@ def save_images(image_label_tuples: List[Tuple[object]]) -> List[str]:
     """
     sight_list = []
     for pair in image_label_tuples:
-        sight_list.append("sight_name")
+        sight_name = pair[1][4]
+        if(sight_name in sight_list == False):
+            sight_list.append(sight_name)
+            # create directories for new class
+            os.mkdir("../training_data/" + sight_name + "/images")
+            os.mkdir("../training_data/" + sight_name + "/labels")
+        # create image file
+        index = len(glob.glob("../training_data/" + sight_name + "/images/*")) + 1
+        ext = imghdr.what(pair[0])
+        image_file = open( "../training_data/" + sight_name + "/images/" + str(index) + ext, "wb")
+        image_file.write(pair[0])
+        image_file.close()
+        # create label file
+        label_file = open("../training_data/" + sight_name + "/labels/" + str(index) + ".txt", "w")
+        label_file.write(pair[1])
+        label_file.close()
     return sight_list
 
 
