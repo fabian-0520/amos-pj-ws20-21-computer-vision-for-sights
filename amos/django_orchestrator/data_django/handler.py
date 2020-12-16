@@ -1,5 +1,5 @@
 """This module contains necessary business logic in order to communicate with the data warehouse."""
-from data.exec_sql import exec_dql_query, exec_dml_query
+from data_django.exec_sql import exec_dql_query, exec_dml_query
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from hashlib import md5
 from json import loads
@@ -23,9 +23,11 @@ def upload_image(image: InMemoryUploadedFile, city: str) -> str:
     source_hash: str
         Image lookup hash.
     """
-    empty_dml_query = 'INSERT INTO load_layer.sight_images(sight_image, sight_city, ' \
-                      'sight_image_height, sight_image_width, sight_image_data_source) ' \
-                      'VALUES (%s, %s, %s, %s, %s)'
+    empty_dml_query = (
+        "INSERT INTO load_layer.sight_images(sight_image, sight_city, "
+        "sight_image_height, sight_image_width, sight_image_data_source) "
+        "VALUES (%s, %s, %s, %s, %s)"
+    )
 
     img = Image.open(image)
     img_bytes = img.tobytes()
@@ -70,21 +72,25 @@ def _get_image_label_dml_query(labels: str, source_hash: str) -> str:
         Prepared DML query for the label insertion.
     """
     bounding_boxes_input_dict = loads(labels)
-    n_bounding_boxes = len(bounding_boxes_input_dict['boundingBoxes'])
-    bounding_boxes_postgres_output_string = '{'
+    n_bounding_boxes = len(bounding_boxes_input_dict["boundingBoxes"])
+    bounding_boxes_postgres_output_string = "{"
 
     for bounding_box_idx in range(n_bounding_boxes):
-        bounding_box = bounding_boxes_input_dict['boundingBoxes'][bounding_box_idx]
-        bounding_boxes_postgres_output_string += f'"({bounding_box["ulx"]},{bounding_box["uly"]},' \
-                                                 f'{bounding_box["lrx"]},{bounding_box["lry"]},' \
-                                                 f'{bounding_box["sightName"]})"'
+        bounding_box = bounding_boxes_input_dict["boundingBoxes"][bounding_box_idx]
+        bounding_boxes_postgres_output_string += (
+            f'"({bounding_box["ulx"]},{bounding_box["uly"]},'
+            f'{bounding_box["lrx"]},{bounding_box["lry"]},'
+            f'{bounding_box["sightName"]})"'
+        )
         if bounding_box_idx < n_bounding_boxes - 1:  # still bounding boxes to come
-            bounding_boxes_postgres_output_string += ','
+            bounding_boxes_postgres_output_string += ","
 
-    bounding_boxes_postgres_output_string += '}'
+    bounding_boxes_postgres_output_string += "}"
 
-    return "INSERT INTO load_layer.sight_image_labels(sight_image_data_source, sight_labels) " \
-           f"VALUES ('{source_hash}', '{bounding_boxes_postgres_output_string}')"
+    return (
+        "INSERT INTO load_layer.sight_image_labels(sight_image_data_source, sight_labels) "
+        f"VALUES ('{source_hash}', '{bounding_boxes_postgres_output_string}')"
+    )
 
 
 def get_downloaded_model(city: str) -> Optional[bytes]:
@@ -100,8 +106,9 @@ def get_downloaded_model(city: str) -> Optional[bytes]:
     found_model: bytes or None
         Retrieved .pt model file.
     """
-    trained_model_query = f"SELECT trained_model FROM data_mart_layer.current_trained_models " \
-                          f"WHERE city_name = '{city.upper()}'"
+    trained_model_query = (
+        f"SELECT trained_model FROM data_mart_layer.current_trained_models " f"WHERE city_name = '{city.upper()}'"
+    )
     found_model = exec_dql_query(trained_model_query, return_result=True)
     if found_model:
         return found_model[0][0].tobytes()
