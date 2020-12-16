@@ -5,7 +5,6 @@ import yaml
 
 from yolov5.trainer_endpoint import (
     generate_training_config_yaml,
-    save_images,
     parse_label_string,
 )
 
@@ -29,10 +28,6 @@ class MTSTestCase(unittest.TestCase):
                 print(exc)
         self.assertEqual(3, config_file["nc"])
         self.assertEqual("sight_a", config_file["names"][0])
-
-    def test_image_saving(self):
-        labels = save_images([])
-        self.assertEqual(0, len(labels))
 
     def test_string_parser(self):
         example_string = '{"(11,11,21,21,\\"Brandenburger Tor\\")","(15,15,25,25,\\"Siegessäule\\")"}'

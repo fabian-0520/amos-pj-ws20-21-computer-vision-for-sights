@@ -22,8 +22,6 @@ services:
     image: mts:v1
     build: amos/mts/yolov5
     environment:
-      - apikey=${apikey}
-      - maps_key=${maps_key}
       - PGHOST=postgres
       - PGDATABASE=${PGDATABASE}
       - PGPORT=${PGPORT}
