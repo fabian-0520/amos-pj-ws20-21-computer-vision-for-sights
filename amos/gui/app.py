@@ -97,6 +97,7 @@ class UI_MainWindow(QWidget):
         if self.Box_Stadt.currentIndex() > 0:
             msg = QMessageBox()
             msg.setWindowTitle("Download City")
+            msg.setWindowIcon(QIcon("icon_logo.png"))
             msg.setText("Do you want to download " + self.Box_Stadt.currentText() + "?")
             msg.setIcon(QMessageBox.Question)
             msg.setStandardButtons(QMessageBox.Cancel|QMessageBox.Ok)
