@@ -1,6 +1,7 @@
-ENV city=berlin
 # Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
 FROM nvcr.io/nvidia/pytorch:20.10-py3
+
+ENV city=berlin
 
 # Install dependencies
 RUN pip install --upgrade pip
@@ -15,7 +16,7 @@ WORKDIR /usr/src/app
 COPY yolov5 /usr/src/app
 
 # Fetch images, store and generate config .yml
-RUN python3 -c "persist_training_data('$city')"
+RUN python3 -c "from trainer_endpoint import persist_training_data; persist_training_data('$city')"
 
 # Copy weights
 RUN python3 -c "from models import *; \

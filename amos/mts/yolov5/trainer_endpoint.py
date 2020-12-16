@@ -9,8 +9,6 @@ from typing import Optional, Tuple, List
 from psycopg2 import connect
 from psycopg2._psycopg import Binary
 
-from yolov5.utils.general import strip_optimizer
-
 
 def persist_training_data(city_name: str) -> None:
     """
@@ -26,6 +24,9 @@ def persist_training_data(city_name: str) -> None:
 
 
 def cleanup():
+    """
+    Cleans up created training data directory and its contents.
+    """
     try:
         shutil.rmtree("../training_data")
     except OSError as e:
@@ -109,11 +110,12 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
             print("Skipped image, couldn't read")
             continue
         try:
-            image_file = open("../training_data/images/" + str(index) + ext, "wb")
+            image_file = open("../training_data/images/" + str(index) + "." + ext, "wb")
             image_file.write(pair[0])
             image_file.close()
         except IOError as e:
             print(e)
+            continue
         # create label file
         try:
             label_file = open("../training_data/labels/" + str(index) + ".txt", "w")
@@ -152,8 +154,6 @@ def upload_trained_model(city_name: str, image_count: int) -> None:
     image_count: int
         the amount of images used for training
     """
-    # optimizes weights and saves them to tmp.pt
-    strip_optimizer("runs/train/exp0_*/weights/best.pt", "tmp.pt")
     # opening the files and reading as binary
     in_file = open("tmp.pt", "rb")
     data = in_file.read()
