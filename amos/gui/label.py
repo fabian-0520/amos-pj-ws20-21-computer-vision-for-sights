@@ -1,16 +1,17 @@
-import sys, os, shutil
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QStatusBar, QMenuBar, QMessageBox, QComboBox, QApplication, QMainWindow
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import Qt, QCoreApplication, QRect, QMetaObject
+"""This module contains the label component of the UI."""
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QLabel
 
-class Image_Label(QLabel):
-    """
-    Creates and handles with the label in the middle of the application
+
+class ImageLabel(QLabel):
+    """Creates and handles the label in the middle of the application.
+
     Attributes
     ----------
     image : str
-        path of image file
+        path of image_name file
     """
     image = "logo.png"
 
@@ -26,9 +27,9 @@ class Image_Label(QLabel):
         self.setObjectName("Label_Bild")
         self.setAlignment(QtCore.Qt.AlignCenter)
 
-    def dragEnterEvent(self, event : QtGui.QDragEnterEvent) -> None:
-        """
-        Handles with the enter event of the dragged image
+    def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
+        """Handles the enter event of the dragged image.
+
         Parameters
         ----------
         event: QDragEnterEvent
@@ -40,8 +41,8 @@ class Image_Label(QLabel):
             event.ignore()
 
     def dragMoveEvent(self, event : QtGui.QDragMoveEvent) -> None:
-        """
-        Handles with the move event of the dragged image
+        """Handles the move event of the dragged image.
+
         Parameters
         ----------
         event: QDragMoveEvent
@@ -53,8 +54,8 @@ class Image_Label(QLabel):
             event.ignore()
 
     def dropEvent(self, event : QtGui.QDropEvent) -> None:
-        """
-        Handles with the drop event and loads the image into the label
+        """Handles the drop event and loads the image_name into the label.
+
         Parameters
         ----------
         event: QDropEvent
