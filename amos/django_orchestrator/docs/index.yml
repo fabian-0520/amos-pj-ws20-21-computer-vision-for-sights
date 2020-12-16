@@ -1,0 +1,124 @@
+# Swagger API description that clients can access to learn about
+# the defined client-Django orchestrator communication protocol.
+
+swagger: "2.0"
+info:
+  description: "This is the official API description for the SightScan Django Orchestration Service."
+  version: "0.1"
+  title: "Django Orchestration Service"
+  contact:
+    email: "f.skalski@campus.tu-berlin.de"
+host: "localhost:1337"
+basePath: "/api"
+tags:
+- name: "cities"
+  description: "City-related operations."
+schemes:
+- "http"
+paths:
+  /cities:
+    get:
+      tags:
+        - "cities"
+      summary: "Returns a list of currently supported cities."
+      operationId: "getCities"
+      responses:
+        "200":
+          description: "City names successfully retrieved."
+          schema:
+            $ref: "#/definitions/Cities"
+        "500":
+          description: "Unexpected server error."
+  /cities/{cityName}/image:
+    post:
+      tags:
+      - "cities"
+      summary: "Inserts a given image including labels into the data warehouse to extend the overall training set."
+      operationId: "insertImage"
+      parameters:
+        - in: path
+          name: cityName
+          required: true
+          description: "Name of the city the image to insert belongs to."
+        - in: formData
+          name: image
+          type: "file"
+          required: true
+          description: "The image to upload"
+        - in: formData
+          name: labels
+          type: "file"
+          required: true
+          schema:
+            $ref: "#/definitions/BoundingBoxLabels"
+          description: "The bounding box labels belonging to the image."
+      responses:
+        "200":
+          description: "Image successfully saved."
+        "400":
+          description: "Invalid request format."
+        "500":
+          description: "Unexpected server error."
+  /cities/{cityName}/model:
+    get:
+      tags:
+        - "cities"
+      summary: "Fetches an already trained city model from the data warehouse."
+      operationId: "getModel"
+      parameters:
+        - in: path
+          name: cityName
+          required: true
+          description: "Name of the city whose trained model to fetch."
+      responses:
+        "200":
+          description: "Model successfully fetched."
+          content:
+            application/model:
+              schema:
+                type: "string"
+                format: "binary"
+        "400":
+          description: "Invalid request format."
+        "500":
+          description: "Unexpected server error."
+definitions:
+  Cities:
+    type: "object"
+    properties:
+      cities:
+        type: "array"
+        description: "Supported city list."
+        items:
+          type: "string"
+          description: "Supported city."
+  BoundingBoxLabels:
+    type: "object"
+    properties:
+      boundingBoxes:
+        type: "array"
+        items:
+          $ref: "#/definitions/BoundingBoxLabelObject"
+  BoundingBoxLabelObject:
+    type: "object"
+    properties:
+      ulx:
+        required: true
+        type: "number"
+        description: "Upper left relative x value of the bounding box."
+      uly:
+        required: true
+        type: "number"
+        description: "Upper left relative y value of the bounding box."
+      lrx:
+        required: true
+        type: "number"
+        description: "Lower right relative x value of the bounding box."
+      lry:
+        required: true
+        type: "number"
+        description: "Lower right relative y value of the bounding box."
+      sightName:
+        required: true
+        type: "string"
+        description: "Name of the sight the bounding box surrounds."

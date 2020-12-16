@@ -12,7 +12,10 @@ idna = "*"
 requests = "*"
 selenium = "*"
 python-dotenv = "*"
-
+django = "*"
+djangorestframework = "*"
+django-swagger-render = "*"
+image = "*"
 
 [dev-packages]
 flake8 = "*"

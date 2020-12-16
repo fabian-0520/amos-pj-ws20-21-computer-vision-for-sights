@@ -14,10 +14,10 @@ create schema if not exists data_mart_layer;
 
 drop type if exists bounding_box;
 create type bounding_box as (
-	ul_x smallint,
-	ul_y smallint,
-	lr_x smallint,
-	lr_y smallint,
+	ul_x double precision,
+	ul_y double precision,
+	lr_x double precision,
+	lr_y double precision,
 	box_label VARCHAR(100)
 );
 
@@ -381,7 +381,7 @@ create index idx_surrogate_key on integration_layer.dim_models_trained_models (s
 ----------------------------------------------------------------------------------------------------------------
 -- refresh all materialized views at once -> triggered by cron job
 -- source: https://github.com/sorokine/RefreshAllMaterializedViews/blob/master/RefreshAllMaterializedViews.sql (12:43 AM, 14 November 2020)
-CREATE OR REPLACE FUNCTION RefreshAllMaterializedViews(schema_arg TEXT DEFAULT 'public')
+CREATE OR REPLACE FUNCTION RefreshAllMaterializedViews(schema_arg TEXT DEFAULT 'data_mart_layer')
 RETURNS INT AS $$
 	DECLARE
 		r RECORD;
@@ -390,8 +390,11 @@ RETURNS INT AS $$
 		FOR r IN SELECT matviewname FROM pg_matviews WHERE schemaname = schema_arg 
 		LOOP
 			RAISE NOTICE 'Refreshing %.%', schema_arg, r.matviewname;
-			EXECUTE 'REFRESH MATERIALIZED VIEW ' || schema_arg || '.' || r.matviewname; 
+			EXECUTE 'REFRESH MATERIALIZED VIEW ' || schema_arg || '.' || r.matviewname || ' WITH DATA'; 
 		END LOOP;
+
+		-- additionally needed, since not located inside of previous loop
+		EXECUTE 'REFRESH MATERIALIZED VIEW data_mart_layer.current_trained_models WITH DATA';
 		
 		RETURN 1;
 	END 

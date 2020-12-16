@@ -1,0 +1,9 @@
+django
+djangorestframework
+django-swagger-render
+Image
+mock
+requests
+psycopg2-binary
+pytest
+pytest-cov
