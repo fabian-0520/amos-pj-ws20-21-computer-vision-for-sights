@@ -75,11 +75,11 @@ def _get_image_label_dml_query(labels: str, source_hash: str) -> str:
 
     for bounding_box_idx in range(n_bounding_boxes):
         bounding_box = bounding_boxes_input_dict['boundingBoxes'][bounding_box_idx]
-        bounding_boxes_postgres_output_string += f'"({bounding_box["ulx"]}, {bounding_box["uly"]}, ' \
-                                                 f'{bounding_box["lrx"]}, {bounding_box["lry"]}, ' \
+        bounding_boxes_postgres_output_string += f'"({bounding_box["ulx"]},{bounding_box["uly"]},' \
+                                                 f'{bounding_box["lrx"]},{bounding_box["lry"]},' \
                                                  f'{bounding_box["sightName"]})"'
         if bounding_box_idx < n_bounding_boxes - 1:  # still bounding boxes to come
-            bounding_boxes_postgres_output_string += ', '
+            bounding_boxes_postgres_output_string += ','
 
     bounding_boxes_postgres_output_string += '}'
 

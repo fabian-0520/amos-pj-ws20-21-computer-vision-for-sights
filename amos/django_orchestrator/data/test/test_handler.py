@@ -23,8 +23,8 @@ def test_get_image_label_dml_query(labels_mock, md5_mock):
     assert built_query == 'INSERT INTO load_layer.sight_image_labels(sight_image_data_source, sight_labels) ' \
                           'VALUES (\'b\'testtesttesttesttesttesttest\'\', ' \
                           '\'{"' \
-                          '(0.12122, 0.34212, 0.33311, 0.12315, Brandenburger Tor)", ' \
-                          '"(0.12122, 0.34212, 0.33311, 0.12315, Siegessaeule)' \
+                          '(0.12122,0.34212,0.33311,0.12315,Brandenburger Tor)",' \
+                          '"(0.12122,0.34212,0.33311,0.12315,Siegessaeule)' \
                           '"}\')'
 
 
