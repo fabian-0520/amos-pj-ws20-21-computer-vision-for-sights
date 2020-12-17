@@ -138,11 +138,11 @@ If you run a PostgreSQL without our Dockerfile, run the `database_init.sql` file
 
   - The data warehouse is deployed using Amazon RDS and creating a PostgreSQL database instance using the free tier version from AWS.
 
-  ![AMOS%20Build%20deploy%20Documentation%200fea1fdb33cf4509b88828022717ccb0/Untitled.png](AMOS%20Build%20deploy%20Documentation%200fea1fdb33cf4509b88828022717ccb0/Untitled.png)
+  ![Alt text](pictures/postgres_1.png)
 
   1. Simply choose PostgreSQL as a Database engine and the Free tier version
 
-  ![AMOS%20Build%20deploy%20Documentation%200fea1fdb33cf4509b88828022717ccb0/Untitled%201.png](AMOS%20Build%20deploy%20Documentation%200fea1fdb33cf4509b88828022717ccb0/Untitled%201.png)
+  ![Alt text](pictures/postgres_2.png)
 
   1. Add your dataset password and username and create the database.
   2. Once the database is created connect to the database via the credentials and run the database_init.sql file.
