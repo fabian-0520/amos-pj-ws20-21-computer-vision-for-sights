@@ -152,18 +152,8 @@ def connection_mock():
 
 
 @pytest.fixture(scope='module')
-def connection_mock():
-    return ConnectionMock()
-
-
-@pytest.fixture(scope='module')
 def connection_exception_mock():
     return ConnectionExceptionMock()
-
-
-@pytest.fixture(scope='module')
-def in_memory_file_mock():
-    return InMemoryUploadedFileMock()
 
 
 @pytest.fixture(scope='module')
