@@ -1,0 +1,10 @@
+django
+djangorestframework
+django-swagger-render
+google-cloud-vision
+Image
+mock
+requests
+psycopg2-binary
+pytest
+pytest-cov
