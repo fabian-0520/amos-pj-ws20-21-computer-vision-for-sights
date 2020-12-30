@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
-    'data.apps.DataConfig',
+    'dwh_communication.apps.DwhCommunicationConfig',
     'labelling.apps.LabellingConfig',
     'rest_framework',
     'swagger_render'

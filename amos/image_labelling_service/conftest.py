@@ -188,4 +188,3 @@ def vision_response_mock():
             }
         }
     ]
-
