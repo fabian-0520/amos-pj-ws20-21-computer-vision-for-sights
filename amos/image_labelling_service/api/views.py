@@ -25,7 +25,7 @@ def add_labels_to_existing_city(request: Request, city: str) -> HttpResponse:
     response: HttpResponse
         Response object containing a status message.
     """
-    return HttpResponse(f'[{city}, EXISTING] {HTTP_200_MESSAGE}', status=200)
+    return HttpResponse(f'[{city.upper()}, EXISTING] {HTTP_200_MESSAGE}', status=200)
 
 
 @api_view(['POST'])
@@ -46,7 +46,7 @@ def add_labels_to_new_city(request: Request, city: str) -> HttpResponse:
         Response object containing a status message.
     """
     persist_google_vision_labels(city)
-    return HttpResponse(f'[{city}, NEW] {HTTP_200_MESSAGE}', status=200)
+    return HttpResponse(f'[{city.upper()}, NEW] {HTTP_200_MESSAGE}', status=200)
 
 
 @api_view(['GET'])

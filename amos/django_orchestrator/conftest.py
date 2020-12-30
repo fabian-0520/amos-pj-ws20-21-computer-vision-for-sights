@@ -8,6 +8,9 @@ class InMemoryUploadedFileMock:
     def __init__(self):
         self.content_type = 'image/png'
 
+    def open(self):
+        return ImageMock()
+
 
 class RequestMock:
     FILES: dict = None
@@ -81,14 +84,6 @@ class ImageMock:
 
     def tobytes(self):
         return b'testtesttesttesttesttesttest'
-
-
-class InMemoryUploadedFileMock:
-    def __init__(self):
-        pass
-
-    def open(self):
-        return ImageMock()
 
 
 class MD5Mock:

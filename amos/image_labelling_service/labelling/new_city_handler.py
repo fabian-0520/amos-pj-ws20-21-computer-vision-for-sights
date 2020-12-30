@@ -2,7 +2,7 @@
 
 and merging them into the data warehouse - provided the specified city is yet not supported.
 """
-from dwh_communication.exec_sql import exec_dql_query, exec_dml_query
+from dwh_communication.exec_dwh_sql import exec_dql_query, exec_dml_query
 from google.cloud import vision
 from google.protobuf.json_format import MessageToDict
 from os import environ
