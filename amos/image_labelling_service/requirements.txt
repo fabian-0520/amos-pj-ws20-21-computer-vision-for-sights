@@ -1,10 +1,12 @@
 django
 djangorestframework
 django-swagger-render
+google-cloud
 google-cloud-vision
 Image
 mock
 requests
+protobuf
 psycopg2-binary
 pytest
 pytest-cov
