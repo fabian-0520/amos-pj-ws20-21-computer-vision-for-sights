@@ -8,3 +8,4 @@ python-dotenv
 coverage
 mock
 pytest
+Pillow
