@@ -20,13 +20,13 @@ paths:
     get:
       tags:
         - "cities"
-        summary: "Returns the full image labelling logs."
-        operationId: "getLogs"
-        responses:
-          "200":
-            description: "Logs successfully retrieved."
-          "500":
-            description: "Unexpected server error."
+      summary: "Returns the full image labelling logs."
+      operationId: "getLogs"
+      responses:
+        "200":
+          description: "Logs successfully retrieved."
+        "500":
+          description: "Unexpected server error."
   /citites/{cityName}:
     post:
       tags:
