@@ -200,7 +200,7 @@ def _parse_landmark_to_bounding_box_str(landmark_annotation: Dict[str, Union[str
     lr_x = round(lr_x, ndigits=BOUNDING_BOX_DECIMALS_PRECISION)
     lr_y = round(lr_y, ndigits=BOUNDING_BOX_DECIMALS_PRECISION)
 
-    return f'"({ul_x},{ul_y},{lr_x},{lr_y},{sight_name})"'
+    return f'"({ul_x},{1 - ul_y},{lr_x},{1 - lr_y},{sight_name})"'
 
 
 def _read_image_ids_for_labelling(city_name: str) -> Optional[List[int]]:
@@ -235,6 +235,7 @@ def _read_image_ids_for_labelling(city_name: str) -> Optional[List[int]]:
             f'cities.city_name = \'{city_name.upper()}\'' \
             ') AS ids ' \
             f'ORDER BY RANDOM() LIMIT {max_google_vision_calls_per_new_city}'
+
     image_ids_to_label = exec_dql_query(query, return_result=True)
     if image_ids_to_label is not None:
         image_ids_to_label = [id_tpl[0] for id_tpl in image_ids_to_label]

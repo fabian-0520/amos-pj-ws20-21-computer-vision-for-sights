@@ -5,6 +5,7 @@ from labelling.new_city_handler import persist_google_vision_labels, _get_image_
 from mock import patch
 from typing import Dict, Union, List
 import os
+import re
 
 MODULE_PATH = 'labelling.new_city_handler'
 
@@ -68,8 +69,8 @@ def test_label_image(vision_response_mock: List[Dict[str, Union[str, float, dict
         assert mock_url in called_query
 
         # both labels saved
-        assert vision_response_mock[0]['description'] in called_query
-        assert vision_response_mock[1]['description'] in called_query
+        assert re.escape(vision_response_mock[0]['description']) in called_query
+        assert re.escape(vision_response_mock[1]['description']) in called_query
 
 
 def test_log_incident() -> None:
@@ -95,7 +96,7 @@ def test_parsing_landmark_to_str(vision_response_mock: List[Dict[str, Union[str,
         )
     )
 
-    assert bounding_box_infos[-1] == test_landmark['description']
+    assert bounding_box_infos[-1] == re.escape(test_landmark['description'])
 
 
 def test_read_image_ids_for_labelling(monkeypatch: MonkeyPatch) -> None:
