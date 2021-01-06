@@ -203,7 +203,7 @@ class AutoCrawler:
                 print("Download failed - ", e)
                 continue
 
-    def download_from_site(self, keyword, site_code):
+    def download_from_site(self, keyword, region, site_code):
         site_name = Sites.get_text(site_code)
         add_url = Sites.get_face_url(site_code) if self.face else ""
 
@@ -217,10 +217,10 @@ class AutoCrawler:
             print("Collecting links... {} from {}".format(keyword, site_name))
 
             if site_code == Sites.GOOGLE:
-                links = collect.google(keyword, add_url)
+                links = collect.google(keyword, region, add_url)
 
             elif site_code == Sites.GOOGLE_FULL:
-                links = collect.google_full(keyword, add_url, self.limit)
+                links = collect.google_full(keyword, region, add_url, self.limit)
 
             else:
                 print("Invalid Site Code")
@@ -235,7 +235,7 @@ class AutoCrawler:
             print("Exception {}:{} - {}".format(site_name, keyword, e))
 
     def download(self, args):
-        self.download_from_site(keyword=args[0], site_code=args[1])
+        self.download_from_site(keyword=args[0], region=_region, site_code=args[1])
 
     def do_crawling(self):
         keywords = self.keyword_list
