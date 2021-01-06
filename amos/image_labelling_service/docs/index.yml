@@ -16,7 +16,7 @@ tags:
 schemes:
 - "http"
 paths:
-  /citites/logs:
+  /cities/logs:
     get:
       tags:
         - "cities"
@@ -27,7 +27,7 @@ paths:
           description: "Logs successfully retrieved."
         "500":
           description: "Unexpected server error."
-  /citites/{cityName}:
+  /cities/{cityName}:
     post:
       tags:
         - "cities"
@@ -39,7 +39,7 @@ paths:
           description: "Label request successfully executed."
         "500":
           description: "Unexpected server error."
-  /citites/{cityName}/existing:
+  /cities/{cityName}/existing:
     post:
       tags:
         - "cities"
