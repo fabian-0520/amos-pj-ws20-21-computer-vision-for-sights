@@ -263,7 +263,7 @@ class AutoCrawler:
             print("Exception {}:{} - {}".format(site_name, keyword, e))
 
     def download(self, args):
-        self.download_from_site(keyword=args[0], region=_region, site_code=args[1])
+        self.download_from_site(keyword=args[0], region=self.region, site_code=args[1])
 
     def do_crawling(self):
         keywords = self.keyword_list
