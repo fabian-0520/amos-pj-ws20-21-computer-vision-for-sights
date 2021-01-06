@@ -2,12 +2,21 @@ FROM alpine
 
 # set root user
 USER root
-
+s
 # Install python, chromium and chromedriver
 RUN apk update
 RUN apk add py-pip
 RUN apk add chromium postgresql-dev python3-dev gcc musl-dev
 RUN apk add --no-cache chromium-chromedriver
+
+# Install pillow (image library)
+RUN apk update \
+    && apk add --virtual build-deps gcc python3-dev musl-dev \
+    && apk add postgresql \
+    && pip install psycopg2 \
+    && apk add jpeg-dev zlib-dev libjpeg \
+    && pip install Pillow \
+    && apk del build-deps
 
 # Set directory to copy files into, and copy
 WORKDIR /crawler
