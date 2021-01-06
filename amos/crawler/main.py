@@ -324,7 +324,7 @@ class AutoCrawler:
                 print("dir: {}, file_count: {}".format(dir, n_files))
 
             print("Remove directories above? (y/n)")
-            answer = input()
+            answer = "y"
 
             if answer == "y":
                 # removing directories too small files
