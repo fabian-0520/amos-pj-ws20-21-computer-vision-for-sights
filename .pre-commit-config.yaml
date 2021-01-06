@@ -3,10 +3,15 @@ repos:
     rev: 3.8.4  # Use the ref you want to point at
     hooks:
       - id: flake8
-        args: [--count --select=E9,F63,F7,F82 --show-source --statistics --exit-zero --max-complexity=10 --max-line-length=127]
+        args: ['--count', '--select=E9,F63,F7,F82', '--show-source', '--statistics', '--exit-zero', '--max-complexity=10', '--max-line-length=127']
 
-  - repo: https://github.com/psf/black
-    rev: stable
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
     hooks:
-      - id: black
-        args: [--line-length=127]
+      - id: end-of-file-fixer
+
+  #- repo: https://github.com/psf/black
+  #  rev: stable
+  #  hooks:
+  #    - id: black
+  #      args: [--line-length=127]
