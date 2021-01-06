@@ -2,7 +2,7 @@ FROM alpine
 
 # set root user
 USER root
-s
+
 # Install python, chromium and chromedriver
 RUN apk update
 RUN apk add py-pip
