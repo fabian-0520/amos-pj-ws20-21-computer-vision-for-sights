@@ -3,11 +3,11 @@ from data_django.handler import upload_image, upload_image_labels, _get_image_la
 from mock import patch, PropertyMock
 
 
-def test_upload_image(in_memory_file_mock, md5_mock):
-    with patch("data_django.handler.Image", new_callable=PropertyMock, return_value=in_memory_file_mock), patch(
-        "data_django.handler.md5", return_value=md5_mock
-    ), patch("data_django.handler.exec_dml_query"):
-        assert upload_image(in_memory_file_mock, "Berlin") == md5_mock.hexdigest()
+def test_upload_image(in_memory_uploaded_file_mock, md5_mock):
+    with patch("data_django.handler.Image", new_callable=PropertyMock, return_value=in_memory_uploaded_file_mock), \
+         patch("data_django.handler.md5", return_value=md5_mock), \
+         patch("data_django.handler.exec_dml_query"):
+        assert upload_image(in_memory_uploaded_file_mock, "Berlin") == md5_mock.hexdigest()
 
 
 def test_upload_image_labels(labels_mock, md5_mock):
@@ -37,6 +37,6 @@ def test_get_downloaded_model_found(model_mock):
 
 
 def test_get_downloaded_model_not_found():
-    with patch("data_django.handler.exec_dql_query", return_value=[]) as mocked_models:
+    with patch("data_django.handler.exec_dql_query", return_value=[]):
         result_model = get_downloaded_model("berlin")
         assert result_model is None

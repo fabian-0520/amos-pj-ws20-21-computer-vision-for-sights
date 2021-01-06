@@ -1,0 +1,54 @@
+# base: URL/city
+# /existing appended if existing
+
+swagger: "2.0"
+info:
+  description: "This is the official API description for the SightScan Image Labelling Service."
+  version: "0.1"
+  title: "Image Labelling Service"
+  contact:
+    email: "f.skalski@campus.tu-berlin.de"
+host: "localhost:7331"
+basePath: "/api"
+tags:
+- name: "cities"
+  description: "City-related label retrieval."
+schemes:
+- "http"
+paths:
+  /cities/logs:
+    get:
+      tags:
+        - "cities"
+      summary: "Returns the full image labelling logs."
+      operationId: "getLogs"
+      responses:
+        "200":
+          description: "Logs successfully retrieved."
+        "500":
+          description: "Unexpected server error."
+  /cities/{cityName}:
+    post:
+      tags:
+        - "cities"
+      summary: "Retrieves and adds bounding box labels for a newly supported city [= yet without image labels]
+      into the data warehouse by accessing the Google Vision API."
+      operationId: "addLabelsForNewCity"
+      responses:
+        "200":
+          description: "Label request successfully executed."
+        "500":
+          description: "Unexpected server error."
+  /cities/{cityName}/existing:
+    post:
+      tags:
+        - "cities"
+      summary: "Retrieves and adds labels for an already supported city [= with existing image labels].
+      This functionality is not implemented yet and merely provided for optional future extensibility."
+      operationId: "addLabelsForExistingCity"
+      responses:
+        "200":
+          description: "Label request successfully executed."
+        "500":
+          description: "Unexpected server error."
+

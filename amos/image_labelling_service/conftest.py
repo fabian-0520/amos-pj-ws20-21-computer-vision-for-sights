@@ -2,23 +2,6 @@ from typing import Tuple
 import pytest
 
 
-class InMemoryUploadedFileMock:
-    content_type: str = None
-
-    def __init__(self):
-        self.content_type = 'image/png'
-
-    def open(self):
-        return ImageMock()
-
-
-class RequestMock:
-    FILES: dict = None
-
-    def __init__(self):
-        self.FILES = {'image': 'some Image', 'labels': _get_labels_string()}
-
-
 class CursorMock:
     def __enter__(self):
         return self
@@ -86,6 +69,14 @@ class ImageMock:
         return b'testtesttesttesttesttesttest'
 
 
+class InMemoryUploadedFileMock:
+    def __init__(self):
+        pass
+
+    def open(self):
+        return ImageMock()
+
+
 class MD5Mock:
     def __init__(self):
         pass
@@ -124,21 +115,12 @@ def env_setup(monkeypatch):
     monkeypatch.setenv('PG_DATABASE', 'test')
     monkeypatch.setenv('PG_USER', 'test')
     monkeypatch.setenv('PG_PASSWORD', 'test')
-
-
-@pytest.fixture(scope='module')
-def in_memory_uploaded_file_mock():
-    return InMemoryUploadedFileMock()
+    monkeypatch.setenv('MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY', '100')
 
 
 @pytest.fixture(scope='module')
 def labels_mock():
     return _get_labels_string()
-
-
-@pytest.fixture(scope='module')
-def request_mock():
-    return RequestMock()
 
 
 @pytest.fixture(scope='module')
@@ -152,15 +134,57 @@ def connection_exception_mock():
 
 
 @pytest.fixture(scope='module')
-def image_mock():
-    return ImageMock()
-
-
-@pytest.fixture(scope='module')
 def md5_mock():
     return MD5Mock()
 
 
 @pytest.fixture(scope='module')
-def model_mock():
-    return ModelMock()
+def vision_response_mock():
+    return [
+        {
+            'description': 'Test Sight 1',
+            'boundingPoly': {
+                'vertices': [
+                    {
+                        'x': 100,
+                        'y': 250
+                    },
+                    {
+                        'x': 300,
+                        'y': 200
+                    },
+                    {
+                        'x': 300,
+                        'y': 250
+                    },
+                    {
+                        'x': 100,
+                        'y': 200
+                    }
+                ]
+            }
+        },
+        {
+            'description': 'Test Sight 2',
+            'boundingPoly': {
+                'vertices': [
+                    {
+                        'x': 433,
+                        'y': 500
+                    },
+                    {
+                        'x': 300,
+                        'y': 100
+                    },
+                    {
+                        'x': 300,
+                        'y': 500
+                    },
+                    {
+                        'x': 433,
+                        'y': 100
+                    }
+                ]
+            }
+        }
+    ]
