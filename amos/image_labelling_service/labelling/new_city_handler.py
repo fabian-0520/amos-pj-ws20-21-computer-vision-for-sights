@@ -62,7 +62,7 @@ def _get_image_resolution(image_bytes: bytes) -> Tuple[int, int]:
     return image.width, image.height
 
 
-def _get_landmarks_from_vision(image_bytes: bytes) -> List[Dict[str, Union[str, float, dict, list]]]:
+def _get_landmarks_from_vision(image_bytes: bytes) -> Optional[List[Dict[str, Union[str, float, dict, list]]]]:
     """Retrieves and returns the landmarks for a given image from the Google Vision API.
 
     Parameters
@@ -83,7 +83,14 @@ def _get_landmarks_from_vision(image_bytes: bytes) -> List[Dict[str, Union[str, 
     """
     client = vision.ImageAnnotatorClient()
     image = vision.Image(content=image_bytes)
-    return MessageToDict(client.landmark_detection(image=image)._pb)['landmarkAnnotations']
+    landmark_annotations = MessageToDict(client.landmark_detection(image=image)._pb)
+
+    if 'landmarkAnnotations' in landmark_annotations and len(landmark_annotations['landmarkAnnotations']) > 0:
+        landmark_annotations = landmark_annotations['landmarkAnnotations']
+    else:
+        landmark_annotations = None
+
+    return landmark_annotations
 
 
 def _get_merged_bounding_box_string(bounding_box_strings: List[str]) -> str:
@@ -127,6 +134,11 @@ def _label_image(image_id: int) -> None:
     # retrieve bounding boxes in data warehouse-readable format
     image_bytes, image_source = bytes(content[0][0]), content[0][1]
     raw_landmark = _get_landmarks_from_vision(image_bytes)
+
+    if raw_landmark is None:
+        log_incident(f'Google vision has identified no landmark for image {image_id}.')
+        return
+
     width, height = _get_image_resolution(image_bytes)
     bounding_box_strings = [_parse_landmark_to_bounding_box_str(landmark_annotation, width, height)
                             for landmark_annotation in raw_landmark]
