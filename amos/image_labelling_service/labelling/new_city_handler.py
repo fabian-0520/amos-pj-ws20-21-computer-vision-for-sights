@@ -11,6 +11,7 @@ from typing import Optional, Dict, Union, Tuple, List
 import datetime
 import io
 import pytz
+import re
 
 BOUNDING_BOX_DECIMALS_PRECISION = 5  # 5 decimal places for relative bounding box coordinates
 LOG_FILE_NAME = 'special_incidents.log'
@@ -29,9 +30,11 @@ def persist_google_vision_labels(city_name: str) -> None:
         for image_id in image_ids_for_labelling:
             log_incident(f'Trying to retrieve bounding box labels for image {image_id} '
                          f'[new city: {city_name.upper()}].')
-            _label_image(image_id)
-            log_incident(f'Retrieving + persisting bounding box labels for image '
-                         f'{image_id} successful [new city: {city_name.upper()}].')
+            if _label_image(image_id):
+                log_incident(f'Retrieving + persisting bounding box labels for image '
+                             f'{image_id} successful [new city: {city_name.upper()}].')
+            else:
+                log_incident(f'Google vision API has identified no landmark for image {image_id}.')
     else:
         log_incident(f'No images to be labelled found [new city: {city_name.upper()}].')
 
@@ -117,13 +120,18 @@ def _get_merged_bounding_box_string(bounding_box_strings: List[str]) -> str:
     return merged_bounding_boxes
 
 
-def _label_image(image_id: int) -> None:
-    """Labels the image with the given image ID from the data warehouse.
+def _label_image(image_id: int) -> bool:
+    """Labels the image with the given image ID from the data warehouse and returns if the labelling was successful.
 
     Parameters
     ----------
     image_id: int
         Image id.
+
+    Returns
+    -------
+    is_successfully_labelled: bool
+        Whether the labelling was successful.
     """
     # query for image
     dql_query = 'SELECT img.image_file AS file, img.image_source AS source ' \
@@ -134,20 +142,20 @@ def _label_image(image_id: int) -> None:
     # retrieve bounding boxes in data warehouse-readable format
     image_bytes, image_source = bytes(content[0][0]), content[0][1]
     raw_landmark = _get_landmarks_from_vision(image_bytes)
+    is_label_retrieved = raw_landmark is not None
 
-    if raw_landmark is None:
-        log_incident(f'Google vision has identified no landmark for image {image_id}.')
-        return
+    if is_label_retrieved:
+        width, height = _get_image_resolution(image_bytes)
+        bounding_box_strings = [_parse_landmark_to_bounding_box_str(landmark_annotation, width, height)
+                                for landmark_annotation in raw_landmark]
+        final_bounding_boxes_string = _get_merged_bounding_box_string(bounding_box_strings)
 
-    width, height = _get_image_resolution(image_bytes)
-    bounding_box_strings = [_parse_landmark_to_bounding_box_str(landmark_annotation, width, height)
-                            for landmark_annotation in raw_landmark]
-    final_bounding_boxes_string = _get_merged_bounding_box_string(bounding_box_strings)
+        # merge labels into data warehouse
+        dml_query = "INSERT INTO load_layer.sight_image_labels(sight_image_data_source, sight_labels) " \
+                    f"VALUES ('{image_source}', '{final_bounding_boxes_string}')"
+        exec_dml_query(dml_query, filling_parameters=None)
 
-    # merge labels into data warehouse
-    dml_query = "INSERT INTO load_layer.sight_image_labels(sight_image_data_source, sight_labels) " \
-                f"VALUES ('{image_source}', '{final_bounding_boxes_string}')"
-    exec_dml_query(dml_query, filling_parameters=None)
+    return is_label_retrieved
 
 
 def log_incident(msg: str) -> None:
@@ -181,7 +189,7 @@ def _parse_landmark_to_bounding_box_str(landmark_annotation: Dict[str, Union[str
     bounding_box_str: str
         String representing the identified landmark annotation.
     """
-    sight_name = landmark_annotation['description']
+    sight_name = re.escape(landmark_annotation['description'].replace("'", "").replace('"', ''))
     bounding_box = landmark_annotation['boundingPoly']['vertices']
 
     x_vals = [point['x']/image_width for point in bounding_box]
