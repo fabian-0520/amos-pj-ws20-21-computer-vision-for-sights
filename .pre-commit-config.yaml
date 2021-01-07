@@ -11,7 +11,6 @@ repos:
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
-      #- id: whitespaces
   #    - id: check-json
   #    - id: check-yaml
   #    - id: docker-compose-check
@@ -21,3 +20,8 @@ repos:
   #  hooks:
   #    - id: black
   #      args: [--line-length=127]
+
+
+# workflow:
+# - pip install pre-commit
+# - after you staged files with git add you can use "pre-commit run" to analyse and reformat your code
