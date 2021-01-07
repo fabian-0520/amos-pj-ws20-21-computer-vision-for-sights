@@ -19,5 +19,5 @@ Load images and detect sights in the SightScan Desktop app.
 - download the specific pretrained model associated with the currently selected city
 - if nothing was detected - ask for support by the user by labeling the current image or by telling the application which sight is in the image --> create new class for the sight ???
 - what to do with incorrect use of the application, e.g. labeling an image with no sight in it - confusing the model...
-	e.g. request for adding a new city with irregular name / too small, too uninsteresting 
+	e.g. request for adding a new city with irregular name / too small, too uninsteresting
 	e.g. loading non-image files --> label should still display "Drop the image here"

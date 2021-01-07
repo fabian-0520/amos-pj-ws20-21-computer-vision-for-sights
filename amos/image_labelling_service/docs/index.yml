@@ -51,4 +51,3 @@ paths:
           description: "Label request successfully executed."
         "500":
           description: "Unexpected server error."
-

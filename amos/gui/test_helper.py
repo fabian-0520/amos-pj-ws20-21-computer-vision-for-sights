@@ -47,4 +47,3 @@ def test_file_reload_new_dir():
 def _create_file(dummy_full_path):
     with open(f'{os.getcwd()}/{dummy_full_path}', 'w+') as file:
         file.write('dummy')
-
