@@ -27,7 +27,7 @@ jobs:
           for entry in ./amos/*; do
             touch requirements.txt
             if [ -f $entry/requirements.txt ]; then
-              cat $entry/requirements.txt >> ./.github/skripts/requirements.txt;
+              cat $entry/requirements.txt >> requirements.txt;
             fi
           done
           pip install -r requirements.txt;
