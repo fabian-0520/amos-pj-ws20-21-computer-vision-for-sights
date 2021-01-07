@@ -14,15 +14,17 @@ Copyright 2018 YoongiKim
    limitations under the License.
 """
 
+import argparse
+import base64
+import imghdr
 import os
-import requests
 import shutil
 from multiprocessing import Pool
-import argparse
-from collect_links import CollectLinks
-import imghdr
-import base64
 
+import requests
+from PIL import Image
+
+from collect_links import CollectLinks
 from data_crawler.image import insert_image
 from sight_collector import get_sights
 
@@ -57,6 +59,7 @@ class AutoCrawler:
         limit=0,
         no_driver=False,
         keyword_list="['Brandenburger Tor', 'Alexanderplatz']",
+        region="Berlin",
     ):
         """
         :param skip_already_exist: Skips keyword already downloaded before. This is needed when re-downloading.
@@ -81,6 +84,7 @@ class AutoCrawler:
         self.limit = limit
         self.no_driver = no_driver
         self.keyword_list = keyword_list
+        self.region = region
 
         os.makedirs("./{}".format(self.download_path), exist_ok=True)
 
@@ -133,15 +137,19 @@ class AutoCrawler:
             os.makedirs(path)
 
     @staticmethod
-    def save_object_to_file(keyword, site_name, object, file_path, is_base64=False):
+    def save_object_to_file(
+        keyword, site_name, object, file_path, region, is_base64=False
+    ):
         try:
             with open("{}".format(file_path), "wb") as file:
                 if is_base64:
                     file.write(object)
                 else:
                     shutil.copyfileobj(object.raw, file)
+            im = Image.open(file_path)
+            width, height = im.size
             with open("{}".format(file_path), "rb") as file:
-                insert_image(file.read(), "10", "10", file_path)
+                insert_image(file.read(), width, height, file_path, region)
         except Exception as e:
             print("Save failed - {}".format(e))
 
@@ -164,7 +172,11 @@ class AutoCrawler:
                 break
 
             try:
-                print("Downloading {} from {}: {} / {}".format(keyword, site_name, success_count + 1, max_count))
+                print(
+                    "Downloading {} from {}: {} / {}".format(
+                        keyword, site_name, success_count + 1, max_count
+                    )
+                )
 
                 if str(link).startswith("data:image/jpeg;base64"):
                     response = self.base64_to_object(link)
@@ -180,10 +192,20 @@ class AutoCrawler:
                     is_base64 = False
 
                 no_ext_path = "{}/{}/{}_{}".format(
-                    self.download_path.replace('"', ""), keyword, site_name, str(index).zfill(4)
+                    self.download_path.replace('"', ""),
+                    keyword,
+                    site_name,
+                    str(index).zfill(4),
                 )
                 path = no_ext_path + "." + ext
-                self.save_object_to_file(keyword, site_name, response, path, is_base64=is_base64)
+                self.save_object_to_file(
+                    keyword,
+                    site_name,
+                    response,
+                    path,
+                    is_base64=is_base64,
+                    region=self.region,
+                )
 
                 success_count += 1
                 del response
@@ -203,12 +225,14 @@ class AutoCrawler:
                 print("Download failed - ", e)
                 continue
 
-    def download_from_site(self, keyword, site_code):
+    def download_from_site(self, keyword, region, site_code):
         site_name = Sites.get_text(site_code)
         add_url = Sites.get_face_url(site_code) if self.face else ""
 
         try:
-            collect = CollectLinks(no_gui=self.no_gui, no_driver=self.no_driver)  # initialize chrome driver
+            collect = CollectLinks(
+                no_gui=self.no_gui, no_driver=self.no_driver
+            )  # initialize chrome driver
         except Exception as e:
             print("Error occurred while initializing chromedriver - {}".format(e))
             return
@@ -217,16 +241,20 @@ class AutoCrawler:
             print("Collecting links... {} from {}".format(keyword, site_name))
 
             if site_code == Sites.GOOGLE:
-                links = collect.google(keyword, add_url)
+                links = collect.google(keyword, region, add_url)
 
             elif site_code == Sites.GOOGLE_FULL:
-                links = collect.google_full(keyword, add_url, self.limit)
+                links = collect.google_full(keyword, region, add_url, self.limit)
 
             else:
                 print("Invalid Site Code")
                 links = []
 
-            print("Downloading images from collected links... {} from {}".format(keyword, site_name))
+            print(
+                "Downloading images from collected links... {} from {}".format(
+                    keyword, site_name
+                )
+            )
             self.download_images(keyword, links, site_name, max_count=self.limit)
 
             print("Done {} : {}".format(site_name, keyword))
@@ -235,7 +263,7 @@ class AutoCrawler:
             print("Exception {}:{} - {}".format(site_name, keyword, e))
 
     def download(self, args):
-        self.download_from_site(keyword=args[0], site_code=args[1])
+        self.download_from_site(keyword=args[0], region=self.region, site_code=args[1])
 
     def do_crawling(self):
         keywords = self.keyword_list
@@ -287,14 +315,16 @@ class AutoCrawler:
         if len(dict_too_small) >= 1:
             print("Data imbalance detected.")
             print("Below keywords have smaller than 50% of average file count.")
-            print("I recommend you to remove these directories and re-download for that keyword.")
+            print(
+                "I recommend you to remove these directories and re-download for that keyword."
+            )
             print("_________________________________")
             print("Too small file count directories:")
             for dir, n_files in dict_too_small.items():
                 print("dir: {}, file_count: {}".format(dir, n_files))
 
             print("Remove directories above? (y/n)")
-            answer = input()
+            answer = "y"
 
             if answer == "y":
                 # removing directories too small files
@@ -303,7 +333,9 @@ class AutoCrawler:
                     shutil.rmtree(dir)
                     print("Removed {}".format(dir))
 
-                print("Now re-run this program to re-download removed files. (with skip_already_exist=True)")
+                print(
+                    "Now re-run this program to re-download removed files. (with skip_already_exist=True)"
+                )
         else:
             print("Data imbalance not detected.")
 
@@ -316,10 +348,17 @@ if __name__ == "__main__":
         default="true",
         help="Skips keyword already downloaded before. This is needed when re-downloading.",
     )
-    parser.add_argument("--threads", type=int, default=4, help="Number of threads to download.")
-    parser.add_argument("--google", type=str, default="true", help="Download from google.com (boolean)")
     parser.add_argument(
-        "--full", type=str, default="false", help="Download full resolution image instead of thumbnails (slow)"
+        "--threads", type=int, default=4, help="Number of threads to download."
+    )
+    parser.add_argument(
+        "--google", type=str, default="true", help="Download from google.com (boolean)"
+    )
+    parser.add_argument(
+        "--full",
+        type=str,
+        default="false",
+        help="Download full resolution image instead of thumbnails (slow)",
     )
     parser.add_argument("--face", type=str, default="false", help="Face search mode")
     parser.add_argument(
@@ -331,7 +370,10 @@ if __name__ == "__main__":
         'Default: "auto" - false if full=false, true if full=true',
     )
     parser.add_argument(
-        "--limit", type=int, default=0, help="Maximum count of images to download per site. (0: infinite)"
+        "--limit",
+        type=int,
+        default=0,
+        help="Maximum count of images to download per site. (0: infinite)",
     )
     parser.add_argument(
         "--no_driver",
@@ -339,9 +381,17 @@ if __name__ == "__main__":
         default="false",
         help="Whether a preconfigured driver should not be used (by default false, meaning it will)",
     )
-    parser.add_argument("--region", type=str, default="Berlin", help="The region sights need to be found for")
     parser.add_argument(
-        "--sights_limit", type=int, default=10, help="The limit of sights to be found by the collector api"
+        "--region",
+        type=str,
+        default="Berlin",
+        help="The region sights need to be found for",
+    )
+    parser.add_argument(
+        "--sights_limit",
+        type=int,
+        default=10,
+        help="The limit of sights to be found by the collector api",
     )
     args = parser.parse_args()
 
@@ -366,7 +416,16 @@ if __name__ == "__main__":
     print(
         "Options - skip:{}, threads:{}, google:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, region:{}, "
         "no_driver:{}, sights_limit:{} ".format(
-            _skip, _threads, _google, _full, _face, _no_gui, _limit, _region, _no_driver, _sights_limit
+            _skip,
+            _threads,
+            _google,
+            _full,
+            _face,
+            _no_gui,
+            _limit,
+            _region,
+            _no_driver,
+            _sights_limit,
         )
     )
 
@@ -382,5 +441,6 @@ if __name__ == "__main__":
         limit=_limit,
         keyword_list=sights,
         no_driver=_no_driver,
+        region=_region,
     )
     crawler.do_crawling()

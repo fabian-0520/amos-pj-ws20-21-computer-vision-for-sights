@@ -25,7 +25,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import os.path as osp
 
-
 class CollectLinks:
     def __init__(self, no_gui=False, no_driver=False):
         executable = ""
@@ -109,8 +108,9 @@ class CollectLinks:
     def remove_duplicates(_list):
         return list(dict.fromkeys(_list))
 
-    def google(self, keyword, add_url=""):
-        self.browser.get("https://www.google.com/search?q={}&source=lnms&tbm=isch{}".format(keyword, add_url))
+    def google(self, keyword, region, add_url=""):
+        sight_keyword = str(region + ' ' + keyword)
+        self.browser.get("https://www.google.com/search?q={}&source=lnms&tbm=isch{}".format(sight_keyword, add_url))
 
         time.sleep(1)
 
@@ -164,10 +164,10 @@ class CollectLinks:
 
         return links
 
-    def google_full(self, keyword, add_url="", limit=5000):
+    def google_full(self, keyword, region, add_url="", limit=5000):
         print("[Full Resolution Mode]")
-
-        self.browser.get("https://www.google.com/search?q={}&tbm=isch{}".format(keyword, add_url))
+        sight_keyword = str(region + ' ' + keyword)
+        self.browser.get("https://www.google.com/search?q={}&tbm=isch{}".format(sight_keyword, add_url))
         time.sleep(1)
 
         elem = self.browser.find_element_by_tag_name("body")
