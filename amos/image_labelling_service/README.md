@@ -21,6 +21,6 @@ docker run  -e PG_HOST=<HOST>
             -e PG_PORT=<PORT>
             -e PG_PASSWORD=<PASSWORD>
             -e MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY=<MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY>
-            -p 7331:7331
+            -p 8001:8001
             -it image_labelling_service
-7. Refer to 0.0.0.0:7331/swagger to get a nicely formatted overview of the supported communication protocol
+7. Refer to 0.0.0.0:8001/swagger to get a nicely formatted overview of the supported communication protocol

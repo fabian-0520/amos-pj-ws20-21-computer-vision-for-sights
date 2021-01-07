@@ -10,5 +10,5 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONWRITEBYTECODE 1
 ENV PYTHONPATH "/django_orchestrator"
 
-EXPOSE 1337
-CMD ["python", "manage.py", "runserver", "0.0.0.0:1337"]
+EXPOSE 8002
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"]
