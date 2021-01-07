@@ -40,12 +40,12 @@ class UiMainWindow(QWidget):
     def __init__(self, parent) -> None:
         """Creates new configured instance of the UI's main window."""
         super().__init__(parent)
-  
+
         main_window.setObjectName("main_window")
         main_window.resize(self.window_width, self.window_height)
         self.centralwidget = QWidget(main_window)
         self.centralwidget.setObjectName("centralwidget")
-       
+
         self.Box_Stadt = QComboBox(self.centralwidget)
         self.Box_Stadt.setGeometry(QRect(self.dist, self.dist, self.button_width, self.button_height))
         self.Box_Stadt.setObjectName("Box_Stadt")
@@ -54,15 +54,15 @@ class UiMainWindow(QWidget):
         self.Box_Stadt.activated.connect(self.show_popup)
 
         self.Button_Detection = QPushButton(self.centralwidget)
-        self.Button_Detection.setGeometry(QRect(self.window_width-(self.dist+self.button_width),
-                                                self.window_height-(self.dist+self.button_height),
+        self.Button_Detection.setGeometry(QRect(self.window_width - (self.dist + self.button_width),
+                                                self.window_height - (self.dist + self.button_height),
                                                 self.button_width, self.button_height)
                                           )
         self.Button_Detection.setObjectName("Button_Detection")
         self.Button_Detection.clicked.connect(self.detect_sights)
 
         self.Button_Bild = QPushButton(self.centralwidget)
-        self.Button_Bild.setGeometry(QRect(self.dist, self.window_height-(self.dist+self.button_height),
+        self.Button_Bild.setGeometry(QRect(self.dist, self.window_height - (self.dist + self.button_height),
                                            self.button_width, self.button_height)
                                      )
         self.Button_Bild.setObjectName("Button_Bild")
@@ -73,7 +73,7 @@ class UiMainWindow(QWidget):
                        (self.dist + self.button_height + self.dist)
         label_start_y = self.dist + self.button_height + self.dist
         self.Label_Bild.setGeometry(QRect(self.dist, label_start_y,
-                                          self.window_width-(self.dist*2), label_height))
+                                          self.window_width - (self.dist * 2), label_height))
 
         main_window.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(main_window)
@@ -114,12 +114,12 @@ class UiMainWindow(QWidget):
             msg.setWindowIcon(QIcon("icon_logo.png"))
             msg.setText("Do you want to download " + self.Box_Stadt.currentText() + "?")
             msg.setIcon(QMessageBox.Question)
-            msg.setStandardButtons(QMessageBox.Cancel|QMessageBox.Ok)
+            msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
             msg.setDefaultButton(QMessageBox.Ok)
             msg.setInformativeText("When downloaded sights of " + self.Box_Stadt.currentText() + " can be detected.")
             msg.buttonClicked.connect(self.handover_city)
 
-            x = msg.exec_()
+            msg.exec_()
 
     def handover_city(self, button) -> None:
         """Starts the download of the pre-trained model of the selected city.
@@ -134,7 +134,7 @@ class UiMainWindow(QWidget):
             print(city)
             # start download of model with city
 
-    def detect_sights (self) -> None:
+    def detect_sights(self) -> None:
         """Starts detection for the dropped image
         with the downloaded model and displays the results in the label."""
         # retrieving image name

@@ -1,6 +1,5 @@
 import io
 import os
-import  numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.patches as patches
@@ -22,21 +21,22 @@ def get_location(input_image):
     labels = response.landmark_annotations
 
     for label in labels:
-        result.append([label.bounding_poly.vertices[0].x, label.bounding_poly.vertices[0].y, label.bounding_poly.vertices[2].x, label.bounding_poly.vertices[2].y, label.description])
+        result.append([label.bounding_poly.vertices[0].x, label.bounding_poly.vertices[0].y,
+                       label.bounding_poly.vertices[2].x, label.bounding_poly.vertices[2].y, label.description])
 
     return result
 
 
-def visualize(path, loc, show = False):
+def visualize(path, location, show=False):
     img = mpimg.imread(path)
     fig, ax = plt.subplots(1)
     ax.imshow(img)
     # Create a Rectangle patch
-    for l in loc:
-        rect = patches.Rectangle((l[0], l[3]), l[2] - l[0], l[1] - l[3], linewidth=1,
+    for loc in location:
+        rect = patches.Rectangle((loc[0], loc[3]), loc[2] - loc[0], loc[1] - loc[3], linewidth=1,
                                  edgecolor='g', facecolor='none')
         ax.add_patch(rect)
-        plt.text(l[0], l[1], l[4])
+        plt.text(loc[0], loc[1], loc[4])
 
     if show:
         plt.show()
@@ -77,6 +77,3 @@ def label_images(path):
 
 if __name__ == "__main__":
     demo()
-
-
-

@@ -40,7 +40,7 @@ class ImageLabel(QLabel):
         else:
             event.ignore()
 
-    def dragMoveEvent(self, event : QtGui.QDragMoveEvent) -> None:
+    def dragMoveEvent(self, event: QtGui.QDragMoveEvent) -> None:
         """Handles the move event of the dragged image.
 
         Parameters
@@ -53,7 +53,7 @@ class ImageLabel(QLabel):
         else:
             event.ignore()
 
-    def dropEvent(self, event : QtGui.QDropEvent) -> None:
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
         """Handles the drop event and loads the image_name into the label.
 
         Parameters

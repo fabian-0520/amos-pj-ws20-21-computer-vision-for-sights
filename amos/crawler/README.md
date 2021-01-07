@@ -2,7 +2,7 @@
 
 Either run locally (by following steps below) or in docker container (Dockerfile)
 
-With docker: `docker run --name crawler image_name "location_here"` where the image name is the image tag 
+With docker: `docker run --name crawler image_name "location_here"` where the image name is the image tag
 you set for the configuration.
 
 This only works if you also have your api keys in .env in the same directory as this README.
@@ -39,7 +39,7 @@ Google multiprocess image crawler (High Quality & Speed & Customizable)
 --no_gui auto      No GUI mode. (headless mode) Acceleration for full_resolution mode, but unstable on thumbnail mode.
                    Default: "auto" - false if full=false, true if full=true
                    (can be used for docker linux system)
-                   
+
 --limit 0          Maximum count of images to download per site. (0: infinite)
 
 --no_driver false Whether a driver should be used

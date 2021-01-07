@@ -37,6 +37,6 @@ def test_get_downloaded_model_found(model_mock):
 
 
 def test_get_downloaded_model_not_found():
-    with patch("data_django.handler.exec_dql_query", return_value=[]) as mocked_models:
+    with patch("data_django.handler.exec_dql_query", return_value=[]):
         result_model = get_downloaded_model("berlin")
         assert result_model is None
