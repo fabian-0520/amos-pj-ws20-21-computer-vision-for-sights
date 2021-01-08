@@ -9,10 +9,8 @@ import os
 import shutil
 import sys
 
-YOLO_PATH = './../mts/yolov5'
-OUTPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH = '/runs/detect/'
-INPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH = './data/images'
-GUI_PATH = './../../gui'
+OUTPUT_PREDICTION_DIR = './runs/detect/'
+INPUT_PREDICTION_DIR = './data/images'
 
 
 class UiMainWindow(QWidget):
@@ -143,15 +141,12 @@ class UiMainWindow(QWidget):
         image_name = self.Label_Bild.image[image_index:]
 
         # stage images for prediction
-        os.chdir(YOLO_PATH)
-        wipe_prediction_input_images(INPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH)
-        shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH)
+        wipe_prediction_input_images(INPUT_PREDICTION_DIR)
+        shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
         # start YOLO prediction
-        os.system('python ./detect.py --weights ./weights/best.pt')
-        os.chdir(GUI_PATH)
-        prediction_path = get_current_prediction_output_path(YOLO_PATH + OUTPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH,
-                                                             image_name)
+        os.system('python ./detect.py --weights ./weights/Berlin.pt')
+        prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
 
         # show prediction in UI
         self.Label_Bild.setPixmap(QPixmap(prediction_path))
