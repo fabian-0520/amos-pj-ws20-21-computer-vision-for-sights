@@ -4,6 +4,8 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel
 
+import os
+
 
 class ImageLabel(QLabel):
     """Creates and handles the label in the middle of the application.
@@ -23,7 +25,7 @@ class ImageLabel(QLabel):
 
         self.setText("")
         self.setPixmap(QPixmap(self.image))
-        self.setScaledContents(True)
+        self.setScaledContents(False)
         self.setObjectName("Label_Bild")
         self.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -64,7 +66,13 @@ class ImageLabel(QLabel):
         if event.mimeData().hasImage:
             event.setDropAction(Qt.CopyAction)
             self.image = event.mimeData().urls()[0].toLocalFile()
-            self.setPixmap(QPixmap(self.image))
+            x = self.width()
+            y = self.height()
+            im = QPixmap(self.image).scaled(x, y, aspectRatioMode=Qt.KeepAspectRatio)
+            im.save(os.getcwd() + "/tmp.jpg")
+            self.image = (os.getcwd() + "/tmp.jpg")
+            self.setPixmap(im)
+            # self.setPixmap(QPixmap(self.image))
             self.setStyleSheet("")
             event.accept()
         else:

@@ -141,6 +141,7 @@ class UiMainWindow(QWidget):
         print(f'Starting detection of {self.Label_Bild.image}')
         image_index = self.Label_Bild.image.rfind('/')
         image_name = self.Label_Bild.image[image_index:]
+        
 
         # stage images for prediction
         os.chdir(YOLO_PATH)
