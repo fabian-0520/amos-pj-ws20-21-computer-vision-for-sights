@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget, QPushButton, QStatusBar, QMenuBar, \
     QMessageBox, QComboBox, QApplication, QMainWindow
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
+from dwh_communication.dwh_handler import get_downloaded_model
 import os
 import shutil
 import sys
@@ -127,9 +128,12 @@ class UiMainWindow(QWidget):
         button:
             Pushed button inside the popup
         """
+        
         if button.text() == "OK":
             city = self.Box_Stadt.currentText()
             print(city)
+            model = get_downloaded_model(city)
+            
             # start download of model with city
 
     def detect_sights(self) -> None:
