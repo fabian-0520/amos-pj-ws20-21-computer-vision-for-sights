@@ -132,8 +132,10 @@ class UiMainWindow(QWidget):
         if button.text() == "OK":
             city = self.Box_Stadt.currentText()
             print(city)
-            # model = get_downloaded_model(city)
-            # start download of model with city
+            model = get_downloaded_model(city)
+            with open("weights/" + city + ".pt", "wb+") as file:
+                file.write(model)
+                
 
     def detect_sights(self) -> None:
         """Starts detection for the dropped image
