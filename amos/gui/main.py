@@ -132,8 +132,7 @@ class UiMainWindow(QWidget):
         if button.text() == "OK":
             city = self.Box_Stadt.currentText()
             print(city)
-            model = get_downloaded_model(city)
-            
+            # model = get_downloaded_model(city)
             # start download of model with city
 
     def detect_sights(self) -> None:
@@ -149,11 +148,17 @@ class UiMainWindow(QWidget):
         shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
         # start YOLO prediction
-        os.system('python ./detect.py --weights ./weights/Berlin.pt')
-        prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
+        city = self.Box_Stadt.currentText()
+        if city == 'Choose City':
+            # Show Pop Up to choose a city
+            print('You have to choose a city first.')
 
-        # show prediction in UI
-        self.Label_Bild.setPixmap(QPixmap(prediction_path))
+        else:
+            os.system('python ./detect.py --weights ./weights/' + city + '.pt')
+            prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
+
+            # show prediction in UI
+            self.Label_Bild.setPixmap(QPixmap(prediction_path))
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
