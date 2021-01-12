@@ -44,10 +44,10 @@ jobs:
         run: |
           for entry in ./amos/*; do
             result=$(pytest $entry || true --cov=$entry);
-            echo $result;
+            echo -e "$result\n";
             percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//');
-            echo $percentage
+            echo -e "$percentage\n"
             if [[ "$percentage" -lt 70 ]]; then
-              echo "Current code coverage for $entry is under 70%\n";
+              echo -e "Current code coverage for $entry is under 70%\n";
             fi
           done
