@@ -47,10 +47,10 @@ jobs:
                     --max-line-length=127 \
                     --statistics \
                     --ignore=W503,W504,W293,W391 \
-                    --exclude amos/(mts|crawler/collect_links.py) 
+                    --exclude amos/(mts|crawler/collect_links.py)
       - name: Test with pytest
-        with:
-          paths: '!amos/mts/**'
+        #uses:
+          #paths: '!amos/mts/**'
         run: |
           pytest
 
