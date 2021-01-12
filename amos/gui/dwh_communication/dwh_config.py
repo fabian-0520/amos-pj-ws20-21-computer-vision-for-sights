@@ -12,6 +12,7 @@ def config():
         Parsed dictionary containing the data warehouse connection parameters.
     """
 
+    load_dotenv(find_dotenv())
     db = {}
     params = ['host', 'port', 'database', 'user', 'password']
 
