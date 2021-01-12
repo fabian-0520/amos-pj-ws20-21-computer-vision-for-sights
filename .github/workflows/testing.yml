@@ -39,7 +39,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=W503,W504,W293,W391,E127 --exclude=amos/mts,amos/crawler/collect_links.py
       - name: Test with pytest
         run: |
-          pytest
+          pytest --filterwarnings=ignore::DeprecationWarning
 
       - name: Test Code Coverage
         #with:
