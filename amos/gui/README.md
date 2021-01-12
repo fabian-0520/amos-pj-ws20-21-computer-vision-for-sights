@@ -4,7 +4,9 @@ Load images and detect sights in the SightScan Desktop app.
 ### How to start
 1. "pip install -r requirements.txt"
 
-2. "python main.py" or double-click the main.py
+2. Add the .env file to the gui/dwh_communication folder. This file should specify host, port, database, user and password of our AWS DWH.
+
+3. "python main.py" or double-click the main.py
 
 
 ### How to use - current functionalities are all optional
