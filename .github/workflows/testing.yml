@@ -43,7 +43,7 @@ jobs:
       - name: Test Code Coverage
         run: |
           for entry in ./amos/*; do
-            result=$(pytest entry || true --cov=$entry);
+            result=$(pytest $entry || true --cov=$entry);
             echo $result;
             percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//');
             echo $percentage
