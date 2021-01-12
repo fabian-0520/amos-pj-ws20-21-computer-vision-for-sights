@@ -49,6 +49,5 @@ jobs:
             echo $percentage
             if [[ "$percentage" -lt 70 ]]; then
               echo "Current code coverage for $entry is under 70%";
-              exit 1;
             fi
           done
