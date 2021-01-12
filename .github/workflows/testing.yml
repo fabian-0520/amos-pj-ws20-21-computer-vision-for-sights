@@ -55,8 +55,8 @@ jobs:
           pytest
 
       - name: Test Code Coverage
-        with:
-          paths: '!amos/mts/**'
+        #with:
+          #paths: '!amos/mts/**'
         run: |
           for entry in ./amos/*; do
             result=$(pytest --cov=$entry);
