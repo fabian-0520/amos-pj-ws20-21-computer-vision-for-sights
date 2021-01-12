@@ -3,7 +3,6 @@ import unittest
 
 import yaml
 import sys
-
 sys.path.append('..')
 from trainer_endpoint import (
     generate_training_config_yaml,
