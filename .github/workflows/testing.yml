@@ -6,8 +6,6 @@ name: Code Testing
 on:
   push:
     branches: [main, develop, feature/64-fix_ci_pipeline]
-    paths-ignore:
-    - 'amos/mts/**'
   pull_request:
     branches:
       - "**"
@@ -49,8 +47,6 @@ jobs:
                     --ignore=W503,W504,W293,W391 \
                     --exclude amos/(mts|crawler/collect_links.py)
       - name: Test with pytest
-        #uses:
-          #paths: '!amos/mts/**'
         run: |
           pytest
 
