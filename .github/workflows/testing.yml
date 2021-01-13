@@ -46,7 +46,7 @@ jobs:
             result=$(pytest $entry || true --cov=$entry);
             echo -e "$result\n";
             percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//');
-            percentage=$(percentage*100)
+            percentage=$percentage \* 100
             echo -e "$percentage\n"
             if [[ $percentage -lt 70 ]]; then
               echo -e "Current code coverage for $entry is under 70%\n";
