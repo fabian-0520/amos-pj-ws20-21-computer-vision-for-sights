@@ -10,6 +10,6 @@ docker run  -e PG_HOST=<HOST>
             -e PG_USER=<USER>
             -e PG_PORT=<PORT>
             -e PG_PASSWORD=<PASSWORD>
-            -p 1337:1337
+            -p 8002:8002
             -it django_orchestrator
-5. Refer to 0.0.0.0:1337/swagger to get a nicely formatted overview of the supported communication protocol
+5. Refer to 0.0.0.0:8002/swagger to get a nicely formatted overview of the supported communication protocol

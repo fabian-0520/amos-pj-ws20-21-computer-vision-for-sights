@@ -46,7 +46,7 @@ def trigger_city_image_labelling() -> None:
     if not _notify_external_service(city_without_image_labels_query, ils_training_service_url, "new"):
         labeled_city_to_update = """
             SELECT dim_cities.city_name
-            FROM (SELECT count(*) AS n_missing_labels, fa ct_sights.city_id AS city_id
+            FROM (SELECT count(*) AS n_missing_labels, fact_sights.city_id AS city_id
                     FROM integration_layer.dim_sights_images AS dim_images,
                             integration_layer.fact_sights AS fact_sights
                     WHERE fact_sights.image_id = dim_images.image_id AND dim_images.image_labels IS NULL
