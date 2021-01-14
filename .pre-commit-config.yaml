@@ -1,0 +1,27 @@
+repos:
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.4  # Use the ref you want to point at
+    hooks:
+      - id: flake8
+        args: ['--count', '--show-source', '--statistics', '--max-complexity=10', '--max-line-length=127', '--ignore=W503,W504,W293,W391,E127']
+        exclude: ^amos/(mts/|crawler/collect_links.py)
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  #    - id: check-json
+  #    - id: check-yaml
+  #    - id: docker-compose-check
+
+  #- repo: https://github.com/psf/black
+  #  rev: stable
+  #  hooks:
+  #    - id: black
+  #      args: [--line-length=127]
+
+
+# workflow:
+# - pip install pre-commit
+# - after you staged files with git add you can use "pre-commit run" to analyse and reformat your code

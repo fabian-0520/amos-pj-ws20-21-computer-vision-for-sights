@@ -4,7 +4,9 @@ Load images and detect sights in the SightScan Desktop app.
 ### How to start
 1. "pip install -r requirements.txt"
 
-2. "python main.py" or double-click the main.py
+2. Add the .env file to the gui/dwh_communication folder. This file should specify host, port, database, user and password of our AWS DWH.
+
+3. "python main.py" or double-click the main.py
 
 
 ### How to use - current functionalities are all optional
@@ -19,5 +21,5 @@ Load images and detect sights in the SightScan Desktop app.
 - download the specific pretrained model associated with the currently selected city
 - if nothing was detected - ask for support by the user by labeling the current image or by telling the application which sight is in the image --> create new class for the sight ???
 - what to do with incorrect use of the application, e.g. labeling an image with no sight in it - confusing the model...
-	e.g. request for adding a new city with irregular name / too small, too uninsteresting 
+	e.g. request for adding a new city with irregular name / too small, too uninsteresting
 	e.g. loading non-image files --> label should still display "Drop the image here"

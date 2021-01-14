@@ -8,7 +8,7 @@ info:
   title: "Image Labelling Service"
   contact:
     email: "f.skalski@campus.tu-berlin.de"
-host: "localhost:7331"
+host: "0.0.0.0:8001"
 basePath: "/api"
 tags:
 - name: "cities"
@@ -51,4 +51,3 @@ paths:
           description: "Label request successfully executed."
         "500":
           description: "Unexpected server error."
-

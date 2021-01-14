@@ -33,3 +33,8 @@ pytest
 
 # ui
 pyqt5
+
+#dwh connection
+psycopg2-binary
+typing
+python-dotenv
