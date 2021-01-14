@@ -118,7 +118,7 @@ class UiMainWindow(QWidget):
             msg.setInformativeText("When downloaded sights of " + self.Box_Stadt.currentText() + " can be detected.")
             msg.buttonClicked.connect(self.handover_city)
 
-            x = msg.exec_()
+            msg.exec_()
 
     def handover_city(self, button) -> None:
         """Starts the download of the pre-trained model of the selected city.
@@ -144,6 +144,7 @@ class UiMainWindow(QWidget):
         print(f'Starting detection of {self.Label_Bild.image}')
         image_index = self.Label_Bild.image.rfind('/')
         image_name = self.Label_Bild.image[image_index:]
+        
 
         # stage images for prediction
         wipe_prediction_input_images(INPUT_PREDICTION_DIR)

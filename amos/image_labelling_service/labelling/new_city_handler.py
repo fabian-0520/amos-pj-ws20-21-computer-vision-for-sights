@@ -192,8 +192,8 @@ def _parse_landmark_to_bounding_box_str(landmark_annotation: Dict[str, Union[str
     sight_name = re.escape(landmark_annotation['description'].replace("'", "").replace('"', ''))
     bounding_box = landmark_annotation['boundingPoly']['vertices']
 
-    x_vals = [point['x']/image_width for point in bounding_box]
-    y_vals = [point['y']/image_height for point in bounding_box]
+    x_vals = [point['x'] / image_width for point in bounding_box]
+    y_vals = [point['y'] / image_height for point in bounding_box]
     ul_x, ul_y, lr_x, lr_y = min(x_vals), max(y_vals), max(x_vals), min(y_vals)
     ul_x = round(ul_x, ndigits=BOUNDING_BOX_DECIMALS_PRECISION)
     ul_y = round(ul_y, ndigits=BOUNDING_BOX_DECIMALS_PRECISION)
