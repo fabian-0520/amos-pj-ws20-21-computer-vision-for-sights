@@ -3,6 +3,8 @@ from helper import wipe_prediction_input_images, get_current_prediction_output_p
 from label import ImageLabel
 from PyQt5.QtWidgets import QWidget, QPushButton, QStatusBar, QMenuBar, \
     QMessageBox, QComboBox, QApplication, QMainWindow
+from PyQt5.QtMultimedia import QCamera, QCameraInfo
+from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 from dwh_communication.dwh_handler import get_downloaded_model
@@ -44,6 +46,11 @@ class UiMainWindow(QWidget):
         main_window.resize(self.window_width, self.window_height)
         self.centralwidget = QWidget(main_window)
         self.centralwidget.setObjectName("centralwidget")
+        
+        self.available_cameras = QCameraInfo.availableCameras()
+        
+        self.camera_viewfinder = QCameraViewfinder()
+        self.camera_viewfinder.show()
 
         self.Box_Stadt = QComboBox(self.centralwidget)
         self.Box_Stadt.setGeometry(QRect(self.dist, self.dist, self.button_width, self.button_height))
@@ -66,6 +73,17 @@ class UiMainWindow(QWidget):
                                      )
         self.Button_Bild.setObjectName("Button_Bild")
         self.Button_Bild.clicked.connect(self.dragdrop)
+
+        self.Box_Camera_selector = QComboBox(self.centralwidget)
+        self.Box_Camera_selector.setGeometry(QRect(self.window_width - (self.dist + self.button_width),
+                                            self.dist, self.button_width, self.button_height)
+                                    )
+        self.Box_Camera_selector.setObjectName("Box_Camera_selector")
+        self.Box_Camera_selector.addItem("Choose Webcam")
+        self.Box_Camera_selector.addItems([camera.description()
+                                            for camera in self.available_cameras])
+        self.Box_Camera_selector.activated.connect(self.select_camera)
+        # add action
 
         self.Label_Bild = ImageLabel(self.centralwidget)
         label_height = (self.window_height - self.dist - self.button_height - self.dist) - \
@@ -102,6 +120,7 @@ class UiMainWindow(QWidget):
         main_window.setWindowTitle(_translate(window, "SightScan"))
         self.Box_Stadt.setItemText(0, _translate(window, "Choose City"))
         self.Box_Stadt.setItemText(1, _translate(window, "Berlin"))
+        # self.Box_Camera_selector.setItemText(0, _translate(window, "Choose Webcam"))
         self.Button_Detection.setText(_translate(window, "Start Detection"))
         self.Button_Bild.setText(_translate(window, "Enable File Drop"))
 
@@ -184,6 +203,15 @@ class UiMainWindow(QWidget):
             self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
             self.Label_Bild.image = "logo.png"
             self.Button_Bild.setText(QCoreApplication.translate(window, enable))
+
+    def select_camera(self):
+        """Activates the webcam...
+        """
+        self.camera = QCamera(self.available_cameras[0])
+        self.camera.setViewfinder(self.camera_viewfinder)
+        #self.camera.setCaptureMode(QCamera.CaptureViewfinder)
+        #self.camera.error.connect(lambda: self.alert(self.camera.errorString()))
+        #self.camera.start()
 
 
 if __name__ == "__main__":
