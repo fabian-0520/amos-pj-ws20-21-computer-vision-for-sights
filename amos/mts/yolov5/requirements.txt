@@ -28,15 +28,11 @@ pandas
 # extras --------------------------------------
 thop  # FLOPS computation
 pycocotools>=2.0  # COCO mAP
-<<<<<<< Updated upstream
 
 # db connection
 psycopg2-binary
 
-
 # testing
 pytest
 # yaml creation
-yaml
-=======
->>>>>>> Stashed changes
+# yaml

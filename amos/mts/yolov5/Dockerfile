@@ -1,5 +1,5 @@
 # Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-FROM nvcr.io/nvidia/pytorch:20.12-py3
+FROM nvcr.io/nvidia/pytorch:20.10-py3
 
 ENV city=berlin
 # Install linux packages
@@ -18,13 +18,13 @@ WORKDIR /usr/src/yolov5
 COPY . /usr/src/yolov5
 
 # Fetch images, store and generate config .yml
-RUN python3 -c "from trainer_endpoint import persist_training_data; persist_training_data('$city')"
+# RUN python3 -c "from trainer_endpoint import persist_training_data; persist_training_data('$city')"
 
 # Copy weights
 RUN python3 -c "from models import *; \
-attempt_download('weights/yolov5s.pt')"
+from utils import google_utils;"
+# google_utils.attempt_download('weights/yolov5s.pt')"
 
-=======
 #RUN python3 -c "from models import *; \
 #attempt_download('weights/yolov5s.pt'); \
 #attempt_download('weights/yolov5m.pt'); \
