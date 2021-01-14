@@ -2,7 +2,8 @@ import os
 import unittest
 
 import yaml
-
+import sys
+sys.path.append('./..')
 from yolov5.trainer_endpoint import (
     generate_training_config_yaml,
     parse_label_string, persist_training_data, cleanup,

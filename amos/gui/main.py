@@ -118,7 +118,7 @@ class UiMainWindow(QWidget):
             msg.setInformativeText("When downloaded sights of " + self.Box_Stadt.currentText() + " can be detected.")
             msg.buttonClicked.connect(self.handover_city)
 
-            x = msg.exec_()
+            msg.exec_()
 
     def handover_city(self, button) -> None:
         """Starts the download of the pre-trained model of the selected city.
