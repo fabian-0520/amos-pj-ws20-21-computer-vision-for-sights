@@ -14,4 +14,4 @@ repos:
 
 # workflow:
 # - pip install pre-commit
-# - after you staged files with git add you can use "pre-commit run" to analyse and reformat your code
+# - pre-commit install # to install the .pre-commit-config.yaml as pre-commit hook
