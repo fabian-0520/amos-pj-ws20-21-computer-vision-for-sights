@@ -120,17 +120,18 @@ def handle_trigger_image_crawler(city: str):
 
     client.set_missing_host_key_policy(AutoAddPolicy())
     client.connect(host, username=user, key_filename=key_filename)
-    print("hello")
     ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(
-        "aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 703797117622.dkr.ecr.eu-central-1.amazonaws.com"
+        "aws ecr get-login-password --region eu-central-1 | docker login"
+        " --username AWS --password-stdin 703797117622.dkr.ecr.eu-central-1.amazonaws.com"
     )
     ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(
         "docker pull 703797117622.dkr.ecr.eu-central-1.amazonaws.com/crawler:latest"
     )
     ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(
-        "docker run -e PGHOST=localhost -e PGDATABASE=docker -e PGPORT=5432 -e PGUSER=docker -e PGPASSWORD=docker -e apikey=5ae2e3f221c38a28845f05b657103b8ad7a5a87a5a05a7d8123341a3 -e maps_key=AIzaSyBVHy7kHw6zDfNowu2CVhmEPDwnZoMhvyw 703797117622.dkr.ecr.eu-central-1.amazonaws.com/crawler:latest {0}".format(
-            city
-        )
+        "docker run -e PGHOST=localhost -e PGDATABASE=docker -e PGPORT=5432 -e PGUSER=docker -e PGPASSWORD=docker"
+        " -e apikey=5ae2e3f221c38a28845f05b657103b8ad7a5a87a5a05a7d8123341a3"
+        " -e maps_key=AIzaSyBVHy7kHw6zDfNowu2CVhmEPDwnZoMhvyw"
+        " 703797117622.dkr.ecr.eu-central-1.amazonaws.com/crawler:latest {0}".format(city)
     )
 
     client.close()

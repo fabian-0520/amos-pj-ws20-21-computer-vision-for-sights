@@ -135,7 +135,6 @@ def trigger_image_crawler(request: Request) -> HttpResponse:
     """
 
     body_unicode = request.body.decode("utf-8")
-    print(body_unicode)
     body = json.loads(body_unicode)
     city = body["city"]
     handle_trigger_image_crawler(city)
