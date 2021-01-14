@@ -144,6 +144,7 @@ class UiMainWindow(QWidget):
         print(f'Starting detection of {self.Label_Bild.image}')
         image_index = self.Label_Bild.image.rfind('/')
         image_name = self.Label_Bild.image[image_index:]
+        
 
         # stage images for prediction
         wipe_prediction_input_images(INPUT_PREDICTION_DIR)
