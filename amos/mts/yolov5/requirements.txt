@@ -17,7 +17,7 @@ tqdm>=4.41.0
 # wandb
 
 # plotting ------------------------------------
-seaborn
+seaborn>=0.11.0
 pandas
 
 # export --------------------------------------
@@ -28,6 +28,7 @@ pandas
 # extras --------------------------------------
 thop  # FLOPS computation
 pycocotools>=2.0  # COCO mAP
+<<<<<<< Updated upstream
 
 # db connection
 psycopg2-binary
@@ -37,3 +38,5 @@ psycopg2-binary
 pytest
 # yaml creation
 yaml
+=======
+>>>>>>> Stashed changes
