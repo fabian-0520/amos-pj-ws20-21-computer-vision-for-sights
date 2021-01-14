@@ -5,14 +5,13 @@ from PyQt5.QtWidgets import QWidget, QPushButton, QStatusBar, QMenuBar, \
     QMessageBox, QComboBox, QApplication, QMainWindow
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
+from dwh_communication.dwh_handler import get_downloaded_model
 import os
 import shutil
 import sys
 
-YOLO_PATH = './../mts/yolov5'
-OUTPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH = '/runs/detect/'
-INPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH = './data/images'
-GUI_PATH = './../../gui'
+OUTPUT_PREDICTION_DIR = './runs/detect/'
+INPUT_PREDICTION_DIR = './data/images'
 
 
 class UiMainWindow(QWidget):
@@ -119,7 +118,7 @@ class UiMainWindow(QWidget):
             msg.setInformativeText("When downloaded sights of " + self.Box_Stadt.currentText() + " can be detected.")
             msg.buttonClicked.connect(self.handover_city)
 
-            x = msg.exec_()
+            msg.exec_()
 
     def handover_city(self, button) -> None:
         """Starts the download of the pre-trained model of the selected city.
@@ -129,10 +128,14 @@ class UiMainWindow(QWidget):
         button:
             Pushed button inside the popup
         """
+        
         if button.text() == "OK":
             city = self.Box_Stadt.currentText()
             print(city)
-            # start download of model with city
+            model = get_downloaded_model(city)
+            with open("weights/" + city + ".pt", "wb+") as file:
+                file.write(model)
+                
 
     def detect_sights(self) -> None:
         """Starts detection for the dropped image
@@ -144,18 +147,21 @@ class UiMainWindow(QWidget):
         
 
         # stage images for prediction
-        os.chdir(YOLO_PATH)
-        wipe_prediction_input_images(INPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH)
-        shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH)
+        wipe_prediction_input_images(INPUT_PREDICTION_DIR)
+        shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
         # start YOLO prediction
-        os.system('python ./detect.py --weights ./weights/best.pt')
-        os.chdir(GUI_PATH)
-        prediction_path = get_current_prediction_output_path(YOLO_PATH + OUTPUT_PREDICTION_DIR_RELATIVE_TO_YOLO_PATH,
-                                                             image_name)
+        city = self.Box_Stadt.currentText()
+        if city == 'Choose City':
+            # Show Pop Up to choose a city
+            print('You have to choose a city first.')
 
-        # show prediction in UI
-        self.Label_Bild.setPixmap(QPixmap(prediction_path))
+        else:
+            os.system('python ./detect.py --weights ./weights/' + city + '.pt')
+            prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
+
+            # show prediction in UI
+            self.Label_Bild.setPixmap(QPixmap(prediction_path))
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""

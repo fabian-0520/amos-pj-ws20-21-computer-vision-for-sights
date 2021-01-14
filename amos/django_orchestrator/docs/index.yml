@@ -8,7 +8,7 @@ info:
   title: "Django Orchestration Service"
   contact:
     email: "f.skalski@campus.tu-berlin.de"
-host: "localhost:1337"
+host: "localhost:8002"
 basePath: "/api"
 tags:
 - name: "cities"
