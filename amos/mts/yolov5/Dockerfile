@@ -18,8 +18,8 @@ COPY . /usr/src/yolov5
 
 # Copy weights
 RUN python3 -c "from models import *; \
-from utils import google_utils;\
-google_utils.attempt_download('weights/yolov5s.pt')"
+from utils import google_utils;"
+# google_utils.attempt_download('weights/yolov5s.pt')"
 
 RUN apt-get update && \
     apt-get install libgl1-mesa-glx -y
