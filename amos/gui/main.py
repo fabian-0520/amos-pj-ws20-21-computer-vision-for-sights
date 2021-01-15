@@ -70,6 +70,7 @@ class UiMainWindow(QWidget):
         self.Button_Bild.setObjectName("Button_Bild")
         self.Button_Bild.clicked.connect(lambda: self.camera_viewfinder.hide())
         self.Button_Bild.clicked.connect(lambda: self.Box_Camera_selector.setCurrentIndex(0))
+        self.Button_Bild.clicked.connect(lambda: self.stacked_widget.setCurrentIndex(0))
         self.Button_Bild.clicked.connect(lambda: self.Label_Bild.show())
         self.Button_Bild.clicked.connect(self.dragdrop)
 
