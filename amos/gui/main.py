@@ -17,7 +17,7 @@ INPUT_PREDICTION_DIR = './data/images'
 class UiMainWindow(QWidget):
     """Main UI window of the application.
 
-    Attributes
+    Attributes:
     ----------
     window_width : int
         Width of the window
