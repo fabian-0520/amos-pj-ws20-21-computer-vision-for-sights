@@ -29,12 +29,15 @@ class UiMainWindow(QWidget):
         Height of buttons
     dist : int
         Distance to the edge of Widgets(Window/Button/Label...)
+    cityChosen : Boolean
+        model of city was downloaded
     """
     window_width = 800
     window_height = 650
     button_width = 180
     button_height = 50
     dist = 30
+    cityChosen = False
 
     def __init__(self, parent) -> None:
         """Creates new configured instance of the UI's main window."""
@@ -128,40 +131,42 @@ class UiMainWindow(QWidget):
         button:
             Pushed button inside the popup
         """
-        
+
         if button.text() == "OK":
             city = self.Box_Stadt.currentText()
+            self.cityChosen = True
             print(city)
             model = get_downloaded_model(city)
             with open("weights/" + city + ".pt", "wb+") as file:
                 file.write(model)
-                
 
     def detect_sights(self) -> None:
         """Starts detection for the dropped image
         with the downloaded model and displays the results in the label."""
         # retrieving image name
-        print(f'Starting detection of {self.Label_Bild.image}')
-        image_index = self.Label_Bild.image.rfind('/')
-        image_name = self.Label_Bild.image[image_index:]
-        
+        if self.cityChosen is True:
+            print(f'Starting detection of {self.Label_Bild.image}')
+            image_index = self.Label_Bild.image.rfind('/')
+            image_name = self.Label_Bild.image[image_index:]
 
-        # stage images for prediction
-        wipe_prediction_input_images(INPUT_PREDICTION_DIR)
-        shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
+            # stage images for prediction
+            wipe_prediction_input_images(INPUT_PREDICTION_DIR)
+            shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
-        # start YOLO prediction
-        city = self.Box_Stadt.currentText()
-        if city == 'Choose City':
-            # Show Pop Up to choose a city
-            print('You have to choose a city first.')
+            # start YOLO prediction
+            city = self.Box_Stadt.currentText()
+            if city == 'Choose City':
+                # Show Pop Up to choose a city
+                print('You have to choose a city first.')
 
+            else:
+                os.system('python ./detect.py --weights ./weights/' + city + '.pt')
+                prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
+
+                # show prediction in UI
+                self.Label_Bild.setPixmap(QPixmap(prediction_path))
         else:
-            os.system('python ./detect.py --weights ./weights/' + city + '.pt')
-            prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
-
-            # show prediction in UI
-            self.Label_Bild.setPixmap(QPixmap(prediction_path))
+            print("at first select a city")
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
