@@ -1,11 +1,13 @@
 """This module contains the cron job business logic, i.e. triggering the external DWH,
 Model Training Service (MTS) and Image Labelling Service (ILS)."""
-from typing import Optional
-from cron_jobs.mts_ec2_communication import is_mts_ec2_instance_running, trigger_mts_training, stop_mts_ec2_instance_after_training, boot_mts_ec2_instance
+from cron_jobs.mts_ec2_communication import is_mts_ec2_instance_running, trigger_mts_training, \
+    stop_mts_ec2_instance_after_training, boot_mts_ec2_instance
 from data.sql_exec import exec_sql
 from os import environ
 from requests import post
 import schedule
+from threading import Thread
+from typing import Optional
 
 
 def start_cron_job(func, every_seconds):
@@ -71,7 +73,8 @@ def trigger_city_model_training() -> None:
             # if train_city is not None:  # uncomment for testing
             boot_mts_ec2_instance()
             trigger_mts_training(train_city)
-            stop_mts_ec2_instance_after_training(train_city)
+            stop_thread = Thread(target=stop_mts_ec2_instance_after_training, args=(train_city,))
+            stop_thread.start()
     except Exception as e:
         print(f'Error occurred during MTS pipeline execution: {e}.')
 
