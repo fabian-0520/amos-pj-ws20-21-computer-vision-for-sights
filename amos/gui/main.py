@@ -10,6 +10,7 @@ import os
 import shutil
 import sys
 
+
 OUTPUT_PREDICTION_DIR = './runs/detect/'
 INPUT_PREDICTION_DIR = './data/images'
 
@@ -119,6 +120,7 @@ class UiMainWindow(QWidget):
             msg.buttonClicked.connect(self.handover_city)
 
             msg.exec_()
+    
 
     def handover_city(self, button) -> None:
         """Starts the download of the pre-trained model of the selected city.
@@ -154,8 +156,16 @@ class UiMainWindow(QWidget):
         city = self.Box_Stadt.currentText()
         if city == 'Choose City':
             # Show Pop Up to choose a city
-            print('You have to choose a city first.')
+            emsg = QMessageBox()
+            emsg.setWindowTitle("No city chosen")
+            emsg.setWindowIcon(QIcon("icon_logo.png"))
+            emsg.setText("You need to choose a city before the detection can start.")
+            emsg.setIcon(QMessageBox.Warning)
+            emsg.setStandardButtons(QMessageBox.Ok)
+            emsg.setDefaultButton(QMessageBox.Ok)
 
+            emsg.exec_() 
+            
         else:
             os.system('python ./detect.py --weights ./weights/' + city + '.pt')
             prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
