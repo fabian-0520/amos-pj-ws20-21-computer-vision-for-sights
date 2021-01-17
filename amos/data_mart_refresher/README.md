@@ -26,27 +26,11 @@ How to: run/deploy the DMR via Docker
 4. Move into the project directory (.../data_mart_refresher)
 5. Build the Docker image: docker build -t data_mart_refresher .
 6. Run the Docker image:
-   docker run 
-   -e ILS_PUBLIC_ENDPOINT_URL=http://test.de
-   -e MTS_EC2_INSTANCE_ID=i-03a7d6be2beacdc11
-   -e AWS_ACCESS_KEY_ID=AKIA2HXMTYK3IXGC4QOZ
-   -e AWS_ACCESS_KEY=+qbfzFimxv03RRHJJFUfggtIJ/z8VQ/v4SouKqtX
-   -e AWS_REGION=eu-central-1
-   -e IS_MTS_GPU_ENABLED=False
-   -e DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=5
-   -e DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=60
-   -e DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=10
-   -e PGHOST=postgres.cxuqxclhqrjq.eu-central-1.rds.amazonaws.com
-   -e PGDATABASE=postgres
-   -e PGUSER=postgres
-   -e PGPORT=5432
-   -e PGPASSWORD=dwh-sight-scan
-   -it data_mart_refresher
+   sudo docker run -d -e ILS_PUBLIC_ENDPOINT_URL=<ILS_PUBLIC_ENDPOINT_URL> -e MTS_EC2_INSTANCE_ID=<MTS_EC2_INSTANCE_ID> -e AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> -e AWS_ACCESS_KEY=<AWS_ACCESS_KEY> -e AWS_REGION=<AWS_REGION> -e IS_MTS_GPU_ENABLED=<False | True> -e DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=<DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS> -e DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=<DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS> -e DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=<DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS> -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -it data_mart_refresher
 
 
 How to: run tests incl. coverage
-
----
+================================
 
 1. Open the terminal
 2. Move into the project directory (.../data_mart_refresher)
