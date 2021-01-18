@@ -5,10 +5,11 @@ from PyQt5.QtWidgets import QWidget, QPushButton, QStatusBar, QMenuBar, \
     QMessageBox, QComboBox, QApplication, QMainWindow
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
-from dwh_communication.dwh_handler import get_downloaded_model
+# from dwh_communication.dwh_handler import get_downloaded_model
 import os
 import shutil
 import sys
+
 
 OUTPUT_PREDICTION_DIR = './runs/detect/'
 INPUT_PREDICTION_DIR = './data/images'
@@ -17,7 +18,7 @@ INPUT_PREDICTION_DIR = './data/images'
 class UiMainWindow(QWidget):
     """Main UI window of the application.
 
-    Attributes
+    Attributes:
     ----------
     window_width : int
         Width of the window
@@ -29,15 +30,12 @@ class UiMainWindow(QWidget):
         Height of buttons
     dist : int
         Distance to the edge of Widgets(Window/Button/Label...)
-    cityChosen : Boolean
-        model of city was downloaded
     """
     window_width = 800
     window_height = 650
     button_width = 180
     button_height = 50
     dist = 30
-    cityChosen = False
 
     def __init__(self, parent) -> None:
         """Creates new configured instance of the UI's main window."""
@@ -134,17 +132,16 @@ class UiMainWindow(QWidget):
 
         if button.text() == "OK":
             city = self.Box_Stadt.currentText()
-            self.cityChosen = True
             print(city)
-            model = get_downloaded_model(city)
-            with open("weights/" + city + ".pt", "wb+") as file:
-                file.write(model)
+            # model = get_downloaded_model(city)
+            # with open("weights/" + city + ".pt", "wb+") as file:
+            #    file.write(model)
 
     def detect_sights(self) -> None:
         """Starts detection for the dropped image
         with the downloaded model and displays the results in the label."""
         # retrieving image name
-        if self.cityChosen is True:
+        if self.Box_Stadt.currentText() != 'Choose City':
             print(f'Starting detection of {self.Label_Bild.image}')
             image_index = self.Label_Bild.image.rfind('/')
             image_name = self.Label_Bild.image[image_index:]
@@ -155,18 +152,23 @@ class UiMainWindow(QWidget):
 
             # start YOLO prediction
             city = self.Box_Stadt.currentText()
-            if city == 'Choose City':
-                # Show Pop Up to choose a city
-                print('You have to choose a city first.')
+            os.system('python ./detect.py --weights ./weights/' + city + '.pt')
+            prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
 
-            else:
-                os.system('python ./detect.py --weights ./weights/' + city + '.pt')
-                prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
+            # show prediction in UI
+            self.Label_Bild.setPixmap(QPixmap(prediction_path))
 
-                # show prediction in UI
-                self.Label_Bild.setPixmap(QPixmap(prediction_path))
         else:
-            print("at first select a city")
+            # Show Pop Up to choose a city
+            emsg = QMessageBox()
+            emsg.setWindowTitle("No city chosen")
+            emsg.setWindowIcon(QIcon("icon_logo.png"))
+            emsg.setText("You need to choose a city before the detection can start.")
+            emsg.setIcon(QMessageBox.Warning)
+            emsg.setStandardButtons(QMessageBox.Ok)
+            emsg.setDefaultButton(QMessageBox.Ok)
+
+            emsg.exec_()
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""

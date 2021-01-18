@@ -108,8 +108,8 @@ def detect(save_img=False):
                             f.write(str(line))
 
                     if save_img or view_img:  # Add bbox to image
-                        label = '%s %.2f' % (names[int(cls)], conf)                        
-                        plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=-1, r=20)
+                        label = '%s %.2f' % (names[int(cls)], conf)
+                        plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=-1, r=10)
                         # plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
 
             # Print time (inference + NMS)
