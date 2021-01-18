@@ -68,7 +68,7 @@ class ImageLabel(QLabel):
             self.image = event.mimeData().urls()[0].toLocalFile()
             x = self.width()
             y = self.height()
-            im = QPixmap(self.image).scaled(x, y, aspectRatioMode=Qt.KeepAspectRatio)
+            im = QPixmap(self.image).scaled(x, y)  # , aspectRatioMode=Qt.KeepAspectRatio)
             im.save(os.getcwd() + "/tmp.jpg")
             self.image = (os.getcwd() + "/tmp.jpg")
             self.setPixmap(im)

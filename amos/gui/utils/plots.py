@@ -72,10 +72,10 @@ def plot_one_point(x, img, color=None, label=None, point_thickness=None, r=0):
     xMiddle = c1[0] + (c2[0]-c1[0])/2
     yMiddle = c1[1] + (c2[1]-c1[1])/2
     middle = (int(xMiddle), int(yMiddle))
+    ground_scale = 0.5
+    upper_ratio_bound = 2.0
+    lower_ratio_bound = 1.0
     img_asp_ratio = round(img.shape[1] / img.shape[0], 3)
-    print(len(label))
-    char_size = 0 #wie gross, abhängig von font_scale
-    text_size = round(char_size * len(label))
     #cv2.rectangle(img, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
     if label:
         tf = max(tl - 1, 1)  # font thickness
@@ -84,29 +84,37 @@ def plot_one_point(x, img, color=None, label=None, point_thickness=None, r=0):
         #cv2.rectangle(img, c1, c2, color, -1, cv2.LINE_AA)  # filled
         cv2.circle(img, middle, r, color=color, thickness=tl)
         if img_asp_ratio >= 1:
+            scaling_offset = 0.8
+
+            font_scaling = ground_scale * scaling_offset
+            if img_asp_ratio > upper_ratio_bound:
+                font_scaling = ground_scale * upper_ratio_bound * scaling_offset
+            else:
+                font_scaling = ground_scale * img_asp_ratio * scaling_offset
+            text_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, font_scaling, tf)[0][0]
             if middle[0] >= round(img.shape[1] / 2):
-                cv2.putText(img, label, (middle[0] - r - text_size + 2, middle[1] - r - 2), 0,
-                            0.5 * img_asp_ratio * 0.8,
+                cv2.putText(img, label, (middle[0] - round(text_size / 2) + r + 2, middle[1] - r - 2), 0, font_scaling,
                             color=[255, 255, 255], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
-                cv2.putText(img, label, (middle[0] - r - text_size, middle[1] - r), 0, 0.5 * img_asp_ratio * 0.8,
-                            color=[0, 0, 0],
-                            thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
-            elif middle[0] < round(img.shape[1] / 2):
-                cv2.putText(img, label, (middle[0] + r + 2, middle[1] - r - 2), 0, 0.5 * img_asp_ratio * 1.25,
-                            color=[255, 255, 255], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
-                cv2.putText(img, label, (middle[0] + r, middle[1] - r), 0, 0.5 * img_asp_ratio * 1.25, color=[0, 0, 0],
-                            thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
-        elif img_asp_ratio < 1:
-            if middle[0] >= round(img.shape[1] / 2):
-                cv2.putText(img, label, (middle[0] - r - text_size + 2, middle[1] - r - 2), 0,
-                            0.5 * img_asp_ratio * 0.8,
-                            color=[255, 255, 255], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
-                cv2.putText(img, label, (middle[0] - r - text_size, middle[1] - r), 0, 0.5 * img_asp_ratio * 0.8,
+                cv2.putText(img, label, (middle[0] - round(text_size / 2) + r, middle[1] - r), 0, font_scaling,
                             color=[0, 0, 0], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
             elif middle[0] < round(img.shape[1] / 2):
-                cv2.putText(img, label, (middle[0] + r + 2, middle[1] - r - 2), 0, 0.5 * img_asp_ratio * 1.25,
+                cv2.putText(img, label, (middle[0] - round(text_size / 2) + r + 2, middle[1] - r - 2), 0, font_scaling,
                             color=[255, 255, 255], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
-                cv2.putText(img, label, (middle[0] + r, middle[1] - r), 0, 0.5 * img_asp_ratio * 1.25, color=[0, 0, 0],
+                cv2.putText(img, label, (middle[0] - round(text_size / 2) + r, middle[1] - r), 0, font_scaling, color=[0, 0, 0],
+                            thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
+        elif img_asp_ratio < 1:
+            scaling_offset = 1.25
+            font_scaling = ground_scale * lower_ratio_bound * scaling_offset
+            text_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, font_scaling, tf)[0][0]
+            if middle[0] >= round(img.shape[1] / 2):
+                cv2.putText(img, label, (middle[0] - round(text_size / 2) + r + 2, middle[1] - r - 2), 0, font_scaling,
+                            color=[255, 255, 255], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
+                cv2.putText(img, label, (middle[0] - round(text_size / 2) + r, middle[1] - r), 0, font_scaling,
+                            color=[0, 0, 0], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
+            elif middle[0] < round(img.shape[1] / 2):
+                cv2.putText(img, label, (middle[0] - round(text_size / 2) + r + 2, middle[1] - r - 2), 0, font_scaling,
+                            color=[255, 255, 255], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
+                cv2.putText(img, label, (middle[0] - round(text_size / 2) + r, middle[1] - r), 0, font_scaling, color=[0, 0, 0],
                             thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
 
 def plot_wh_methods():  # from utils.plots import *; plot_wh_methods()
