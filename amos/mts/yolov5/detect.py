@@ -123,7 +123,7 @@ def detect(save_img=True):
             # Save results (image with detections)
             if save_img:
                 print (dataset.mode) #debug
-                if dataset.mode == 'images':
+                if dataset.mode == 'image':
                     cv2.imwrite(save_path, im0)
                 else:  # 'video'
                     if vid_path != save_path:  # new video
