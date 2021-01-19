@@ -22,8 +22,8 @@ COPY . /usr/src/yolov5
 
 # Copy weights
 RUN python3 -c "from models import *; \
-from utils import google_utils;"
-# google_utils.attempt_download('weights/yolov5s.pt')"
+from utils import google_utils; \
+google_utils.attempt_download('weights/yolov5s.pt')"
 
 #RUN python3 -c "from models import *; \
 #attempt_download('weights/yolov5s.pt'); \
