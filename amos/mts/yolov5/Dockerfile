@@ -1,5 +1,5 @@
 # Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-FROM nvcr.io/nvidia/pytorch:20.10-py3
+FROM python:3.8
 
 ENV city=berlin
 
@@ -13,10 +13,10 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 # Copy contents
-COPY yolov5 /usr/src/app
+COPY . /usr/src/app
 
 # Fetch images, store and generate config .yml
-RUN python3 -c "from trainer_endpoint import persist_training_data; persist_training_data('$city')"
+ENTRYPOINT ['python3', '-c','from trainer_endpoint import persist_training_data; persist_training_data("$city")']
 
 # Copy weights
 RUN python3 -c "from models import *; \
