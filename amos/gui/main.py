@@ -199,6 +199,7 @@ class UiMainWindow(QWidget):
         
         else:
             print("Insert Video detection function")
+            os.system('python detect.py --source 0 --weights ./weights/' + city + '.pt')
 
 
     def dragdrop(self) -> None:
