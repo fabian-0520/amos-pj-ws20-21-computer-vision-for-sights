@@ -16,11 +16,11 @@ WORKDIR /usr/src/app
 COPY . /usr/src/app
 
 # Fetch images, store and generate config .yml
-ENTRYPOINT ['python3', '-c','from trainer_endpoint import persist_training_data; persist_training_data("$city")']
+ENTRYPOINT ["python", "-c","from trainer_endpoint import persist_training_data; persist_training_data('berlin')"]
 
 # Copy weights
-RUN python3 -c "from models import *; \
-attempt_download('weights/yolov5s.pt')"
+#RUN python3 -c "from models import *; \
+#attempt_download('weights/yolov5s.pt')"
 
 #attempt_download('weights/yolov5m.pt'); \
 #attempt_download('weights/yolov5l.pt')"
