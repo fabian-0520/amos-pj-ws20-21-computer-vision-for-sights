@@ -21,13 +21,10 @@ def get_downloaded_model(city: str) -> Optional[bytes]:
         Retrieved .pt model file.
     """
     api_endpoint_url = environ["API_ENDPOINT_URL"]
+    print("{0}/api/cities/{1}/model".format(api_endpoint_url, city.upper()))
     try:
-        r = requests.get("{0}/api/cities/{1}/model".format(api_endpoint_url, city))
+        r = requests.get("{0}/api/cities/{1}/model".format(api_endpoint_url, city.upper()))
+        return r.content
     except requests.exceptions.RequestException as e:
         print(e)
         return None
-
-    found_model = r.content
-
-    if found_model:
-        return found_model

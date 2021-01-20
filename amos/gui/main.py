@@ -79,7 +79,10 @@ class UiMainWindow(QWidget):
         self.Button_Bild = QPushButton(self.centralwidget)
         self.Button_Bild.setGeometry(
             QRect(
-                self.dist, self.window_height - (self.dist + self.button_height), self.button_width, self.button_height
+                self.dist,
+                self.window_height - (self.dist + self.button_height),
+                self.button_width,
+                self.button_height,
             )
         )
         self.Button_Bild.setObjectName("Button_Bild")
@@ -93,7 +96,12 @@ class UiMainWindow(QWidget):
 
         self.Box_Camera_selector = QComboBox(self.centralwidget)
         self.Box_Camera_selector.setGeometry(
-            QRect(self.window_width - (self.dist + self.button_width), self.dist, self.button_width, self.button_height)
+            QRect(
+                self.window_width - (self.dist + self.button_width),
+                self.dist,
+                self.button_width,
+                self.button_height,
+            )
         )
         self.Box_Camera_selector.setObjectName("Box_Camera_selector")
         self.Box_Camera_selector.addItem("")
@@ -108,7 +116,12 @@ class UiMainWindow(QWidget):
         )
         label_start_y = self.dist + self.button_height + self.dist
         self.stacked_widget.setGeometry(
-            QRect(self.dist, label_start_y, self.window_width - (self.dist * 2), label_height)
+            QRect(
+                self.dist,
+                label_start_y,
+                self.window_width - (self.dist * 2),
+                label_height,
+            )
         )
 
         self.camera_viewfinder = QCameraViewfinder()
@@ -211,7 +224,13 @@ class UiMainWindow(QWidget):
                 self.Label_Bild.setPixmap(QPixmap(prediction_path))
 
         else:
-            print("Insert Video detection function")
+            city = self.Box_Stadt.currentText()
+            if city == "Choose City":
+                # Show Pop Up to choose a city
+                print("You have to choose a city first.")
+            else:
+                print("Video Detection Started")
+                os.system("python detect.py --source 0 --img-size 320 --weights ./weights/" + city + ".pt")
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
