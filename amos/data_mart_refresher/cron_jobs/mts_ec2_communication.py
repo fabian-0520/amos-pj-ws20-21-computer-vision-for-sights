@@ -42,8 +42,8 @@ def stop_mts_ec2_instance_after_training(city: str) -> None:
         Name of the city the MTS currently trains for.
     """
     training_completed_query = f"""
-        SELECT count(*) 
-        FROM data_mart_layer.current_trained_models 
+        SELECT count(*)
+        FROM data_mart_layer.current_trained_models
         WHERE upper(city_name) = '{city.upper()}'
     """
     while exec_sql(training_completed_query, return_result=True) == 0:
