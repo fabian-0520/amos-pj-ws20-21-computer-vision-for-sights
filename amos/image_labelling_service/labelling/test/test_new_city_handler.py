@@ -11,7 +11,7 @@ MODULE_PATH = 'labelling.new_city_handler'
 
 
 def get_test_image_bytes() -> bytes:
-    with open('labelling/test/test_image.png', 'rb') as image:
+    with open('labelling/test/test_image.testimage', 'rb') as image:
         return image.read()
 
 
