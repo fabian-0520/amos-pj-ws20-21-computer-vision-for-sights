@@ -233,17 +233,6 @@ class UiMainWindow(QWidget):
                 print("Video Detection Started")
                 os.system("python detect.py --source 0 --img-size 320 --weights ./weights/" + city + ".pt")
 
-        else:
-            # Show Pop Up to choose a city
-            emsg = QMessageBox()
-            emsg.setWindowTitle("No city chosen")
-            emsg.setWindowIcon(QIcon("icon_logo.png"))
-            emsg.setText("You need to choose a city before the detection can start.")
-            emsg.setIcon(QMessageBox.Warning)
-            emsg.setStandardButtons(QMessageBox.Ok)
-            emsg.setDefaultButton(QMessageBox.Ok)
-
-            emsg.exec_()
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
