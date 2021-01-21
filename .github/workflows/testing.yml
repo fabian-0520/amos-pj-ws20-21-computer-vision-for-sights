@@ -38,11 +38,11 @@ jobs:
           flake8 . --count --show-source --select=E9,F63,F7,F82 --max-complexity=10 --max-line-length=127 --statistics --ignore=W503,W504,W293,W391,E127 --exclude=amos/mts,amos/crawler/collect_links.py,amos/gui/models,amos/gui/utils,amos/gui/detect.py
       - name: Test with pytest
         run: |
-          pytest || true
+          pytest
       - name: Test Code Coverage
         run: |
           for entry in ./amos/*; do
-            result=$(pytest $entry || true --cov=$entry);
+            result=$(pytest $entry --cov=$entry);
             echo -e "$result\n";
             percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//');
             echo -e "$percentage\n"
