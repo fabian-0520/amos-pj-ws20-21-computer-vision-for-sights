@@ -11,7 +11,7 @@ MODULE_PATH = 'labelling.new_city_handler'
 
 
 def get_test_image_bytes() -> bytes:
-    with open('labelling/test/test_image.png', 'rb') as image:
+    with open('labelling/test/test_image.testimage', 'rb') as image:
         return image.read()
 
 
@@ -36,8 +36,8 @@ def test_persist_google_vision_labels_no_images_available() -> None:
 
 def test_get_image_resolution() -> None:
     width, height = _get_image_resolution(get_test_image_bytes())
-    assert width == 950
-    assert height == 672
+    assert width == 718
+    assert height == 620
 
 
 def test_get_merged_bounding_box_string() -> None:

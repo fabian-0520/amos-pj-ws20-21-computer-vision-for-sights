@@ -1,9 +1,13 @@
 """This module contains the cron job business logic, i.e. triggering the external DWH,
 Model Training Service (MTS) and Image Labelling Service (ILS)."""
+from cron_jobs.mts_ec2_communication import is_mts_ec2_instance_running, trigger_mts_training, \
+    stop_mts_ec2_instance_after_training, boot_mts_ec2_instance
 from data.sql_exec import exec_sql
 from os import environ
 from requests import post
 import schedule
+from threading import Thread
+from typing import Optional
 
 
 def start_cron_job(func, every_seconds):
@@ -24,9 +28,9 @@ def trigger_city_image_labelling() -> None:
     POST request with the city name as a path parameter.
     """
     ils_training_service_url = (
-        environ["DATA_MART_MTS_ENDPOINT_URL"][:-1]
-        if environ["DATA_MART_MTS_ENDPOINT_URL"][-1] == "/"
-        else environ["DATA_MART_MTS_ENDPOINT_URL"]
+        environ["ILS_PUBLIC_ENDPOINT_URL"][:-1]
+        if environ["ILS_PUBLIC_ENDPOINT_URL"][-1] == "/"
+        else environ["ILS_PUBLIC_ENDPOINT_URL"]
     )
     city_without_image_labels_query = """
         SELECT dim_cities.city_name AS city_name
@@ -43,10 +47,10 @@ def trigger_city_image_labelling() -> None:
         WHERE dim_cities.city_id = completely_new.city_id
         ORDER BY completely_new.insertion_timestamp ASC limit 1"""
 
-    if not _notify_external_service(city_without_image_labels_query, ils_training_service_url, "new"):
+    if not _notify_external_ils(city_without_image_labels_query, ils_training_service_url, "new"):
         labeled_city_to_update = """
             SELECT dim_cities.city_name
-            FROM (SELECT count(*) AS n_missing_labels, fa ct_sights.city_id AS city_id
+            FROM (SELECT count(*) AS n_missing_labels, fact_sights.city_id AS city_id
                     FROM integration_layer.dim_sights_images AS dim_images,
                             integration_layer.fact_sights AS fact_sights
                     WHERE fact_sights.image_id = dim_images.image_id AND dim_images.image_labels IS NULL
@@ -55,52 +59,51 @@ def trigger_city_image_labelling() -> None:
                 integration_layer.dim_sights_cities AS dim_cities
             WHERE dim_cities.city_id = labeled_city_to_update.city_id
         """
-        _notify_external_service(labeled_city_to_update, ils_training_service_url, "existing")
+        _notify_external_ils(labeled_city_to_update, ils_training_service_url, "existing")
 
 
 def trigger_city_model_training() -> None:
-    """Triggers the model training service (MTS) if necessary by sending a
-    POST request with the city name as a path parameter.
+    """Triggers the model training service (MTS) if necessary by booting the EC2 GPU instance
+    with the city name as a path parameter.
     """
-    mts_training_service_url = (
-        environ["DATA_MART_MTS_ENDPOINT_URL"][:-1]
-        if environ["DATA_MART_MTS_ENDPOINT_URL"][-1] == "/"
-        else environ["DATA_MART_MTS_ENDPOINT_URL"]
-    )
-    city_without_model_query = """
-        SELECT city_dim.city_name AS city_name
-        FROM (SELECT dc_inner.city_id AS city_id, dc_inner.city_name AS city_name
-              FROM integration_layer.fact_sights AS fs_inner,
-                integration_layer.dim_sights_images AS di_inner,
-                integration_layer.dim_sights_cities AS dc_inner
-              WHERE fs_inner.image_id = di_inner.image_id AND fs_inner.city_id = dc_inner.city_id
-                AND di_inner.image_labels IS NOT NULL
-              ) AS city_dim
-        LEFT JOIN integration_layer.fact_models model_facts ON city_dim.city_id = model_facts.city_id
-        WHERE model_facts.city_id IS NULL ORDER BY model_facts.timestamp_id ASC LIMIT 1"""
+    train_city = _get_city_name_for_training()
+    # train_city = 'istanbul'  # uncomment for testing
+    try:
+        if train_city is not None and not is_mts_ec2_instance_running():
+            # if train_city is not None:  # uncomment for testing
+            boot_mts_ec2_instance()
+            trigger_mts_training(train_city)
+            stop_thread = Thread(target=stop_mts_ec2_instance_after_training, args=(train_city,))
+            stop_thread.start()
+    except Exception as e:
+        print(f'Error occurred during MTS pipeline execution: {e}.')
 
-    if not _notify_external_service(city_without_model_query, mts_training_service_url):
-        city_model_to_be_updated_query = """
-            SELECT city_model_to_update.city_name AS city_name
-            FROM (SELECT images.available_training_size - models.last_training_size AS n_new_images,
-                    dim_cities.city_name AS city_name
-                  FROM (SELECT count(*) AS available_training_size, city_id AS city_id
-                        FROM integration_layer.fact_sights AS fact_sights,
-                            integration_layer.dim_sights_images AS dim_images
-                        WHERE fact_sights.image_id = dim_images.image_id AND dim_images.image_labels IS NOT NULL
-                        GROUP BY city_id) AS images,
-                       (SELECT max(n_considered_images) AS last_training_size, inner_fact_models.city_id AS city_id
-                        FROM integration_layer.dim_models_trained_models AS inner_dim_models,
-                            integration_layer.fact_models AS inner_fact_models
-                        WHERE inner_dim_models.trained_model_id = inner_fact_models.trained_model_id
-                        GROUP BY inner_fact_models.city_id) AS models,
-                        integration_layer.dim_sights_cities AS dim_cities
-                  WHERE images.city_id = models.city_id AND models.city_id = dim_cities.city_id AND
-                    images.available_training_size - models.last_training_size > 0
-                  ORDER BY n_new_images DESC LIMIT 1) AS city_model_to_update
-            WHERE n_new_images > 99
-        """
-        _notify_external_service(city_model_to_be_updated_query, mts_training_service_url)
+
+def _get_city_name_for_training() -> Optional[str]:
+    """Returns the city name needed for the next training process, None if no training is required.
+
+    Returns
+    -------
+    train_city: str or None
+        Name of the city to train for, None if no training should take place.
+    """
+    city_without_model_query = f"""
+        SELECT DISTINCT(dim_cities.city_name) AS city_name
+        FROM (
+            SELECT fs_inner.city_id AS city_id
+            FROM integration_layer.fact_sights AS fs_inner,
+                 integration_layer.dim_sights_images AS di_inner
+            WHERE fs_inner.image_id = di_inner.image_id AND di_inner.image_labels IS NOT NULL
+            GROUP BY city_id
+            HAVING count(*) > {environ['MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING']}
+        ) AS trainable_cities, integration_layer.dim_sights_cities AS dim_cities
+        LEFT JOIN integration_layer.fact_models AS model_facts ON model_facts.city_id = dim_cities.city_id
+        WHERE dim_cities.city_id = trainable_cities.city_id AND model_facts.trained_model_id IS NULL
+        LIMIT 1
+    """
+    train_city = exec_sql(city_without_model_query, return_result=True)
+
+    return train_city
 
 
 def trigger_data_marts_refresh() -> None:
@@ -109,7 +112,7 @@ def trigger_data_marts_refresh() -> None:
     exec_sql(postgres_fct_call)
 
 
-def _notify_external_service(dwh_sql: str, post_base_url: str, optional_path_param=None) -> bool:
+def _notify_external_ils(dwh_sql: str, post_base_url: str, optional_path_param=None) -> bool:
     """Potentially updates an external endpoint with the non-empty result of the passed SQL query
     as a path parameter and returns whether the notification was indeed executed.
 

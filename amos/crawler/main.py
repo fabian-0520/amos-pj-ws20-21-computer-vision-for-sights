@@ -138,7 +138,7 @@ class AutoCrawler:
 
     @staticmethod
     def save_object_to_file(
-        keyword, site_name, object, file_path, region, is_base64=False
+        link, site_name, object, file_path, region, is_base64=False
     ):
         try:
             with open("{}".format(file_path), "wb") as file:
@@ -149,7 +149,7 @@ class AutoCrawler:
             im = Image.open(file_path)
             width, height = im.size
             with open("{}".format(file_path), "rb") as file:
-                insert_image(file.read(), width, height, file_path, region)
+                insert_image(file.read(), width, height, link, region)
         except Exception as e:
             print("Save failed - {}".format(e))
 
@@ -199,7 +199,7 @@ class AutoCrawler:
                 )
                 path = no_ext_path + "." + ext
                 self.save_object_to_file(
-                    keyword,
+                    str(link),
                     site_name,
                     response,
                     path,

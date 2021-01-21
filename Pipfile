@@ -16,6 +16,8 @@ django = "*"
 djangorestframework = "*"
 django-swagger-render = "*"
 image = "*"
+paramiko = "*"
+mock = "*"
 
 [dev-packages]
 flake8 = "*"
