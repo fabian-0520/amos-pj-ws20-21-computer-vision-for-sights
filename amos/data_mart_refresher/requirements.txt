@@ -1,5 +1,7 @@
+boto3
 coverage
 mock
+paramiko
 psycopg2-binary
 pytest
 requests

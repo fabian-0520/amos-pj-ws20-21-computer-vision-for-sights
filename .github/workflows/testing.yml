@@ -5,7 +5,7 @@ name: Code Testing
 
 on:
   push:
-    branches: [main, develop, feature/64-fix_ci_pipeline]
+    branches: [main, develop]
   pull_request:
     branches:
       - "**"
@@ -36,7 +36,7 @@ jobs:
           # stop the build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=W503,W504,W293,W391,E127 --exclude=amos/mts,amos/crawler/collect_links.py
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=W503,W504,W293,W391,E127 --exclude=amos/mts,amos/crawler/collect_links.py,amos/gui/models,amos/gui/utils,amos/gui/detect.py
       - name: Test with pytest
         run: |
           pytest || true
