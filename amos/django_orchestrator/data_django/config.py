@@ -16,7 +16,7 @@ def config():
     params = ['host', 'port', 'database', 'user', 'password']
 
     for param in params:
-        env_variable_name = f'PG_{param.upper()}'
+        env_variable_name = f'PG{param.upper()}'
         env_variable = os.getenv(env_variable_name)
         if env_variable is not None:
             db[param] = env_variable

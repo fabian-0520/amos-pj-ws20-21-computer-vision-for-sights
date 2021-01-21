@@ -12,11 +12,11 @@ def test_config():
 
 
 def test_config_error(monkeypatch):
-    monkeypatch.delenv("PG_HOST", raising=True)
-    monkeypatch.delenv("PG_PORT", raising=True)
-    monkeypatch.delenv("PG_DATABASE", raising=True)
-    monkeypatch.delenv("PG_USER", raising=True)
-    monkeypatch.delenv("PG_PASSWORD", raising=True)
+    monkeypatch.delenv("PGHOST", raising=True)
+    monkeypatch.delenv("PGPORT", raising=True)
+    monkeypatch.delenv("PGDATABASE", raising=True)
+    monkeypatch.delenv("PGUSER", raising=True)
+    monkeypatch.delenv("PGPASSWORD", raising=True)
 
     with raises(ReferenceError):
         config()

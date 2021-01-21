@@ -16,7 +16,9 @@ from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
+
 from api_communication.api_handler import get_downloaded_model
+
 import os
 import shutil
 import sys
@@ -28,7 +30,7 @@ INPUT_PREDICTION_DIR = "./data/images"
 class UiMainWindow(QWidget):
     """Main UI window of the application.
 
-    Attributes
+    Attributes:
     ----------
     window_width : int
         Width of the window
@@ -205,7 +207,6 @@ class UiMainWindow(QWidget):
             print(f"Starting detection of {self.Label_Bild.image}")
             image_index = self.Label_Bild.image.rfind("/")
             image_name = self.Label_Bild.image[image_index:]
-
             # stage images for prediction
             wipe_prediction_input_images(INPUT_PREDICTION_DIR)
             shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
@@ -231,6 +232,18 @@ class UiMainWindow(QWidget):
             else:
                 print("Video Detection Started")
                 os.system("python detect.py --source 0 --img-size 320 --weights ./weights/" + city + ".pt")
+
+        else:
+            # Show Pop Up to choose a city
+            emsg = QMessageBox()
+            emsg.setWindowTitle("No city chosen")
+            emsg.setWindowIcon(QIcon("icon_logo.png"))
+            emsg.setText("You need to choose a city before the detection can start.")
+            emsg.setIcon(QMessageBox.Warning)
+            emsg.setStandardButtons(QMessageBox.Ok)
+            emsg.setDefaultButton(QMessageBox.Ok)
+
+            emsg.exec_()
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
