@@ -119,11 +119,11 @@ def _get_labels_string():
 def env_setup(monkeypatch):
     monkeypatch.setenv('PYTHONPATH', '/django_orchestrator')
     monkeypatch.setenv('PYTHONPATH', 'test')
-    monkeypatch.setenv('PG_HOST', 'test')
-    monkeypatch.setenv('PG_PORT', 'test')
-    monkeypatch.setenv('PG_DATABASE', 'test')
-    monkeypatch.setenv('PG_USER', 'test')
-    monkeypatch.setenv('PG_PASSWORD', 'test')
+    monkeypatch.setenv('PGHOST', 'test')
+    monkeypatch.setenv('PGPORT', 'test')
+    monkeypatch.setenv('PGDATABASE', 'test')
+    monkeypatch.setenv('PGUSER', 'test')
+    monkeypatch.setenv('PGPASSWORD', 'test')
 
 
 @pytest.fixture(scope='module')
