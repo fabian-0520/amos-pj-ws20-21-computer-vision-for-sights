@@ -5,7 +5,7 @@ name: Code Testing
 
 on:
   push:
-    branches: [main, develop, feature/64-fix_ci_pipeline]
+    branches: [main, develop]
   pull_request:
     branches:
       - "**"
