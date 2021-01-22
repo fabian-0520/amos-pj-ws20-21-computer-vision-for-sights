@@ -178,7 +178,6 @@ class UiMainWindow(QWidget):
             msg.setDefaultButton(QMessageBox.Ok)
             msg.setInformativeText("When downloaded sights of " + self.Box_Stadt.currentText() + " can be detected.")
             msg.buttonClicked.connect(self.handover_city)
-
             msg.exec_()
 
     def handover_city(self, button) -> None:
@@ -232,7 +231,6 @@ class UiMainWindow(QWidget):
             else:
                 print("Video Detection Started")
                 os.system("python detect.py --source 0 --img-size 320 --weights ./weights/" + city + ".pt")
-
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
