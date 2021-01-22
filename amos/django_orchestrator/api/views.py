@@ -7,6 +7,7 @@ from api.view_handlers import (
     handle_get_supported_cities,
     handle_trigger_image_crawler,
     HTTP_200_MESSAGE,
+    handle_get_latest_city_model_version,
 )
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
@@ -30,6 +31,26 @@ def get_trained_city_model(request: Request, city: str) -> HttpResponse:
         Response object containing the trained model as a .pt file.
     """
     response = handle_get_trained_city_model(city)
+    return HttpResponse(response[0], status=response[1])
+
+
+@api_view(["GET"])
+def get_latest_city_model_version(request: Request, city: str) -> HttpResponse:
+    """Returns the latest version of the persisted city model.
+
+    Parameters
+    ----------
+    request: Request
+        Request object.
+    city: str
+        Name of the city.
+
+    Returns
+    -------
+    response: HttpResponse
+        Response object containing the latest model version.
+    """
+    response = handle_get_latest_city_model_version(city)
     return HttpResponse(response[0], status=response[1])
 
 

@@ -44,7 +44,6 @@ create table if not exists load_layer.trained_models (
 	city VARCHAR(100) not null,
 	trained_model bytea not null,
 	n_considered_images int not null,
-	mapping_table json not null,
 	primary key (id)
 );
 
@@ -88,9 +87,9 @@ create table if not exists integration_layer.dim_models_timestamps (
 create table if not exists integration_layer.dim_models_trained_models (
 	trained_model_id serial not null,
 	trained_model_model BYTEA not null,
-	output_sight_mapping json not null,
 	n_considered_images int not null,
 	surrogate_key INT not null,
+	version INT not null,
 	primary key (trained_model_id)
 );
 
@@ -115,8 +114,8 @@ create table if not exists integration_layer.fact_models(
 
 CREATE MATERIALIZED VIEW if not exists data_mart_layer.current_trained_models as (
 	select cities.city_name as city_name, 
-		   models.output_sight_mapping as output_sight_mapping, 
-		   models.trained_model_model as trained_model
+		   models.trained_model_model as trained_model,
+		   models.version as version
 	from integration_layer.fact_models as fact_models,   
 		(select inner_facts.city_id as city_id, max(timestamp_id) as timestamp_id, max(trained_model_id) as trained_model_id
 		from integration_layer.fact_models as inner_facts
@@ -299,6 +298,7 @@ CREATE OR REPLACE FUNCTION load_models_into_dwh()
 	declare temp_city_key INTEGER := NULL;   
 	declare temp_trained_model_key INTEGER := NULL;   
 	declare temp_timestamp_key INTEGER := NULL;   
+	declare current_version INTEGER := NULL;
 	declare temp_trained_model_surrogate_key INTEGER := (select nextval('trained_model_surrogate_key_sequuence'));
 	declare current_time_stamp BIGINT := (SELECT extract(epoch from now() at time zone 'utc'));
 
@@ -318,8 +318,9 @@ begin
 	end if;
 
 	-- get trained models dimension table key
-	INSERT INTO integration_layer.dim_models_trained_models(trained_model_model, output_sight_mapping, surrogate_key, n_considered_images) 
-		values (new.trained_model, new.mapping_table, temp_trained_model_surrogate_key, NEW.n_considered_images);
+	current_version := (select count(*) from integration_layer.fact_models where city_id = temp_city_key);
+	INSERT INTO integration_layer.dim_models_trained_models(trained_model_model, surrogate_key, n_considered_images, version) 
+		values (new.trained_model, temp_trained_model_surrogate_key, NEW.n_considered_images, current_version + 1);
 	temp_trained_model_key := (select trained_model_id from integration_layer.dim_models_trained_models 
 								where surrogate_key = temp_trained_model_surrogate_key limit 1);
 
@@ -375,9 +376,11 @@ EXECUTE PROCEDURE load_sight_labels_into_dwh();
 -- speed up load jobs even more
 drop index if exists idx_image_source;
 drop index if exists idx_surrogate_key;
+drop index if exists idx_version;
 
 create index idx_image_source on integration_layer.dim_sights_images (image_source);
 create index idx_surrogate_key on integration_layer.dim_models_trained_models (surrogate_key);
+create index idx_version on integration_layer.dim_models_trained_models (version);
 ----------------------------------------------------------------------------------------------------------------
 -- refresh all materialized views at once -> triggered by cron job
 -- source: https://github.com/sorokine/RefreshAllMaterializedViews/blob/master/RefreshAllMaterializedViews.sql (12:43 AM, 14 November 2020)

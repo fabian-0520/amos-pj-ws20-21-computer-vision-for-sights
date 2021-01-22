@@ -1,5 +1,6 @@
 """This module contains the tests for the handler module of the data sub-app."""
-from data_django.handler import upload_image, upload_image_labels, _get_image_label_dml_query, get_downloaded_model
+from data_django.handler import upload_image, upload_image_labels, _get_image_label_dml_query, get_downloaded_model, \
+    get_latest_model_version
 from mock import patch, PropertyMock
 
 
@@ -40,3 +41,15 @@ def test_get_downloaded_model_not_found():
     with patch("data_django.handler.exec_dql_query", return_value=[]):
         result_model = get_downloaded_model("berlin")
         assert result_model is None
+
+
+def test_get_latest_model_version():
+    with patch("data_django.handler.exec_dql_query", return_value=[['22']]):
+        result_model = get_latest_model_version("berlin")
+        assert result_model == 22
+
+
+def test_get_latest_model_version_not_found():
+    with patch("data_django.handler.exec_dql_query", return_value=[]):
+        result_model = get_latest_model_version("berlin")
+        assert result_model == -1
