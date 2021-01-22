@@ -11,7 +11,7 @@ services:
     environment:
       - apikey=${apikey}
       - maps_key=${maps_key}
-      - PGHOST=postgres
+      - PGHOST=${PGHOST}
       - PGDATABASE=${PGDATABASE}
       - PGPORT=${PGPORT}
       - PGUSER=${PGUSER}
@@ -22,7 +22,7 @@ services:
     image: mts:v1
     build: amos/mts/yolov5
     environment:
-      - PGHOST=postgres
+      - PGHOST=${PGHOST}
       - PGDATABASE=${PGDATABASE}
       - PGPORT=${PGPORT}
       - PGUSER=${PGUSER}
