@@ -160,10 +160,10 @@ def upload_trained_model(city_name: str, image_count: int) -> None:
     in_file.close()
     # performing query
     dml_query = (
-        "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images, mapping_table) "
-        "VALUES (%s, %s, %s, %s)"
+        "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images) "
+        "VALUES (%s, %s, %s)"
     )
-    exec_dml_query(dml_query, (city_name, Binary(data), image_count, "{}"))
+    exec_dml_query(dml_query, (city_name, Binary(data), image_count))
 
 
 def exec_sql_query(postgres_sql_string: str, return_result=False) -> Optional[object]:

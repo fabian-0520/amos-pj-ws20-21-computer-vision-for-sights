@@ -1,7 +1,7 @@
 """This module contains the handling logic behind the available API views."""
 from api.validator import is_valid_city, is_valid_image_upload, is_city_existing
 from data_django.exec_sql import exec_dql_query
-from data_django.handler import get_downloaded_model, upload_image, upload_image_labels
+from data_django.handler import get_downloaded_model, upload_image, upload_image_labels, get_latest_model_version
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from json import dumps
 from typing import Union, Tuple
@@ -31,6 +31,28 @@ def handle_get_trained_city_model(city: str) -> Tuple[Union[str, bytes], int]:
         return model, 200
 
     return HTTP_400_MESSAGE, 400
+
+
+def handle_get_latest_city_model_version(city: str) -> Tuple[int, int]:
+    """Returns a trained city model as a .pt file.
+
+    Parameters
+    ----------
+    city: str
+        Name of the city.
+
+    Returns
+    -------
+    content: int
+        Response content.
+    http_status: int
+        HTTP status code.
+    """
+    if is_valid_city(city):
+        version = get_latest_model_version(city)
+        return version, 200
+    else:
+        return -1, 200
 
 
 def handle_persist_sight_image(city: str, image: InMemoryUploadedFile, labels: str) -> Tuple[str, int]:
