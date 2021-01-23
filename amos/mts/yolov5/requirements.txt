@@ -35,4 +35,4 @@ psycopg2-binary
 # testing
 pytest
 # yaml creation
-# yaml
+pyYaml
