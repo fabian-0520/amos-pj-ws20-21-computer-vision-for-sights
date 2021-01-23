@@ -29,8 +29,9 @@ def cleanup():
     """
     try:
         shutil.rmtree("../training_data")
+        shutil.rmtree("../runs")
     except OSError as e:
-        print("Error deleting training data: %s" % e.strerror)
+        print("Error deleting data: %s" % e.strerror)
 
 
 def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
@@ -65,7 +66,7 @@ def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
     for label in labels:
         elements = label.split(",")
         label = elements[-1]
-        re.sub(r'[^\x00-\x7F]+', '', label)  # replace non-ascii characters inside label
+        re.sub(r"[^\x00-\x7F]+", "", label)  # replace non-ascii characters inside label
         label_string = label.replace(" ", "") + " " + " ".join(elements[:-1]) + "\n"
         label_string = label_string.replace('"', "").replace("\\", "")
         label = label.replace('"', "").replace("\\", "").replace(" ", "")
@@ -144,25 +145,28 @@ def generate_training_config_yaml(sights: List[str]) -> None:
     yaml.close()
 
 
-def upload_trained_model(city_name: str, image_count: int) -> None:
+def upload_trained_model(city_name: str) -> None:
     """
     Optimizes the trained model runs into a file and uploads it with corresponding data
     Parameters
     ----------
     city_name: str
         the name of the city the weights belong to
-    image_count: int
-        the amount of images used for training
     """
     # opening the files and reading as binary
     in_file = open("tmp.pt", "rb")
     data = in_file.read()
     in_file.close()
-    # performing query
+    # generating query
     dml_query = (
         "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images) "
         "VALUES (%s, %s, %s)"
     )
+    # get amount of downloaded images
+    image_count = len(
+        [name for name in os.listdir("../training_data/images") if os.path.isfile(name)]
+    )
+    # execute query to upload weights
     exec_dml_query(dml_query, (city_name, Binary(data), image_count))
 
 

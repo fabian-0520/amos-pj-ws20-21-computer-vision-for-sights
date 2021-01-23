@@ -388,3 +388,4 @@ fabric.properties
 # IDE-specific ignores
 .idea
 .idea/
+**/*.pt

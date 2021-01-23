@@ -1,5 +1,5 @@
 # Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-FROM python:3.8
+FROM nvcr.io/nvidia/pytorch:20.10-py3
 
 ENV city=berlin
 # Install linux packages
@@ -18,45 +18,21 @@ WORKDIR /usr/src/yolov5
 COPY . /usr/src/yolov5
 
 # Fetch images, store and generate config .yml
-ENTRYPOINT ["python", "-c","from trainer_endpoint import persist_training_data; persist_training_data('berlin')"]
+RUN python3 -c "from trainer_endpoint import persist_training_data; persist_training_data(''$city'')"
 
 # Copy weights
 RUN python3 -c "from models import *; \
 from utils import google_utils; \
 google_utils.attempt_download('weights/yolov5s.pt')"
 
-#RUN python3 -c "from models import *; \
-#attempt_download('weights/yolov5s.pt'); \
-#attempt_download('weights/yolov5m.pt'); \
-#attempt_download('weights/yolov5l.pt')"
+# Run training
+RUN python3 -c "train.py --cfg --img 640 --epochs 5 --data sight_training_config.yaml --weights yolov5s.pt"
 
+# Run strip optimizer to get a temporary weights file
+RUN python3 -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')"
 
-# ---------------------------------------------------  Extras Below  ---------------------------------------------------
+# Load weights into database
+RUN python3 -c "from trainer_endpoint import upload_trained_model; upload_trained_model(''$city'')"
 
-# Build and Push
-# t=ultralytics/yolov5:latest && sudo docker build -t $t . && sudo docker push $t
-# for v in {300..303}; do t=ultralytics/coco:v$v && sudo docker build -t $t . && sudo docker push $t; done
-
-# Pull and Run
-# t=ultralytics/yolov5:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all $t
-
-# Pull and Run with local directory access
-#t=ultralytics/yolov5:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all -v "$(pwd)"/coco:/usr/src/coco $t
-
-# Kill all
-# sudo docker kill $(sudo docker ps -q)
-
-# Kill all image-based
-# sudo docker kill $(sudo docker ps -a -q --filter ancestor=ultralytics/yolov5:latest)
-
-# Bash into running container
-# sudo docker container exec -it ba65811811ab bash
-
-# Bash into stopped container
-# sudo docker commit 092b16b25c5b usr/resume && sudo docker run -it --gpus all --ipc=host -v "$(pwd)"/coco:/usr/src/coco --entrypoint=sh usr/resume
-
-# Send weights to GCP
-#python -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')" && gsutil cp tmp.pt gs://*.pt
-
-# Clean up
-# docker system prune -a --volumes
+# Cleanup after training for next container launch
+RUN python3 -c "from trainer_endpoint import cleanup; cleanup()"
