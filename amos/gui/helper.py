@@ -1,19 +1,19 @@
 """This module contains helper functions for the main app module."""
 import os
-# import argparse
+import argparse
 import time
 from pathlib import Path
 
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
-# from numpy import random
+from numpy import random
 
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, non_max_suppression, apply_classifier, scale_coords, xyxy2xywh, \
-    set_logging, increment_path  # , strip_optimizer
-# from utils.plots import plot_one_box, plot_one_point
+    set_logging, increment_path, strip_optimizer
+from utils.plots import plot_one_box, plot_one_point
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 
@@ -124,7 +124,7 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
 
     # Get names and colors
     names = model.module.names if hasattr(model, 'module') else model.names
-    #               colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
+    colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
 
     # Run inference
     t0 = time.time()
