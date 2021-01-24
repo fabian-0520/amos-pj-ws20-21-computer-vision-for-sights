@@ -1,5 +1,5 @@
 # Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-FROM nvcr.io/nvidia/pytorch:20.10-py3
+FROM python:3.8
 
 ENV city=berlin
 # Install linux packages
@@ -18,7 +18,7 @@ WORKDIR /usr/src/yolov5
 COPY . /usr/src/yolov5
 
 # Fetch images, store and generate config .yml
-RUN python3 -c "from trainer_endpoint import persist_training_data; persist_training_data(''$city'')"
+RUN python3 -c "from trainer_endpoint import persist_training_data; persist_training_data('$city')"
 
 # Copy weights
 RUN python3 -c "from models import *; \
@@ -32,7 +32,7 @@ RUN python3 -c "train.py --cfg --img 640 --epochs 5 --data sight_training_config
 RUN python3 -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')"
 
 # Load weights into database
-RUN python3 -c "from trainer_endpoint import upload_trained_model; upload_trained_model(''$city'')"
+RUN python3 -c "from trainer_endpoint import upload_trained_model; upload_trained_model('$city')"
 
 # Cleanup after training for next container launch
 RUN python3 -c "from trainer_endpoint import cleanup; cleanup()"
