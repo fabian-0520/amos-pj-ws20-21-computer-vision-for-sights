@@ -1,5 +1,5 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import wipe_prediction_input_images, get_current_prediction_output_path
+from helper import wipe_prediction_input_images, get_current_prediction_output_path, detect
 from label import ImageLabel
 from PyQt5.QtWidgets import (
     QWidget,
@@ -217,7 +217,7 @@ class UiMainWindow(QWidget):
                 print("You have to choose a city first.")
 
             else:
-                os.system("python ./detect.py --weights ./weights/" + city + ".pt")
+                detect(weights='weights/' + city + '.pt')
                 prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
 
                 # show prediction in UI
@@ -230,7 +230,7 @@ class UiMainWindow(QWidget):
                 print("You have to choose a city first.")
             else:
                 print("Video Detection Started")
-                os.system("python detect.py --source 0 --img-size 320 --weights ./weights/" + city + ".pt")
+                detect(weights='weights/' + city + '.pt', source=0, image_size=160)
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
