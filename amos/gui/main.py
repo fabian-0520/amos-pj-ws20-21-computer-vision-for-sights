@@ -19,7 +19,6 @@ from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 
 from api_communication.api_handler import get_downloaded_model
 
-import os
 import shutil
 import sys
 
@@ -200,23 +199,20 @@ class UiMainWindow(QWidget):
         """Starts detection for the dropped image or shown webcam video
         with the downloaded model and displays the results in the label."""
 
+        city = self.Box_Stadt.currentText()
         if self.stacked_widget.currentIndex() == 0:
-
-            # retrieving image name
-            print(f"Starting detection of {self.Label_Bild.image}")
-            image_index = self.Label_Bild.image.rfind("/")
-            image_name = self.Label_Bild.image[image_index:]
-            # stage images for prediction
-            wipe_prediction_input_images(INPUT_PREDICTION_DIR)
-            shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
-
-            # start YOLO prediction
-            city = self.Box_Stadt.currentText()
-            if city == "Choose City":
-                # Show Pop Up to choose a city
-                print("You have to choose a city first.")
-
+            if self.Box_Stadt.currentText() == 'Choose City':
+                self.show_missing_model_popup()
             else:
+                # retrieving image name
+                print(f"Starting detection of {self.Label_Bild.image}")
+                image_index = self.Label_Bild.image.rfind("/")
+                image_name = self.Label_Bild.image[image_index:]
+                # stage images for prediction
+                wipe_prediction_input_images(INPUT_PREDICTION_DIR)
+                shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
+
+                # start YOLO prediction
                 detect(weights='weights/' + city + '.pt')
                 prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
 
@@ -224,13 +220,23 @@ class UiMainWindow(QWidget):
                 self.Label_Bild.setPixmap(QPixmap(prediction_path))
 
         else:
-            city = self.Box_Stadt.currentText()
-            if city == "Choose City":
-                # Show Pop Up to choose a city
-                print("You have to choose a city first.")
+            if self.Box_Stadt.currentText() == 'Choose City':
+                self.show_missing_model_popup()
             else:
                 print("Video Detection Started")
                 detect(weights='weights/' + city + '.pt', source=0, image_size=160)
+
+    def show_missing_model_popup(self) -> None:
+        # Show Pop Up to choose a city
+        emsg = QMessageBox()
+        emsg.setWindowTitle("No city chosen")
+        emsg.setWindowIcon(QIcon("icon_logo.png"))
+        emsg.setText("You need to choose a city before the detection can start.")
+        emsg.setIcon(QMessageBox.Warning)
+        emsg.setStandardButtons(QMessageBox.Ok)
+        emsg.setDefaultButton(QMessageBox.Ok)
+
+        emsg.exec_()
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
