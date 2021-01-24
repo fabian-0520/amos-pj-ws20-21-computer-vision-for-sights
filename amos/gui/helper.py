@@ -1,19 +1,19 @@
 """This module contains helper functions for the main app module."""
 import os
-import argparse
+# import argparse
 import time
 from pathlib import Path
 
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
-from numpy import random
+# from numpy import random
 
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, non_max_suppression, apply_classifier, scale_coords, xyxy2xywh, \
-    strip_optimizer, set_logging, increment_path
-from utils.plots import plot_one_box, plot_one_point
+    set_logging, increment_path  # , strip_optimizer
+# from utils.plots import plot_one_box, plot_one_point
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 
@@ -54,9 +54,10 @@ def get_current_prediction_output_path(prediction_output_base_path: str, image_n
     newest_dir = max(dirs, key=os.path.getmtime)
     return newest_dir + '/' + image_name.replace('/', '')
 
+
 def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
     """ Detects the image or video of the given source by using the specified weights.
-        
+
     Parameters
     ----------
     weights: str
@@ -68,7 +69,7 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
     """
     source = str(source)
     imgsz = image_size
-    save_img=False
+    save_img = False
     opt_project = 'runs/detect'
     opt_name = 'exp'
     opt_exist_ok = False
@@ -82,12 +83,11 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
     view_img = False
     save_txt = False
     webcam = False
-    if source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
-        ('rtsp://', 'rtmp://', 'http://')):
+    detectList = []
+    if source.isnumeric() or source.endswith('.txt') or source.lower().startswith(('rtsp://', 'rtmp://', 'http://')):
         print(source)
         webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
-        ('rtsp://', 'rtmp://', 'http://'))
-    
+            ('rtsp://', 'rtmp://', 'http://'))
 
     # Directories
     save_dir = Path(increment_path(Path(opt_project) / opt_name, exist_ok=opt_exist_ok))  # increment run
@@ -97,7 +97,6 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
     set_logging()
     device = select_device(opt_device)
     half = device.type != 'cpu'  # half precision only supported on CUDA
-
 
     # Load model
     model = attempt_load(weights, map_location=device)  # load FP32 model
@@ -117,15 +116,15 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
         view_img = True
         cudnn.benchmark = True  # set True to speed up constant image size inference
         dataset = LoadStreams(source, img_size=imgsz)
-        print("webcam") #debug
+        print("webcam")  # debug
     else:
         save_img = True
         dataset = LoadImages(source, img_size=imgsz)
-        print("image") #debug
+        print("image")  # debug
 
     # Get names and colors
     names = model.module.names if hasattr(model, 'module') else model.names
-    colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
+    #               colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
 
     # Run inference
     t0 = time.time()
@@ -181,8 +180,8 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
 
                     if save_img or view_img:  # Add bbox to image
                         label = f'{names[int(cls)]} {conf:.2f}'
-                        plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
-
+                        # plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
+                        detectList.append([xyxy, im0.shape, label])
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
@@ -193,8 +192,8 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
 
             # Save results (image with detections)
             if save_img:
-                print ('dataset.mode: ' + dataset.mode) #debug
-                if dataset.mode == 'image' or dataset.mode =='images':
+                print('dataset.mode: ' + dataset.mode)  # debug
+                if dataset.mode == 'image' or dataset.mode == 'images':
                     cv2.imwrite(save_path, im0)
                 else:  # 'video'
                     if vid_path != save_path:  # new video
@@ -214,4 +213,4 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
         print(f"Results saved to {save_dir}{s}")
 
     print(f'Done. ({time.time() - t0:.3f}s)')
-    
+    return detectList

@@ -92,7 +92,7 @@ def plot_one_point(x, img, color=None, label=None, point_thickness=None, r=0):
             text_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_COMPLEX, font_scaling, tf)[0][0]
             if middle[0] >= round(img.shape[1] / 2):
                 cv2.putText(img, label, (middle[0] - round(text_size / 2) + r + 2, middle[1] - r - 2), 0, font_scaling,
-                            color=[255, 255, 255], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
+                           color=[255, 255, 255], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
                 cv2.putText(img, label, (middle[0] - round(text_size / 2) + r, middle[1] - r), 0, font_scaling,
                             color=[0, 0, 0], thickness=tf, lineType=cv2.LINE_AA, bottomLeftOrigin=False)
             elif middle[0] < round(img.shape[1] / 2):
