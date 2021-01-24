@@ -1,3 +1,4 @@
+import argparse
 import glob
 import imghdr
 import os
@@ -249,3 +250,15 @@ def config():
             raise ReferenceError(f"Environment Variable {env_variable_name} not found")
 
     return db
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--city",
+        type=str,
+        default="berlin",
+        help="The city to download images for",
+    )
+    args = parser.parse_args()
+    persist_training_data(args.city)

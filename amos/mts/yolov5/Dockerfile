@@ -1,4 +1,3 @@
-# Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
 FROM python:3.8
 
 ENV city=berlin
@@ -26,7 +25,7 @@ from utils import google_utils; \
 google_utils.attempt_download('weights/yolov5s.pt')"
 
 # Run training
-RUN python3 -c "train.py --cfg --img 640 --epochs 5 --data sight_training_config.yaml --weights yolov5s.pt"
+RUN ["python3", "train.py","--epochs","1","--data", "sight_training_config.yaml","--weights", "yolov5s.pt"]
 
 # Run strip optimizer to get a temporary weights file
 RUN python3 -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')"
