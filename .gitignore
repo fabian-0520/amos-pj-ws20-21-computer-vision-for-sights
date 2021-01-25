@@ -389,3 +389,6 @@ fabric.properties
 .idea
 .idea/
 **/*.pt
+
+# MTS
+amos/mts/yolov5/runs
