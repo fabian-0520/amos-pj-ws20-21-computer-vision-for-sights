@@ -3,6 +3,7 @@ from helper import (
     wipe_prediction_input_images,
     get_current_prediction_output_path,
     detect,
+    detect1,
     enable_detection,
     disable_detection
 )
@@ -229,7 +230,7 @@ class UiMainWindow(QWidget):
                 shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
                 # start YOLO prediction
-                detect(self, weights='weights/' + city + '.pt')
+                detect1(self, weights='weights/' + city + '.pt')
         elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
             # disable_detection()
@@ -324,7 +325,7 @@ class UiMainWindow(QWidget):
         self.camera_viewfinder.show()
         self.camera.start()
         # enable_detection()
-
+     
 
 if __name__ == "__main__":
     # starts the UI
