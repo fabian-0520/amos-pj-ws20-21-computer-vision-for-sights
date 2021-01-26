@@ -1,11 +1,5 @@
 FROM nvcr.io/nvidia/pytorch:20.10-py3
 
-ENV city=berlin
-ENV PGHOST=$PGHOST
-ENV PGDATABASE=$PGDATABSE
-ENV PGUSER=$PGUSER
-ENV PGPASSWORD=$PGPASSWORD
-ENV PGPORT=$PGPORT
 # Install linux packages
 RUN apt update && apt install -y screen libgl1-mesa-glx
 
@@ -21,22 +15,22 @@ WORKDIR /usr/src/yolov5
 # Copy contents
 COPY . /usr/src/yolov5
 
-# Fetch images, store and generate config .yml
-RUN python3 -c "from trainer_endpoint import persist_training_data; persist_training_data('$city')"
-
-# Copy weights
+# Download weights initially
 RUN python3 -c "from models import *; \
 from utils import google_utils; \
 google_utils.attempt_download('weights/yolov5s.pt')"
 
+# Fetch images, store and generate config .yml
+CMD python3 -c "from trainer_endpoint import persist_training_data; persist_training_data()"
+
 # Run training
-RUN ["python3", "train.py","--epochs","1","--data", "sight_training_config.yaml","--weights", "yolov5s.pt"]
+CMD ["python3", "train.py", "--epochs", "1", "--data", "sight_training_config.yaml", "--weights", "yolov5s.pt"]
 
 # Run strip optimizer to get a temporary weights file
-RUN python3 -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')"
+CMD python3 -c "from utils.general import *; strip_optimizer('runs/train/exp0_*/weights/best.pt', 'tmp.pt')"
 
 # Load weights into database
-RUN python3 -c "from trainer_endpoint import upload_trained_model; upload_trained_model('$city')"
+CMD python3 -c "from trainer_endpoint import upload_trained_model; upload_trained_model()"
 
 # Cleanup after training for next container launch
-RUN python3 -c "from trainer_endpoint import cleanup; cleanup()"
+CMD python3 -c "from trainer_endpoint import cleanup; cleanup()"

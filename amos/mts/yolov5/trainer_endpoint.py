@@ -11,19 +11,20 @@ from psycopg2 import connect
 from psycopg2._psycopg import Binary
 
 
-def persist_training_data(city_name: str) -> None:
+def persist_training_data() -> None:
     """
     Generic method to load images, store them and generate a config file for training
-    Parameters
-    ----------
-    city_name: str
-        name of the city to train for
     """
-    print(f"Starting image download for {city_name}")
-    images = load_images_for_city(city_name)
-    print(f"Fetched {len(images)} images")
-    sight_names = save_images(images)
-    generate_training_config_yaml(sight_names)
+    city = os.getenv("city", "")
+
+    if len(city) > 0:
+        print(f"Starting image download for {city}")
+        images = load_images_for_city(city)
+        print(f"Fetched {len(images)} images")
+        sight_names = save_images(images)
+        generate_training_config_yaml(sight_names)
+    else:
+        raise Exception('No city passed!')
 
 
 def cleanup():
@@ -153,29 +154,30 @@ def generate_training_config_yaml(sights: List[str]) -> None:
     yaml.close()
 
 
-def upload_trained_model(city_name: str) -> None:
+def upload_trained_model() -> None:
     """
     Optimizes the trained model runs into a file and uploads it with corresponding data
-    Parameters
-    ----------
-    city_name: str
-        the name of the city the weights belong to
     """
-    # opening the files and reading as binary
-    in_file = open("tmp.pt", "rb")
-    data = in_file.read()
-    in_file.close()
-    # generating query
-    dml_query = (
-        "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images) "
-        "VALUES (%s, %s, %s)"
-    )
-    # get amount of downloaded images
-    image_count = len(
-        [name for name in os.listdir("../training_data/images") if os.path.isfile(name)]
-    )
-    # execute query to upload weights
-    exec_dml_query(dml_query, (city_name, Binary(data), image_count))
+    city = os.getenv("city", "")
+
+    if len(city) > 0:
+        # opening the files and reading as binary
+        in_file = open("tmp.pt", "rb")
+        data = in_file.read()
+        in_file.close()
+        # generating query
+        dml_query = (
+            "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images) "
+            "VALUES (%s, %s, %s)"
+        )
+        # get amount of downloaded images
+        image_count = len(
+            [name for name in os.listdir("../training_data/images") if os.path.isfile(name)]
+        )
+        # execute query to upload weights
+        exec_dml_query(dml_query, (city, Binary(data), image_count))
+    else:
+        raise Exception('No city passed!')
 
 
 def exec_sql_query(postgres_sql_string: str, return_result=False) -> Optional[object]:
@@ -260,12 +262,4 @@ def config():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--city",
-        type=str,
-        default="berlin",
-        help="The city to download images for",
-    )
-    args = parser.parse_args()
-    persist_training_data(args.city)
+    persist_training_data()
