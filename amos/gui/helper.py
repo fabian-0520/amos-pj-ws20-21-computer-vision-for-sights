@@ -18,7 +18,7 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 from PyQt5.QtGui import QImage, QPixmap
 
-
+detection = True
 
 def wipe_prediction_input_images(images_base_path: str) -> None:
     """Wipes the passed images load directory clean of any existing files.
@@ -58,6 +58,14 @@ def get_current_prediction_output_path(prediction_output_base_path: str, image_n
     return newest_dir + '/' + image_name.replace('/', '')
 
 
+def enable_detection() -> None:
+    detection = True
+
+
+def disable_detection() -> None:
+    detection = False
+
+
 def detect(app, weights='weights/Berlin.pt', source='data/images', image_size=640):
     """ Detects the image or video of the given source by using the specified weights.
 
@@ -86,8 +94,7 @@ def detect(app, weights='weights/Berlin.pt', source='data/images', image_size=64
     view_img = False
     save_txt = False
     webcam = False
-    return_values = True
-    detectList = []
+
     if source.isnumeric() or source.endswith('.txt') or source.lower().startswith(('rtsp://', 'rtmp://', 'http://')):
         print(source)
         webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
@@ -135,6 +142,8 @@ def detect(app, weights='weights/Berlin.pt', source='data/images', image_size=64
     img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
     _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
     for path, img, im0s, vid_cap in dataset:
+        if webcam is True and detection is False:
+            break
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -192,15 +201,11 @@ def detect(app, weights='weights/Berlin.pt', source='data/images', image_size=64
                         #convertToQtFormat = QPixmap.fromImage(convertToQtFormat)
                         #app.Label_Bild.setPixmap(QPixmap(convertToQtFormat))
                         #detectList.append([xyxy, im0.shape, label])
-                        
+
                         app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
                         # show prediction in UI
                         app.Label_Bild.setPixmap(QPixmap(app.image))
             time.sleep(1)
-
-
-
-
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
@@ -213,8 +218,6 @@ def detect(app, weights='weights/Berlin.pt', source='data/images', image_size=64
             #app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
             # show prediction in UI
             #app.Label_Bild.setPixmap(QPixmap(app.image))
-
-
 
             # Save results (image with detections)
             """if save_img:
@@ -239,4 +242,3 @@ def detect(app, weights='weights/Berlin.pt', source='data/images', image_size=64
         print(f"Results saved to {save_dir}{s}")
 
     print(f'Done. ({time.time() - t0:.3f}s)')
-    return detectList
