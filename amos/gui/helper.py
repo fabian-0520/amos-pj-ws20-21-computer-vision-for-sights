@@ -16,6 +16,9 @@ from utils.general import check_img_size, non_max_suppression, apply_classifier,
 from utils.plots import plot_one_box, plot_one_point
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 
+from PyQt5.QtGui import QImage, QPixmap
+
+
 
 def wipe_prediction_input_images(images_base_path: str) -> None:
     """Wipes the passed images load directory clean of any existing files.
@@ -55,7 +58,7 @@ def get_current_prediction_output_path(prediction_output_base_path: str, image_n
     return newest_dir + '/' + image_name.replace('/', '')
 
 
-def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
+def detect(app, weights='weights/Berlin.pt', source='data/images', image_size=640):
     """ Detects the image or video of the given source by using the specified weights.
 
     Parameters
@@ -69,7 +72,7 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
     """
     source = str(source)
     imgsz = image_size
-    save_img = False
+    save_img = True
     opt_project = 'runs/detect'
     opt_name = 'exp'
     opt_exist_ok = False
@@ -83,6 +86,7 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
     view_img = False
     save_txt = False
     webcam = False
+    return_values = True
     detectList = []
     if source.isnumeric() or source.endswith('.txt') or source.lower().startswith(('rtsp://', 'rtmp://', 'http://')):
         print(source)
@@ -179,19 +183,41 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
 
                     if save_img or view_img:  # Add bbox to image
+                        print('successfull')
                         label = f'{names[int(cls)]} {conf:.2f}'
-                        # plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
-                        detectList.append([xyxy, im0.shape, label])
+                        plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
+                        #rgbImage = cv2.cvtColor(im0, cv2.COLOR_BGR2RGB)
+                        #convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0],
+                        #                 QImage.Format_RGB888)
+                        #convertToQtFormat = QPixmap.fromImage(convertToQtFormat)
+                        #app.Label_Bild.setPixmap(QPixmap(convertToQtFormat))
+                        #detectList.append([xyxy, im0.shape, label])
+                        
+                        app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
+                        # show prediction in UI
+                        app.Label_Bild.setPixmap(QPixmap(app.image))
+            time.sleep(1)
+
+
+
+
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
 
             # Stream results
-            if view_img:
-                cv2.imshow(str(p), im0)
+            #if view_img:
+            #    cv2.imshow(str(p), im0)
+
+            # convert detected_image into PyQT format
+            #app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
+            # show prediction in UI
+            #app.Label_Bild.setPixmap(QPixmap(app.image))
+
+
 
             # Save results (image with detections)
-            if save_img:
+            """if save_img:
                 print('dataset.mode: ' + dataset.mode)  # debug
                 if dataset.mode == 'image' or dataset.mode == 'images':
                     cv2.imwrite(save_path, im0)
@@ -206,7 +232,7 @@ def detect(weights='weights/Berlin.pt', source='data/images', image_size=640):
                         w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                         h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                         vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
-                    vid_writer.write(im0)
+                    vid_writer.write(im0)"""
 
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''

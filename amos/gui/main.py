@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
-from PyQt5.QtGui import QPixmap, QIcon, QPainter, QPen, QBrush
+from PyQt5.QtGui import QPixmap, QIcon, QPainter, QPen, QBrush, QImage
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject, QPoint, Qt
 
 # from api_communication.api_handler import get_downloaded_model
@@ -135,16 +135,6 @@ class UiMainWindow(QWidget):
         self.stacked_widget.addWidget(self.Label_Bild)
         self.stacked_widget.addWidget(self.camera_viewfinder)
 
-        self.pen = QPen(Qt.black, 5, Qt.SolidLine)
-        self.brush = QBrush(Qt.black, Qt.SolidPattern)
-        self.painter = QPainter()
-        self.painter.setWindow(
-            self.dist,
-            label_start_y,
-            self.window_width - (self.dist * 2),
-            label_height,
-        )
-        self.painter.setBackgroundMode(Qt.TransparentMode)
 
         main_window.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(main_window)
@@ -226,19 +216,15 @@ class UiMainWindow(QWidget):
                 shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
                 # start YOLO prediction
-                detect_list = detect(weights='weights/' + city + '.pt')
-                self.display_detection(detect_list)
-                prediction_path = get_current_prediction_output_path(OUTPUT_PREDICTION_DIR, image_name)
+                detect(self, weights='weights/' + city + '.pt')
 
-                # show prediction in UI
-                self.Label_Bild.setPixmap(QPixmap(prediction_path))
         else:
             if self.Box_Stadt.currentText() == 'Choose City':
                 self.show_missing_model_popup()
             else:
                 print("Video Detection Started")
-                detect_list = detect(weights='weights/' + city + '.pt', source=0, image_size=160)
-                self.display_detection(detect_list)
+                detect(self, weights='weights/' + city + '.pt', source=0, image_size=160)             
+
 
     def show_missing_model_popup(self) -> None:
         # Show Pop Up to choose a city
@@ -296,29 +282,6 @@ class UiMainWindow(QWidget):
             self.camera.start()
             self.Button_Bild.setText(QCoreApplication.translate(window, enable))
 
-    def display_detection(self, detect_list) -> None:
-        label_width = self.window_width - (self.dist * 2)
-        label_height = self.window_height - (self.dist * 4) - (self.button_height * 2)
-        # clear painter with self.painter.eraseRect(???)
-        colors = [[random.randint(0, 255) for _ in range(3)] for _ in detect_list]
-        for i, sight in enumerate(detect_list):
-            xyxy = sight[0]
-            img_height, img_width = sight[1][0:2]
-            label = sight[2][:-5]  # remove indexing for debug mode
-            c1, c2 = (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3]))
-            xMiddle = c1[0] + (c2[0] - c1[0]) / 2
-            yMiddle = c1[1] + (c2[1] - c1[1]) / 2
-            middle = (int(xMiddle), int(yMiddle))
-            print(middle, img_width, img_height, label)
-            x_middle_label = int((middle[0] / img_width) * label_width)
-            y_middle_label = int((middle[1] / img_height) * label_height)
-            print(x_middle_label, y_middle_label)
-
-            # display detected labels
-            self.painter.setPen(self.pen)
-            # set pen color
-            self.painter.drawEllipse(QPoint(x_middle_label, y_middle_label), 5, 5)
-            # self.painter.drawText(QPoint(x_middle_label, y_middle_label - 10), Qt.AlignCenter, label)
 
 if __name__ == "__main__":
     # starts the UI
