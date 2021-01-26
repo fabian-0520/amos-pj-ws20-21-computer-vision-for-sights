@@ -77,6 +77,26 @@ def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
     return label_list
 
 
+def replace_labels(labels: List[str]):
+    """
+    Replaces labels with their respective indexes
+    Parameters
+    ----------
+    labels: the list of label strings
+    -------
+
+    """
+    dir = '../training_data/labels'
+    for file in os.listdir("../training_data/labels"):
+        with open(dir + "/" + file) as f:
+            text = f.read()
+            for index, label in enumerate(labels):
+                text = text.replace(label, str(index))
+
+        with open(dir + "/" + file, "w") as f:
+            f.write(text)
+
+
 def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
     """
     Sorts fetched images according to their labels into correct directories and accordingly generates labels
@@ -130,8 +150,12 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
             print(e)
             continue
         success_count += 1
+    print("replacing labels...")
+    replace_labels(sight_list)
     print(f"The final sight list: {sight_list}")
-    print(f"Downloaded {len(image_label_tuples)}, {success_count} were successfully saved")
+    print(
+        f"Downloaded {len(image_label_tuples)}, {success_count} were successfully saved"
+    )
     return sight_list
 
 
@@ -262,10 +286,7 @@ def config():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--city",
-        type=str,
-        default="berlin",
-        help="The city to download images for",
+        "--city", type=str, default="berlin", help="The city to download images for",
     )
     args = parser.parse_args()
     persist_training_data(args.city)
