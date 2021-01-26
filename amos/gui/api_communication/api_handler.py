@@ -7,8 +7,6 @@ from os import environ
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
 
-environ["API_ENDPOINT_URL"] = "http://ec2-18-184-130-6.eu-central-1.compute.amazonaws.com:8002"
-
 
 def get_downloaded_model(city: str) -> Optional[bytes]:
     """Returns the downloaded and trained model for the specified city if it is via api.
