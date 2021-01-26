@@ -113,7 +113,8 @@ create table if not exists integration_layer.fact_models(
 -- create data mart layer as materialized views
 
 CREATE MATERIALIZED VIEW if not exists data_mart_layer.current_trained_models as (
-	select cities.city_name as city_name, 
+	select models.trained_model_id as trained_model_id,
+		   cities.city_name as city_name, 
 		   models.trained_model_model as trained_model,
 		   models.version as version
 	from integration_layer.fact_models as fact_models,   
@@ -128,6 +129,9 @@ CREATE MATERIALIZED VIEW if not exists data_mart_layer.current_trained_models as
 	cities.city_id = latest_facts.city_id and 
 	models.trained_model_id = fact_models.trained_model_id
 ); 
+
+drop index if exists current_trained_model_idx;
+CREATE UNIQUE INDEX current_trained_model_idx ON data_mart_layer.current_trained_models(trained_model_id);
 
 -- integration layer: add foreign key constraints between fact and dimension tables
 ----------------------------------------------------------------------------------------------------------------
@@ -257,12 +261,14 @@ begin
 
 	-- initialize data mart for city - if not there yet
 	temp_city_images_data_mart_query := format('select
+		image_data.image_id as image_id,
 		image_data.image_file as image_file,
 		image_data.image_labels as image_labels, 
 		image_data.resolution_height as resolution_height,
 		image_data.resolution_height as resolution_width
 		from (
 			select distinct(images.image_source) as url, 
+				images.image_id as image_id, 
 				images.image_file as image_file, 
 				images.image_labels as image_labels, 
 				resolutions.resolution_height as resolution_height, 
@@ -273,7 +279,8 @@ begin
 			WHERE facts.city_id = %s and resolutions.resolution_id = facts.resolution_id and 
 				images.image_id = facts.image_id) as image_data', temp_city_key);
 	
-	EXECUTE format('CREATE MATERIALIZED VIEW IF NOT EXISTS data_mart_layer.%s AS %s', 'images_' || LOWER(formatted_city), temp_city_images_data_mart_query);  -- TODO check
+	EXECUTE format('CREATE MATERIALIZED VIEW IF NOT EXISTS data_mart_layer.%s AS %s', 'images_' || LOWER(formatted_city), temp_city_images_data_mart_query);
+	EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS mart_index_%s ON data_mart_layer.images_%s(image_id)', LOWER(formatted_city), LOWER(formatted_city));
 
     RETURN NEW;
 END;
@@ -393,11 +400,11 @@ RETURNS INT AS $$
 		FOR r IN SELECT matviewname FROM pg_matviews WHERE schemaname = schema_arg 
 		LOOP
 			RAISE NOTICE 'Refreshing %.%', schema_arg, r.matviewname;
-			EXECUTE 'REFRESH MATERIALIZED VIEW ' || schema_arg || '.' || r.matviewname || ' WITH DATA'; 
+			EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY ' || schema_arg || '.' || r.matviewname; 
 		END LOOP;
 
 		-- additionally needed, since not located inside of previous loop
-		EXECUTE 'REFRESH MATERIALIZED VIEW data_mart_layer.current_trained_models WITH DATA';
+		EXECUTE 'REFRESH MATERIALIZED VIEW CONCURRENTLY data_mart_layer.current_trained_models';
 		
 		RETURN 1;
 	END 
