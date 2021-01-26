@@ -134,28 +134,31 @@ def _label_image(image_id: int) -> bool:
         Whether the labelling was successful.
     """
     # query for image
-    dql_query = 'SELECT img.image_file AS file, img.image_source AS source ' \
-                'FROM integration_layer.dim_sights_images AS img ' \
-                f'WHERE img.image_id = {image_id} '
-    content = exec_dql_query(dql_query, return_result=True)
+    try:
+        dql_query = 'SELECT img.image_file AS file, img.image_source AS source ' \
+                    'FROM integration_layer.dim_sights_images AS img ' \
+                    f'WHERE img.image_id = {image_id} '
+        content = exec_dql_query(dql_query, return_result=True)
 
-    # retrieve bounding boxes in data warehouse-readable format
-    image_bytes, image_source = bytes(content[0][0]), content[0][1]
-    raw_landmark = _get_landmarks_from_vision(image_bytes)
-    is_label_retrieved = raw_landmark is not None
+        # retrieve bounding boxes in data warehouse-readable format
+        image_bytes, image_source = bytes(content[0][0]), content[0][1]
+        raw_landmark = _get_landmarks_from_vision(image_bytes)
+        is_label_retrieved = raw_landmark is not None
 
-    if is_label_retrieved:
-        width, height = _get_image_resolution(image_bytes)
-        bounding_box_strings = [_parse_landmark_to_bounding_box_str(landmark_annotation, width, height)
-                                for landmark_annotation in raw_landmark]
-        final_bounding_boxes_string = _get_merged_bounding_box_string(bounding_box_strings)
+        if is_label_retrieved:
+            width, height = _get_image_resolution(image_bytes)
+            bounding_box_strings = [_parse_landmark_to_bounding_box_str(landmark_annotation, width, height)
+                                    for landmark_annotation in raw_landmark]
+            final_bounding_boxes_string = _get_merged_bounding_box_string(bounding_box_strings)
 
-        # merge labels into data warehouse
-        dml_query = "INSERT INTO load_layer.sight_image_labels(sight_image_data_source, sight_labels) " \
-                    f"VALUES ('{image_source}', '{final_bounding_boxes_string}')"
-        exec_dml_query(dml_query, filling_parameters=None)
+            # merge labels into data warehouse
+            dml_query = "INSERT INTO load_layer.sight_image_labels(sight_image_data_source, sight_labels) " \
+                        f"VALUES ('{image_source}', '{final_bounding_boxes_string}')"
+            exec_dml_query(dml_query, filling_parameters=None)
 
-    return is_label_retrieved
+        return is_label_retrieved
+    except Exception:
+        return False
 
 
 def log_incident(msg: str) -> None:
