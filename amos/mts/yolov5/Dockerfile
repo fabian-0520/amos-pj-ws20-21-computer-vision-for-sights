@@ -1,6 +1,11 @@
 FROM python:3.8
 
 ENV city=berlin
+ENV PGHOST=$PGHOST
+ENV PGDATABASE=$PGDATABSE
+ENV PGUSER=$PGUSER
+ENV PGPASSWORD=$PGPASSWORD
+ENV PGPORT=$PGPORT
 # Install linux packages
 RUN apt update && apt install -y screen libgl1-mesa-glx
 

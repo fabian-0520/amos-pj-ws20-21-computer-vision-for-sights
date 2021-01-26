@@ -19,7 +19,9 @@ def persist_training_data(city_name: str) -> None:
     city_name: str
         name of the city to train for
     """
+    print(f"Starting image download for {city_name}")
     images = load_images_for_city(city_name)
+    print(f"Fetched {len(images)} images")
     sight_names = save_images(images)
     generate_training_config_yaml(sight_names)
 
@@ -94,6 +96,7 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
     except FileExistsError:
         print("Directories exist")
 
+    success_count = 0
     for pair in image_label_tuples:
         if pair[0] is None or pair[1] is None:
             continue
@@ -125,6 +128,10 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
             label_file.close()
         except IOError as e:
             print(e)
+            continue
+        success_count += 1
+    print(f"The final sight list: {sight_list}")
+    print(f"Downloaded {len(image_label_tuples)}, {success_count} were successfully saved")
     return sight_list
 
 
