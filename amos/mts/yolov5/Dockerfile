@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM nvcr.io/nvidia/pytorch:20.10-py3
 
 ENV city=berlin
 ENV PGHOST=$PGHOST
