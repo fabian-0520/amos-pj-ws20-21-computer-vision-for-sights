@@ -1,8 +1,8 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
 from helper import (
     wipe_prediction_input_images,
-    get_current_prediction_output_path,
-    Detection
+    Detection,
+    # get_current_prediction_output_path
 )
 
 from label import ImageLabel
@@ -22,10 +22,11 @@ from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 
-# from api_communication.api_handler import get_downloaded_model
+from api_communication.api_handler import get_downloaded_model, get_dwh_model_version
 
 import shutil
 import sys
+import os
 from threading import Thread
 
 OUTPUT_PREDICTION_DIR = "./runs/detect/"
@@ -177,7 +178,22 @@ class UiMainWindow(QWidget):
 
     def show_popup(self) -> None:
         """Shows a pop-up for confirming the download of the selected city."""
-        if self.Box_Stadt.currentIndex() > 0:
+        downloaded_version = -1
+        if not os.path.exists("weights/versions.txt"):
+            with open('weights/versions.txt', 'w'):
+                pass
+        with open("weights/versions.txt", "r") as file:
+            for line in file:
+                elements = line.split("=")
+                if elements[0].upper() == self.Box_Stadt.currentText().upper():
+                    downloaded_version = int(elements[1])
+                    break
+
+        latest_version = get_dwh_model_version(self.Box_Stadt.currentText())
+        # print(latest_version)
+        # print(downloaded_version)
+
+        if downloaded_version == -1:
             msg = QMessageBox()
             msg.setWindowTitle("Download City")
             msg.setWindowIcon(QIcon("icon_logo.png"))
@@ -187,7 +203,33 @@ class UiMainWindow(QWidget):
             msg.setDefaultButton(QMessageBox.Ok)
             msg.setInformativeText("When downloaded sights of " + self.Box_Stadt.currentText() + " can be detected.")
             msg.buttonClicked.connect(self.handover_city)
+
             msg.exec_()
+
+        elif latest_version > downloaded_version:
+            update_msg = QMessageBox()
+            update_msg.setWindowTitle("Update available")
+            update_msg.setWindowIcon(QIcon("icon_logo.png"))
+            update_msg.setText("Do you want to download an update for " + self.Box_Stadt.currentText() + "?")
+            update_msg.setIcon(QMessageBox.Question)
+            update_msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
+            update_msg.setDefaultButton(QMessageBox.Ok)
+            update_msg.setInformativeText(
+                "Updated cities can detect sights faster and more accurately. If you choose not to download, the " +
+                "detection will still work.")
+            update_msg.buttonClicked.connect(self.handover_city)
+
+            update_msg.exec_()
+
+        else:
+            newest_vers_msg = QMessageBox()
+            newest_vers_msg.setWindowTitle("Ready for Detection!")
+            newest_vers_msg.setWindowIcon(QIcon("icon_logo.png"))
+            newest_vers_msg.setText("You can start detecting sights in " + self.Box_Stadt.currentText() + "!")
+            newest_vers_msg.setStandardButtons(QMessageBox.Ok)
+            newest_vers_msg.setDefaultButton(QMessageBox.Ok)
+
+            newest_vers_msg.exec_()
 
     def handover_city(self, button) -> None:
         """Starts the download of the pre-trained model of the selected city.
@@ -200,10 +242,11 @@ class UiMainWindow(QWidget):
 
         if button.text() == "OK":
             city = self.Box_Stadt.currentText()
-            print(city)
-            # model = get_downloaded_model(city)
-            # with open("weights/" + city + ".pt", "wb+") as file:
-            #    file.write(model)
+            # print(city)
+            model = get_downloaded_model(city)
+            if model is not None:
+                with open("weights/" + city + ".pt", "wb+") as file:
+                    file.write(model)
         elif button.text() == "Cancel":
             self.Box_Stadt.setCurrentIndex(0)
 
@@ -316,7 +359,7 @@ class UiMainWindow(QWidget):
             self.Button_Bild.setText(QCoreApplication.translate(window, enable))
 
     def stop_detection(self) -> None:
-        print("reactivated cam")
+        print("reactivate cam !?")
         self.Label_Bild.hide()
         self.stacked_widget.setCurrentIndex(1)
         self.camera_viewfinder.show()
