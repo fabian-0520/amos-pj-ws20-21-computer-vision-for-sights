@@ -31,11 +31,11 @@ How To: Deploying ILS, DOS, MTS, and DMR Services on AWS using EC2 (using macOS 
 
 # Major step #4: Deploy MTS
 
-Step 0: Set up an EC2 instance for the MTS that meets the following four criteria
+Step 0: Set up an EC2 instance (at least P3) for the MTS that meets the following four criteria
     1.) AMI running Ubuntu, NVidia Docker, CUDA, and PyTorch optimization, EBS as root device type for durable storage
         => e.g. "Deep Learning Base AMI (Ubuntu 18.04) Version 32.0 - ami-0d2d39cbe726f9230"
     2.) >= 80GiB of EBS storage allocated
-    3.) at least one NVidia GPU is assigned to the EC2 instance
+    3.) at least one NVidia Volta GPU is assigned to the EC2 instance
     4.) auto-assign for public IP enabled
 Step 1: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to ec2key.pem
 Step 2: Prepare MTS folder structures and libraries through SSH
