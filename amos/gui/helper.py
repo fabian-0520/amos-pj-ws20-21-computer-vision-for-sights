@@ -18,7 +18,6 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 from PyQt5.QtGui import QImage, QPixmap
 
-detection = True
 
 def wipe_prediction_input_images(images_base_path: str) -> None:
     """Wipes the passed images load directory clean of any existing files.
@@ -58,13 +57,6 @@ def get_current_prediction_output_path(prediction_output_base_path: str, image_n
     return newest_dir + '/' + image_name.replace('/', '')
 
 
-def enable_detection() -> None:
-    detection = True
-
-
-def disable_detection() -> None:
-    detection = False
-
 def detect1(app, weights='weights/Berlin.pt', source='data/images', image_size=640):
     """Short Version of detect()"""
     
@@ -100,8 +92,10 @@ def detect1(app, weights='weights/Berlin.pt', source='data/images', image_size=6
     # Run inference
     t0 = time.time()
     img = torch.zeros((1, 3, imgsz, imgsz), device=device)
-
     for path, img, im0s, vid_cap in dataset:
+        # if cv2.waitKey(1) == ord('q'):
+        #    break
+        # print("no key pressed")
         img = torch.from_numpy(img).to(device)
         img = img.float()
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -137,7 +131,12 @@ def detect1(app, weights='weights/Berlin.pt', source='data/images', image_size=6
         time.sleep(1/120)
             
         # Print time (inference + NMS)
-        print(f'{s}Done. ({t2 - t1:.3f}s)')       
+        print(f'{s}Done. ({t2 - t1:.3f}s)')
+        if webcam:
+            # dataset.kill_thread()
+            # kill video capture thread
+            print("stop video capture")
+        break
     
 
 

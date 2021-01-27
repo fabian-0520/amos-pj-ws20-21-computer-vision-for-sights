@@ -4,8 +4,6 @@ from helper import (
     get_current_prediction_output_path,
     detect,
     detect1,
-    enable_detection,
-    disable_detection
 )
 
 from label import ImageLabel
@@ -58,6 +56,7 @@ class UiMainWindow(QWidget):
     button_height = 50
     dist = 30
     coordinates = []
+    detection = True
 
     def __init__(self, parent) -> None:
         """Creates new configured instance of the UI's main window."""
@@ -233,12 +232,11 @@ class UiMainWindow(QWidget):
                 detect1(self, weights='weights/' + city + '.pt')
         elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
-            # disable_detection()
-            self.stop_detection()
+            self.detection = False
+            # self.stop_detection()
             print("stop")
         elif self.stacked_widget.currentIndex() == 1:
             if self.Button_Detection.text() == start:
-                # enable_detection()
                 self.Button_Detection.setText(QCoreApplication.translate(window, stop))
                 if self.Box_Stadt.currentText() == 'Choose City':
                     self.show_missing_model_popup()
@@ -251,10 +249,12 @@ class UiMainWindow(QWidget):
                     weights = 'weights/' + city + '.pt'
                     source = 0
                     image_size = 160
-                    self.thread = Thread(target=detect, args=([self, weights, source, image_size]), daemon=True)
-                    self.thread.start()
-                    # detect(self, weights='weights/' + city + '.pt', source=0, image_size=160)
-                    # self.stop_detection()
+                    # self.thread = Thread(target=detect1, args=([self, weights, source, image_size]), daemon=True)
+                    # self.thread.start()
+                    while self.detection is True:
+                        detect1(self, weights='weights/' + city + '.pt', source=0, image_size=160)
+                    print("exit loop")
+                    self.stop_detection()
         else:
             print("Drop a File or select a Webcam!")
 
@@ -307,7 +307,6 @@ class UiMainWindow(QWidget):
         window = "MainWindow"
         if i == 0:
             self.camera.stop()
-            # disable_detection()
             self.stop_detection()
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
         else:
@@ -319,12 +318,12 @@ class UiMainWindow(QWidget):
             self.Button_Bild.setText(QCoreApplication.translate(window, enable))
 
     def stop_detection(self) -> None:
-        self.thread.join()
+        # self.thread.join()
         self.Label_Bild.hide()
         self.stacked_widget.setCurrentIndex(1)
         self.camera_viewfinder.show()
         self.camera.start()
-        # enable_detection()
+        print("reactivated cam")
      
 
 if __name__ == "__main__":
