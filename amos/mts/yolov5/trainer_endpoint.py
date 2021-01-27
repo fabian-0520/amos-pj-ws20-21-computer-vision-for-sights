@@ -90,9 +90,10 @@ def replace_labels(labels: List[str]):
     dir = '../training_data/labels'
     for file in os.listdir("../training_data/labels"):
         with open(dir + "/" + file) as f:
-            text = f.read()
-            for index, label in enumerate(labels):
-                text = text.replace(label, str(index))
+            text = ""
+            for line in f.readlines():
+                sections = line.split(" ")
+                text += str(labels.index(sections[0])) + " " + " ".join(sections[1:])
 
         with open(dir + "/" + file, "w") as f:
             f.write(text)
