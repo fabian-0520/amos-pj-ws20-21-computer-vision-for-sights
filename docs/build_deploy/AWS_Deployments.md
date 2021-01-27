@@ -48,8 +48,11 @@ Step 2: Prepare MTS folder structures and libraries through SSH
 Step 3: Deploy MTS
     - delete venv and caches
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/mts ubuntu@<MTS_EC2_URL>:~/mts/
+    - sudo scp -i ~/Downloads/ec2key.pem ~/amos-pj-ws20-21-computer-vision-for-sights/amos/mts.sh ubuntu@<MTS_EC2_URL>:~/mts/
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<MTS_EC2_IP>
-    - cd mts/mts/yolov5
+    - cd mts
+    - command chmod +x mts.sh
+    - cd mts/yolov5
     - sudo docker build -t mts .
 Step 4: Wait until the DMR calls the MTS later on!
 
