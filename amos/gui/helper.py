@@ -135,7 +135,7 @@ class Detection:
             app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
             # show prediction in UI
             app.Label_Bild.setPixmap(QPixmap(app.image))
-            time.sleep(1/120)
+            time.sleep(1/60)
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
@@ -293,7 +293,7 @@ class Detection:
                 app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
                             # show prediction in UI
                 app.Label_Bild.setPixmap(QPixmap(app.image))
-                time.sleep(1)
+                time.sleep(1/60)
 
                 # Print time (inference + NMS)
                 print(f'{s}Done. ({t2 - t1:.3f}s)')

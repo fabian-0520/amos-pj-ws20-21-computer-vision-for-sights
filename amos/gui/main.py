@@ -230,7 +230,7 @@ class UiMainWindow(QWidget):
 
                 # start YOLO prediction
                 self.detector.enable_detection()
-                self.detector.detect(self, weights='weights/' + city + '.pt')
+                self.detector.detect1(self, weights='weights/' + city + '.pt')
         elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
             self.detector.disable_detection()
@@ -245,8 +245,8 @@ class UiMainWindow(QWidget):
                     self.camera_viewfinder.hide()
                     self.stacked_widget.setCurrentIndex(0)
                     self.Label_Bild.show()
-                    self.detector.detect(self, weights='weights/' + city + '.pt', source=0, image_size=160)
-                    #self.stop_detection()
+                    self.detector.detect1(self, weights='weights/' + city + '.pt', source=0, image_size=160)
+                    self.stop_detection()
         else:
             print("Drop a File or select a Webcam!")
 
