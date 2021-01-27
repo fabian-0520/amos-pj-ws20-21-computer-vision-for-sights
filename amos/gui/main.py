@@ -2,7 +2,6 @@
 from helper import (
     wipe_prediction_input_images,
     get_current_prediction_output_path,
-    detect,
     Detection
 )
 
@@ -157,7 +156,7 @@ class UiMainWindow(QWidget):
         self.retranslateUi(main_window)
         QMetaObject.connectSlotsByName(main_window)
 
-        self.detect = Detection()
+        self.detector = Detection()
 
     def retranslateUi(self, main_window: QMainWindow) -> None:
         """Set the text initially for all items.
@@ -230,11 +229,11 @@ class UiMainWindow(QWidget):
                 shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
                 # start YOLO prediction
-                self.detect.enable_detection()
-                self.detect.detect1(self, weights='weights/' + city + '.pt')
+                self.detector.enable_detection()
+                self.detector.detect(self, weights='weights/' + city + '.pt')
         elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
-            self.detect.disable_detection()
+            self.detector.disable_detection()
         elif self.stacked_widget.currentIndex() == 1:
             if self.Button_Detection.text() == start:
                 self.Button_Detection.setText(QCoreApplication.translate(window, stop))
@@ -246,8 +245,8 @@ class UiMainWindow(QWidget):
                     self.camera_viewfinder.hide()
                     self.stacked_widget.setCurrentIndex(0)
                     self.Label_Bild.show()
-                    self.detect.detect1(self, weights='weights/' + city + '.pt', source=0, image_size=160)
-                    self.stop_detection()
+                    self.detector.detect(self, weights='weights/' + city + '.pt', source=0, image_size=160)
+                    #self.stop_detection()
         else:
             print("Drop a File or select a Webcam!")
 
@@ -300,7 +299,7 @@ class UiMainWindow(QWidget):
         window = "MainWindow"
         if i == 0:
             self.camera.stop()
-            self.detect.disable_detection()
+            self.detector.disable_detection()
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
             self.stacked_widget.setCurrentIndex(0)
             self.camera_viewfinder.hide()
@@ -322,7 +321,7 @@ class UiMainWindow(QWidget):
         self.stacked_widget.setCurrentIndex(1)
         self.camera_viewfinder.show()
         # self.camera.start()
-        self.detect.enable_detection()
+        self.detector.enable_detection()
 
 
 if __name__ == "__main__":
