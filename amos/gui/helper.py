@@ -62,7 +62,7 @@ class Detection:
         """Creates new configured instance for the detection process."""
         self.detection = True
 
-    def detect1(self, app, weights='weights/Berlin.pt', source='data/images', image_size=160):
+    def detect1(self, app, weights='weights/Berlin.pt', source='data/images', image_size=640):
         """Short Version of detect()"""
 
         source = str(source)
@@ -85,7 +85,6 @@ class Detection:
         # Get names and colors
         names = model.module.names if hasattr(model, 'module') else model.names
         colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
-
         # Set Dataloader
         if webcam:
             dataset = LoadStreams(source, img_size=imgsz)
@@ -102,7 +101,6 @@ class Detection:
                 print("kill")
                 # dataset.kill_thread()
                 break
-            # print("no key pressed")
             img = torch.from_numpy(img).to(device)
             img = img.float()
             img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -154,7 +152,7 @@ class Detection:
         self.detection = True
 
 
-    def detect(self, app, weights='weights/Berlin.pt', source='data/images', image_size=160):
+    def detect(self, app, weights='weights/Berlin.pt', source='data/images', image_size=640):
         """ Detects the image or video of the given source by using the specified weights.
 
         Parameters

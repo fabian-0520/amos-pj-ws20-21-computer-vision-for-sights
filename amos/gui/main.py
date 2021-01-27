@@ -258,8 +258,8 @@ class UiMainWindow(QWidget):
         stop = "Stop Detection"
         window = "MainWindow"
         city = self.Box_Stadt.currentText()
-        if (self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == disable
-                and self.Label_Bild.image != "logo.png"):
+        if self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == disable and \
+                self.Label_Bild.image != "logo.png":
             if self.Box_Stadt.currentText() == 'Choose City':
                 self.show_missing_model_popup()
             else:
