@@ -230,6 +230,7 @@ class UiMainWindow(QWidget):
                 shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
                 # start YOLO prediction
+                self.detect.enable_detection()
                 self.detect.detect1(self, weights='weights/' + city + '.pt')
         elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
