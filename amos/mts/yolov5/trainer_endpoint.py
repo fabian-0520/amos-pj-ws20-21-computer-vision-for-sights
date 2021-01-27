@@ -33,9 +33,13 @@ def cleanup():
     """
     try:
         shutil.rmtree("../training_data")
-        shutil.rmtree("../runs")
     except OSError as e:
-        print("Error deleting data: %s" % e.strerror)
+        print("Error deleting training data: %s" % e.strerror)
+
+    try:
+        shutil.rmtree("./runs")
+    except OSError as e:
+        print("Error deleting runs: %s" % e.strerror)
 
 
 def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
@@ -196,9 +200,7 @@ def upload_trained_model() -> None:
             "VALUES (%s, %s, %s)"
         )
         # get amount of downloaded images
-        image_count = len(
-            [name for name in os.listdir("../training_data/images") if os.path.isfile(name)]
-        )
+        image_count = len(glob.glob("../training_data/images/*"))
         # execute query to upload weights
         exec_dml_query(dml_query, (city, Binary(data), image_count))
     else:
