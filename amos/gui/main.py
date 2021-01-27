@@ -3,7 +3,7 @@ from helper import (
     wipe_prediction_input_images,
     get_current_prediction_output_path,
     detect,
-    detect1,
+    Detection
 )
 
 from label import ImageLabel
@@ -56,7 +56,6 @@ class UiMainWindow(QWidget):
     button_height = 50
     dist = 30
     coordinates = []
-    detection = True
 
     def __init__(self, parent) -> None:
         """Creates new configured instance of the UI's main window."""
@@ -158,6 +157,8 @@ class UiMainWindow(QWidget):
         self.retranslateUi(main_window)
         QMetaObject.connectSlotsByName(main_window)
 
+        self.detect = Detection()
+
     def retranslateUi(self, main_window: QMainWindow) -> None:
         """Set the text initially for all items.
 
@@ -229,12 +230,10 @@ class UiMainWindow(QWidget):
                 shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
                 # start YOLO prediction
-                detect1(self, weights='weights/' + city + '.pt')
+                self.detect.detect1(self, weights='weights/' + city + '.pt')
         elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
-            self.detection = False
-            # self.stop_detection()
-            print("stop")
+            self.detect.disable_detection()
         elif self.stacked_widget.currentIndex() == 1:
             if self.Button_Detection.text() == start:
                 self.Button_Detection.setText(QCoreApplication.translate(window, stop))
@@ -246,14 +245,7 @@ class UiMainWindow(QWidget):
                     self.camera_viewfinder.hide()
                     self.stacked_widget.setCurrentIndex(0)
                     self.Label_Bild.show()
-                    weights = 'weights/' + city + '.pt'
-                    source = 0
-                    image_size = 160
-                    # self.thread = Thread(target=detect1, args=([self, weights, source, image_size]), daemon=True)
-                    # self.thread.start()
-                    while self.detection is True:
-                        detect1(self, weights='weights/' + city + '.pt', source=0, image_size=160)
-                    print("exit loop")
+                    self.detect.detect1(self, weights='weights/' + city + '.pt', source=0, image_size=160)
                     self.stop_detection()
         else:
             print("Drop a File or select a Webcam!")
@@ -307,8 +299,14 @@ class UiMainWindow(QWidget):
         window = "MainWindow"
         if i == 0:
             self.camera.stop()
-            self.stop_detection()
+            self.detect.disable_detection()
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
+            self.stacked_widget.setCurrentIndex(0)
+            self.camera_viewfinder.hide()
+            self.Label_Bild.show()
+            self.Label_Bild.image = "logo.png"
+            self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
+            # print(self.stacked_widget.currentIndex())
         else:
             self.camera_viewfinder.show()
             self.camera = QCamera(self.available_cameras[i - 1])
@@ -318,13 +316,13 @@ class UiMainWindow(QWidget):
             self.Button_Bild.setText(QCoreApplication.translate(window, enable))
 
     def stop_detection(self) -> None:
-        # self.thread.join()
+        print("reactivated cam")
         self.Label_Bild.hide()
         self.stacked_widget.setCurrentIndex(1)
         self.camera_viewfinder.show()
-        self.camera.start()
-        print("reactivated cam")
-     
+        # self.camera.start()
+        self.detect.enable_detection()
+
 
 if __name__ == "__main__":
     # starts the UI
