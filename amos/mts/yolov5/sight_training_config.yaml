@@ -1,9 +1,0 @@
-# train and val data
-train: [../training_data/bbt/images/,../training_data/fst/images/,../training_data/sgs/images/]
-val: [../training_data/bbt/images/,../training_data/fst/images/,../training_data/sgs/images/]
-
-# number of classes
-nc: 3
-
-# class names
-names: [bbt,fst,sgs]

@@ -21,12 +21,8 @@ services:
   model_training_service:
     image: mts:v1
     build: amos/mts/yolov5
-    environment:
-      - PGHOST=${PGHOST}
-      - PGDATABASE=${PGDATABASE}
-      - PGPORT=${PGPORT}
-      - PGUSER=${PGUSER}
-      - PGPASSWORD=${PGPASSWORD}
+    env_file:
+      - .env
     depends_on:
       - postgres
   data_mart_refresher:

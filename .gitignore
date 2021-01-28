@@ -390,3 +390,7 @@ fabric.properties
 # IDE-specific ignores
 .idea
 .idea/
+**/*.pt
+
+# MTS
+amos/mts/yolov5/runs

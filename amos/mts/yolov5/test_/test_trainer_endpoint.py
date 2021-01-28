@@ -32,7 +32,13 @@ class MTSTestCase(unittest.TestCase):
 
     @unittest.skip("only for testing endpoints")
     def test_download(self):
-        persist_training_data("berlin")
+        os.environ["PGHOST"] = "abc"
+        os.environ["PGPORT"] = "5432"
+        os.environ["PGDATABASE"] = "abc"
+        os.environ["PGUSER"] = "abv"
+        os.environ["PGPASSWORD"] = "abc"
+        os.environ["city"] = "berlin"
+        persist_training_data()
         cleanup()
 
     def test_string_parser(self):
