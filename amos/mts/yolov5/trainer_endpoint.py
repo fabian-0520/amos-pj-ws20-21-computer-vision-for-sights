@@ -1,3 +1,4 @@
+import argparse
 import glob
 import imghdr
 import os
@@ -10,17 +11,20 @@ from psycopg2 import connect
 from psycopg2._psycopg import Binary
 
 
-def persist_training_data(city_name: str) -> None:
+def persist_training_data() -> None:
     """
     Generic method to load images, store them and generate a config file for training
-    Parameters
-    ----------
-    city_name: str
-        name of the city to train for
     """
-    images = load_images_for_city(city_name)
-    sight_names = save_images(images)
-    generate_training_config_yaml(sight_names)
+    city = os.getenv("city", "")
+
+    if len(city) > 0:
+        print(f"Starting image download for {city}")
+        images = load_images_for_city(city)
+        print(f"Fetched {len(images)} images")
+        sight_names = save_images(images)
+        generate_training_config_yaml(sight_names)
+    else:
+        raise Exception('No city passed!')
 
 
 def cleanup():
@@ -31,6 +35,11 @@ def cleanup():
         shutil.rmtree("../training_data")
     except OSError as e:
         print("Error deleting training data: %s" % e.strerror)
+
+    try:
+        shutil.rmtree("./runs")
+    except OSError as e:
+        print("Error deleting runs: %s" % e.strerror)
 
 
 def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
@@ -65,12 +74,33 @@ def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
     for label in labels:
         elements = label.split(",")
         label = elements[-1]
-        re.sub(r'[^\x00-\x7F]+', '', label)  # replace non-ascii characters inside label
+        re.sub(r"[^\x00-\x7F]+", "", label)  # replace non-ascii characters inside label
         label_string = label.replace(" ", "") + " " + " ".join(elements[:-1]) + "\n"
         label_string = label_string.replace('"', "").replace("\\", "")
         label = label.replace('"', "").replace("\\", "").replace(" ", "")
         label_list.append((label_string, label))
     return label_list
+
+
+def replace_labels(labels: List[str]):
+    """
+    Replaces labels with their respective indexes
+    Parameters
+    ----------
+    labels: the list of label strings
+    -------
+
+    """
+    dir = '../training_data/labels'
+    for file in os.listdir("../training_data/labels"):
+        with open(dir + "/" + file) as f:
+            text = ""
+            for line in f.readlines():
+                sections = line.split(" ")
+                text += str(labels.index(sections[0])) + " " + " ".join(sections[1:])
+
+        with open(dir + "/" + file, "w") as f:
+            f.write(text)
 
 
 def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
@@ -92,6 +122,7 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
     except FileExistsError:
         print("Directories exist")
 
+    success_count = 0
     for pair in image_label_tuples:
         if pair[0] is None or pair[1] is None:
             continue
@@ -123,6 +154,14 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
             label_file.close()
         except IOError as e:
             print(e)
+            continue
+        success_count += 1
+    print("replacing labels...")
+    replace_labels(sight_list)
+    print(f"The final sight list: {sight_list}")
+    print(
+        f"Downloaded {len(image_label_tuples)}, {success_count} were successfully saved"
+    )
     return sight_list
 
 
@@ -144,26 +183,28 @@ def generate_training_config_yaml(sights: List[str]) -> None:
     yaml.close()
 
 
-def upload_trained_model(city_name: str, image_count: int) -> None:
+def upload_trained_model() -> None:
     """
     Optimizes the trained model runs into a file and uploads it with corresponding data
-    Parameters
-    ----------
-    city_name: str
-        the name of the city the weights belong to
-    image_count: int
-        the amount of images used for training
     """
-    # opening the files and reading as binary
-    in_file = open("tmp.pt", "rb")
-    data = in_file.read()
-    in_file.close()
-    # performing query
-    dml_query = (
-        "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images, mapping_table) "
-        "VALUES (%s, %s, %s, %s)"
-    )
-    exec_dml_query(dml_query, (city_name, Binary(data), image_count, "{}"))
+    city = os.getenv("city", "")
+
+    if len(city) > 0:
+        # opening the files and reading as binary
+        in_file = open("tmp.pt", "rb")
+        data = in_file.read()
+        in_file.close()
+        # generating query
+        dml_query = (
+            "INSERT INTO load_layer.trained_models(city, trained_model, n_considered_images) "
+            "VALUES (%s, %s, %s)"
+        )
+        # get amount of downloaded images
+        image_count = len(glob.glob("../training_data/images/*"))
+        # execute query to upload weights
+        exec_dml_query(dml_query, (city, Binary(data), image_count))
+    else:
+        raise Exception('No city passed!')
 
 
 def exec_sql_query(postgres_sql_string: str, return_result=False) -> Optional[object]:
@@ -245,3 +286,7 @@ def config():
             raise ReferenceError(f"Environment Variable {env_variable_name} not found")
 
     return db
+
+
+if __name__ == "__main__":
+    persist_training_data()

@@ -151,6 +151,7 @@ dmypy.json
 *.avi
 *.data
 *.json
+*.pt
 !amos/gui/logo.png
 !amos/gui/icon_logo.png
 
@@ -173,6 +174,7 @@ data/*
 pycocotools/*
 results*.txt
 gcp_test*.sh
+versions.txt
 
 # Datasets -------------------------------------------------------------------------------------------------------------
 coco/
@@ -388,3 +390,7 @@ fabric.properties
 # IDE-specific ignores
 .idea
 .idea/
+**/*.pt
+
+# MTS
+amos/mts/yolov5/runs

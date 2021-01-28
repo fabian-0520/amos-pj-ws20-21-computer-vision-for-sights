@@ -47,7 +47,7 @@ def trigger_city_image_labelling() -> None:
         WHERE dim_cities.city_id = completely_new.city_id
         ORDER BY completely_new.insertion_timestamp ASC limit 1"""
 
-    if not _notify_external_ils(city_without_image_labels_query, ils_training_service_url, "new"):
+    if not _notify_external_ils(city_without_image_labels_query, ils_training_service_url):
         labeled_city_to_update = """
             SELECT dim_cities.city_name
             FROM (SELECT count(*) AS n_missing_labels, fact_sights.city_id AS city_id
@@ -95,7 +95,7 @@ def _get_city_name_for_training() -> Optional[str]:
                  integration_layer.dim_sights_images AS di_inner
             WHERE fs_inner.image_id = di_inner.image_id AND di_inner.image_labels IS NOT NULL
             GROUP BY city_id
-            HAVING count(*) > {environ['MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING']}
+            HAVING count(*) > {int(environ['MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING'])}
         ) AS trainable_cities, integration_layer.dim_sights_cities AS dim_cities
         LEFT JOIN integration_layer.fact_models AS model_facts ON model_facts.city_id = dim_cities.city_id
         WHERE dim_cities.city_id = trainable_cities.city_id AND model_facts.trained_model_id IS NULL

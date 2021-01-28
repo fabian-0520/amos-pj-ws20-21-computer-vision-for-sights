@@ -73,11 +73,11 @@ def trigger_mts_training(city: str) -> None:
     ssh_client.connect(hostname=public_url,
                        username='ubuntu',
                        pkey=paramiko.RSAKey.from_private_key_file('../ec2key.pem'))
-    ssh_client.exec_command(_get_docker_run_command(city))
+    ssh_client.exec_command(_get_start_command(city))
     ssh_client.close()
 
 
-def _get_docker_run_command(city: str) -> str:
+def _get_start_command(city: str) -> str:
     """Returns the docker run command needed for the MTS in order to train on the given city.
 
     Parameters
@@ -90,14 +90,10 @@ def _get_docker_run_command(city: str) -> str:
     docker_run_command: str
         Corresponding docker run command.
     """
-    prefix = 'sudo docker run -d'
-    prefix += '' if os.environ['IS_MTS_GPU_ENABLED'].upper() == 'FALSE' else ' --ipc=host --gpus all'
-
-    return f'{prefix} ' \
-           f'-e PGHOST={os.environ["PGHOST"]} ' \
-           f'-e PGDATABASE={os.environ["PGDATABASE"]} ' \
-           f'-e PGUSER={os.environ["PGUSER"]} ' \
-           f'-e PGPORT={os.environ["PGPORT"]} ' \
-           f'-e PGPASSWORD={os.environ["PGPASSWORD"]} ' \
-           f'-e city={city} ' \
-           f'-it mts'
+    return f'sudo sh mts/mts.sh {os.environ["PGHOST"]} ' \
+           f'{int(os.environ["PGPORT"])} ' \
+           f'{os.environ["PGDATABASE"]} ' \
+           f'{os.environ["PGUSER"]} ' \
+           f'{os.environ["PGPASSWORD"]} ' \
+           f'{city} ' \
+           f'{int(os.environ["MTS_EPOCHS"])}'

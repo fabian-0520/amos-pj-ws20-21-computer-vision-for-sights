@@ -114,3 +114,26 @@ def get_downloaded_model(city: str) -> Optional[bytes]:
         return found_model[0][0].tobytes()
 
     return None
+
+
+def get_latest_model_version(city: str) -> int:
+    """Returns the version number of the latest model belonging to the passed city.
+
+    Parameters
+    ----------
+    city: str
+        Name of the city.
+
+    Returns
+    -------
+    latest_version: int
+        Latest model version.
+    """
+    trained_model_query = (
+        f"SELECT version FROM data_mart_layer.current_trained_models " f"WHERE city_name = '{city.upper()}'"
+    )
+    found_version = exec_dql_query(trained_model_query, return_result=True)
+    if found_version:
+        return int(found_version[0][0])
+
+    return -1

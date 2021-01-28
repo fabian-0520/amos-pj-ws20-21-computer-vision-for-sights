@@ -82,6 +82,26 @@ paths:
           description: "Invalid request format."
         "500":
           description: "Unexpected server error."
+  /cities/{cityName}/model/version:
+    get:
+      tags:
+        - "cities"
+      summary: "Fetches the version number of the latest city model persisted in the DWH."
+      operationId: "getLatestModelVersion"
+      parameters:
+        - in: path
+          name: cityName
+          required: true
+          description: "Name of the city whose trained model are of importance."
+      responses:
+        "200":
+          description: "Latest model version, -1 if no version is contained in the DWH."
+          content:
+            application/model:
+              schema:
+                type: "number"
+        "500":
+          description: "Unexpected server error."
 definitions:
   Cities:
     type: "object"

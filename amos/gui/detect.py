@@ -13,9 +13,11 @@ from utils.general import check_img_size, non_max_suppression, apply_classifier,
     strip_optimizer, set_logging, increment_path
 from utils.plots import plot_one_box, plot_one_point
 from utils.torch_utils import select_device, load_classifier, time_synchronized
+from main import setCoordinates
 
 
 def detect(save_img=False):
+    coordinates = []
     source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://'))

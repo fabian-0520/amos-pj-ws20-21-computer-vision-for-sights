@@ -10,6 +10,7 @@ import time
 from itertools import repeat
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
+import threading
 from threading import Thread
 
 import cv2
@@ -277,9 +278,9 @@ class LoadStreams:  # multiple IP or RTSP cameras
             h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS) % 100
             _, self.imgs[i] = cap.read()  # guarantee first frame
-            thread = Thread(target=self.update, args=([i, cap]), daemon=True)
+            self.thread = Thread(target=self.update, args=([i, cap]), daemon=True)
             print(' success (%gx%g at %.2f FPS).' % (w, h, fps))
-            thread.start()
+            self.thread.start()
         print('')  # newline
 
         # check for common shapes
@@ -326,6 +327,13 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def __len__(self):
         return 0  # 1E12 frames = 32 streams at 30 FPS for 30 years
 
+    def kill_thread(self):
+        print("kill thread")
+        threading.Event().set()
+        self.thread.join()
+
+        # self.thread.raise_exception()
+        # self.thread.join()
 
 def img2label_paths(img_paths):
     # Define label paths as a function of image paths

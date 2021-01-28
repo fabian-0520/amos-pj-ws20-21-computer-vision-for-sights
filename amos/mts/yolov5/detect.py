@@ -11,7 +11,7 @@ from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, check_requirements, non_max_suppression, apply_classifier, scale_coords, \
     xyxy2xywh, strip_optimizer, set_logging, increment_path
-from utils.plots import plot_one_box, plot_one_point
+from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 
@@ -47,11 +47,9 @@ def detect(save_img=False):
         view_img = True
         cudnn.benchmark = True  # set True to speed up constant image size inference
         dataset = LoadStreams(source, img_size=imgsz)
-        print("webcam") #debug
     else:
         save_img = True
         dataset = LoadImages(source, img_size=imgsz)
-        print("image") #debug
 
     # Get names and colors
     names = model.module.names if hasattr(model, 'module') else model.names
@@ -99,7 +97,7 @@ def detect(save_img=False):
                 # Print results
                 for c in det[:, -1].unique():
                     n = (det[:, -1] == c).sum()  # detections per class
-                    s += f'{n} {names[int(c)]}s, '  # add to string
+                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
@@ -111,8 +109,7 @@ def detect(save_img=False):
 
                     if save_img or view_img:  # Add bbox to image
                         label = f'{names[int(cls)]} {conf:.2f}'
-                        plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
-
+                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
@@ -123,7 +120,6 @@ def detect(save_img=False):
 
             # Save results (image with detections)
             if save_img:
-                print (dataset.mode) #debug
                 if dataset.mode == 'image':
                     cv2.imwrite(save_path, im0)
                 else:  # 'video'
