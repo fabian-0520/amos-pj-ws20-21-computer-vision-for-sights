@@ -137,11 +137,6 @@ class Detection:
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
-            # if webcam:
-                # dataset.kill_thread()
-                # kill video capture thread
-                # print("stop video capture")
-            # break
 
     def disable_detection(self) -> None:
         """Disables the detection process."""
@@ -228,8 +223,10 @@ class Detection:
         img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
         for path, img, im0s, vid_cap in dataset:
-            #if webcam is True and detection is False:
-            #    break
+            if self.detection is False:
+                print("kill")
+                # dataset.kill_thread()
+                break
             img = torch.from_numpy(img).to(device)
             img = img.half() if half else img.float()  # uint8 to fp16/32
             img /= 255.0  # 0 - 255 to 0.0 - 1.0

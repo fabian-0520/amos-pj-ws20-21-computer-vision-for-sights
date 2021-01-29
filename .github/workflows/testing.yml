@@ -34,16 +34,15 @@ jobs:
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=W503,W504,W293,W391,E127 --exclude=amos/mts,amos/crawler/collect_links.py,amos/gui/models,amos/gui/utils,amos/gui/detect.py
+          flake8 . --count --show-source --select=E9,F63,F7,F82 --max-complexity=10 --max-line-length=127 --statistics --ignore=W503,W504,W293,W391,E127,E101,W191 --exclude=amos/mts,amos/crawler/collect_links.py,amos/gui/models,amos/gui/utils,amos/gui/detect.py,amos/gui/helper.py
       - name: Test with pytest
         run: |
-          pytest || true
+          pytest
       - name: Test Code Coverage
         run: |
           for entry in ./amos/*; do
-            result=$(pytest $entry || true --cov=$entry);
+            result=$(pytest $entry --cov=$entry);
             echo -e "$result\n";
             percentage=$(echo $result | grep "TOTAL" | awk ' {print $4}' | sed 's/%$//');
             echo -e "$percentage\n"
