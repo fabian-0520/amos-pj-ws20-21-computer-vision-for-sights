@@ -284,7 +284,7 @@ class UiMainWindow(QWidget):
 		elif self.stacked_widget.currentIndex() == 1:
 			if self.Button_Detection.text() == start:
 				self.Button_Detection.setText(QCoreApplication.translate(window, stop))
-				if sself.model_selected is False:
+				if self.model_selected is False:
 					self.show_missing_model_popup()
 				else:
 					print("Video Detection Started")
