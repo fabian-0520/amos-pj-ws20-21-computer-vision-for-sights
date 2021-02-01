@@ -62,81 +62,6 @@ class Detection:
         """Creates new configured instance for the detection process."""
         self.detection = True
 
-    def detect1(self, app, weights='weights/Berlin.pt', source='data/images', image_size=640):
-        """Short Version of detect()"""
-
-        source = str(source)
-        imgsz = image_size
-        webcam = False
-        opt_device = ''
-
-        if source.isnumeric() or source.endswith('.txt') or source.lower().startswith(('rtsp://', 'rtmp://', 'http://')):
-            print(source)
-            webcam = True
-
-        # Initialize
-        set_logging()
-        device = select_device(opt_device)
-
-        # Load model
-        model = attempt_load(weights)
-        imgsz = check_img_size(imgsz, s=model.stride.max())
-
-        # Get names and colors
-        names = model.module.names if hasattr(model, 'module') else model.names
-        colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
-        # Set Dataloader
-        if webcam:
-            dataset = LoadStreams(source, img_size=imgsz)
-            print("webcam")  # debug
-        else:
-            dataset = LoadImages(source, img_size=imgsz)
-            print("image")  # debug
-
-        # Run inference
-        t0 = time.time()
-        img = torch.zeros((1, 3, imgsz, imgsz), device=device)
-        for path, img, im0s, vid_cap in dataset:
-            if self.detection is False:
-                print("kill")
-                # dataset.kill_thread()
-                break
-            img = torch.from_numpy(img).to(device)
-            img = img.float()
-            img /= 255.0  # 0 - 255 to 0.0 - 1.0
-            if img.ndimension() == 3:
-                img = img.unsqueeze(0)
-
-            # Inference
-            t1 = time_synchronized()
-            pred = model(img)[0]
-
-            # Apply NMS
-            pred = non_max_suppression(pred, 0.25, 0.45, classes=0, agnostic=False)
-            t2 = time_synchronized()
-
-            # Process detections
-            for i, det in enumerate(pred):  # detections per image
-                if webcam:  # batch_size >= 1
-                    p, s, im0, frame = path[i], '%g: ' % i, im0s[i].copy(), dataset.count
-                else:
-                    p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
-
-                if len(det):
-                    # Rescale boxes from img_size to im0 size
-                    det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-
-                for *xyxy, conf, cls in reversed(det):
-                    label = f'{names[int(cls)]} {conf:.2f}'
-                    plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
-
-            app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
-            # show prediction in UI
-            app.Label_Bild.setPixmap(QPixmap(app.image))
-            time.sleep(1/60)
-
-            # Print time (inference + NMS)
-            print(f'{s}Done. ({t2 - t1:.3f}s)')
 
     def disable_detection(self) -> None:
         """Disables the detection process."""
@@ -265,7 +190,7 @@ class Detection:
                     for c in det[:, -1].unique():
                         n = (det[:, -1] == c).sum()  # detections per class
                         s += f'{n} {names[int(c)]}s, '  # add to string
-
+       
                     # Write results
                     for *xyxy, conf, cls in reversed(det):
                         if save_txt:  # Write to file
