@@ -8,10 +8,10 @@ def get_sights(region):
     sight_list = []
     search_query = 'sights ' + str(region)
 
-    places_api_key = os.environ.get("places_api_key")
-    gmaps = googlemaps.Client(key=places_api_key)
+    maps_key = os.environ.get("maps_key")
+    gmaps = googlemaps.Client(key=maps_key)
     #Check if api key exist
-    if not places_api_key:
+    if not maps_key:
         print("Error: no api key")
         return[]
     
