@@ -189,7 +189,7 @@ class UiMainWindow(QWidget):
                     downloaded_version = int(elements[1])
                     break
 
-        latest_version = get_dwh_model_version(self.Box_Stadt.currentText())
+        latest_version = 0
         # print(latest_version)
         # print(downloaded_version)
 
