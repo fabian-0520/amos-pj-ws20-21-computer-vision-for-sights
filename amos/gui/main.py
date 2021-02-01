@@ -1,11 +1,14 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import (
-    wipe_prediction_input_images,
-    Detection,
-    # get_current_prediction_output_path
-)
+import os
+import shutil
+import sys
+from threading import Thread
 
-from label import ImageLabel
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
+from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtMultimedia import QCamera, QCameraInfo
+from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
@@ -17,17 +20,14 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QStackedWidget,
 )
-from PyQt5.QtMultimedia import QCamera, QCameraInfo
-from PyQt5.QtMultimediaWidgets import QCameraViewfinder
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 
 from api_communication.api_handler import get_downloaded_model, get_dwh_model_version
-
-import shutil
-import sys
-import os
-from threading import Thread
+from helper import (
+    wipe_prediction_input_images,
+    Detection,
+    # get_current_prediction_output_path
+)
+from label import ImageLabel
 
 OUTPUT_PREDICTION_DIR = "./runs/detect/"
 INPUT_PREDICTION_DIR = "./data/images"
@@ -122,7 +122,7 @@ class UiMainWindow(QWidget):
 
         self.stacked_widget = QStackedWidget(self.centralwidget)
         label_height = (self.window_height - self.dist - self.button_height - self.dist) - (
-            self.dist + self.button_height + self.dist
+                self.dist + self.button_height + self.dist
         )
         label_start_y = self.dist + self.button_height + self.dist
         self.stacked_widget.setGeometry(
@@ -189,7 +189,7 @@ class UiMainWindow(QWidget):
                     downloaded_version = int(elements[1])
                     break
 
-        latest_version = 0
+        latest_version = get_dwh_model_version(self.Box_Stadt.currentText())
         # print(latest_version)
         # print(downloaded_version)
 
@@ -370,6 +370,9 @@ class UiMainWindow(QWidget):
 if __name__ == "__main__":
     # starts the UI
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon('logo_exe_icon.ico'))
+    trayIcon = QtWidgets.QSystemTrayIcon(QtGui.QIcon("icon_logo.png"), app)
+    trayIcon.show()
     main_window = QMainWindow()
     ui = UiMainWindow(main_window)
     main_window.show()
