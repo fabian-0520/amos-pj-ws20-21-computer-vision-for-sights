@@ -117,7 +117,7 @@ Step 6: Deploy DOS
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<ILS_DOS_DMR_EC2_IP>
     - cd dos/django_orchestrator
     - sudo docker build -t dos .
-    - sudo docker run  -d -e PGHOST=<PGHOST> -e PGDATABASE=<PG_DATABASE> -e PGUSER=<PG_USER> -e PGPORT=<PG_PORT> -e PGPASSWORD=<PG_PASSWORD> -e IC_URL=<IC_URL> -e MAX_SIGHTS_PER_CITY=<MAX_SIGHTS_PER_CITY> -e MAX_IMAGES_PER_SIGHT=<MAX_IMAGES_PER_SIGHT> -e GOOGLE_MAPS_KEY=<GOOGLE_MAPS_KEY> -it dos -p 8002:8002 -it dos
+    - sudo docker run  -d -e PGHOST=<PGHOST> -e PGDATABASE=<PG_DATABASE> -e PGUSER=<PG_USER> -e PGPORT=<PG_PORT> -e PGPASSWORD=<PG_PASSWORD> -e IC_URL=<IC_URL> -e MAX_SIGHTS_PER_CITY=<MAX_SIGHTS_PER_CITY> -e MAX_IMAGES_PER_SIGHT=<MAX_IMAGES_PER_SIGHT> -e GOOGLE_MAPS_KEY=<GOOGLE_MAPS_KEY> -p 8002:8002 -it dos
 Step 7: Deploy DMR (attention - by linking the DMR with the ILS & MTS, costs may arise)
     - delete the venv, __pycache__, and .idea folders from your local DMR directory, along with any other unnecessary files (e.g. .coveragerc)
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/data_mart_refresher ubuntu@<ILS_DOS_DMR_EC2_URL>:~/dmr/

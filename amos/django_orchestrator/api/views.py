@@ -5,7 +5,6 @@ from api.view_handlers import (
     handle_persist_sight_image,
     handle_add_new_city,
     handle_get_supported_cities,
-    handle_trigger_image_crawler,
     HTTP_200_MESSAGE,
     handle_get_latest_city_model_version,
 )

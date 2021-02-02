@@ -8,6 +8,5 @@ urlpatterns = [
     path("cities/<city>/model/version", views.get_latest_city_model_version, name="get_latest_city_model_version"),
     path("cities/", views.get_supported_cities, name="get_supported_cities"),
     path("cities/<city>/add", views.add_new_city, name="add_new_city"),
-    path("", views.get_index, name="get_index"),
-    path("crawler/", views.trigger_image_crawler, name="trigger_image_crawler"),
+    path("", views.get_index, name="get_index")
 ]
