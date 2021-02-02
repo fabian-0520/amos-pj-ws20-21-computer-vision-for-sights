@@ -14,7 +14,7 @@ def get_sights(region, max_sights):
     #Check if api key exist
     if not maps_key:
         print("Error: no api key")
-        return[]
+        return []
     
     #google places request
     places_response = gmaps.places(search_query)
