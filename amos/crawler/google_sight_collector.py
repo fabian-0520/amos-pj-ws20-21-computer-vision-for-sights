@@ -22,7 +22,6 @@ def get_sights(region):
         for i in range(len(places_results)):
             sight_name = places_results[i]['name']
             sight_list.append(sight_name)
-        print(sight_list)
 
     else:
         print("Error: something went wrong with maps api")

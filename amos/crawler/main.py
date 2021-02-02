@@ -26,7 +26,7 @@ from PIL import Image
 
 from collect_links import CollectLinks
 from data_crawler.image import insert_image
-from sight_collector import get_sights
+from google_sight_collector import get_sights
 
 
 class Sites:
@@ -429,7 +429,7 @@ if __name__ == "__main__":
         )
     )
 
-    sights = get_sights(region=_region, sights_limit=_sights_limit)
+    sights = get_sights(region=_region)
     print("Sights: {0}".format(sights))
     crawler = AutoCrawler(
         skip_already_exist=_skip,
