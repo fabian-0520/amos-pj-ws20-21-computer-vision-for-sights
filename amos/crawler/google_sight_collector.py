@@ -1,4 +1,5 @@
 import googlemaps
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,7 +9,7 @@ def get_sights(region):
     sight_list = []
     search_query = 'sights ' + str(region)
 
-    maps_key = os.environ.get("maps_key")
+    maps_key = os.environ.get("MAPS_KEY")
     gmaps = googlemaps.Client(key=maps_key)
     #Check if api key exist
     if not maps_key:

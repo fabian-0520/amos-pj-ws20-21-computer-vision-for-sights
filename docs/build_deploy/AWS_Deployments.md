@@ -2,14 +2,19 @@ How To: Deploying ILS, DOS, MTS, and DMR Services on AWS using EC2 (using macOS 
 ========================================================================================= 
 
 # Needed variables for deployment (to be initialized when doing the deployment)
-- <ILS_DOS_DMR_EC2_IP> := IP of the running EC2 instance
-- <ILS_DOS_DMR_EC2_URL> := URL of the running EC2 instance (always in the form "ec2-xxx-xxx-xxx-xxx.eu-central-1.compute.amazonaws.com", where xxx-xxx-xxx-xxx is the corresponding IP address)
+- <IC_IP> := IP of the running EC2 instance of the crawler
+- <IC_URL> := URL of the running EC2 instance of the crawler
+- <MAX_SIGHTS_PER_CITY> := maximum number of sights to support for a given city
+- <MAX_IMAGES_PER_SIGHT> := maximum number of images to crawl for a given sight
+- <MAPS_KEY> := Google Maps key used to retrieve the "top" sights , leading to better result quality
+- <ILS_DOS_DMR_EC2_IP> := IP of the running EC2 instance for the ILS, DOS, and DMR
+- <ILS_DOS_DMR_EC2_URL> := URL of the running EC2 instance for the ILS, DOS, and DMR (always in the form "ec2-xxx-xxx-xxx-xxx.eu-central-1.compute.amazonaws.com", where xxx-xxx-xxx-xxx is the corresponding IP address)
 - <PG_HOST> := DWH host
 - <PG_DATABASE> := DWH database
 - <PG_USER> := DWH user
 - <PG_PORT> := DWH port
 - <PG_PASSWORD> := DWH password
-- <MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY> := max. number of allowed Vision API calls for each new supported city that has yet no labels in the DWH
+- <MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY> := max. number of allowed Vision API calls for each new supported city that has yet no labels in the DWH; make sure this parameter is at least as big as <MAX_SIGHTS_PER_CITY>*<MAX_IMAGES_PER_SIGHT>
 - <ILS_PUBLIC_ENDPOINT_URL>: Image Labelling Service (ILS) endpoint URL for retrieving labels
 - <MTS_EC2_INSTANCE_ID>: instance ID of the MTS EC2 instance
 - <MTS_EC2_IP>: initial IP of the MTS EC2 instance right after deployment (changes over time)
@@ -24,10 +29,25 @@ How To: Deploying ILS, DOS, MTS, and DMR Services on AWS using EC2 (using macOS 
 - <DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS>: frequency for retrieving image labels
 
 # Major step #1: Deploy DWH
+Simply create a PostgreSQL instance on Amazon RDS and copy-paste the PGHOST, PGPORT, PGDATABASE, PGUSER, and PGPASSWORD parameters
 
 # Major step #2: Generate a global deployment SSH key on AWS to be reused for all components
 
 # Major step #3: Deploy IC
+Step 0: Set up a lightweight EC2 instance for the IC
+Step 1: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to ec2key.pem
+Step 2: Prepare IC folder structures and libraries through SSH
+    - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
+    - sudo mkdir crawler
+    - sudo chmod 777 crawler
+    - exit
+Step 3: Deploy IC
+    - delete venv and caches
+    - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/crawler ubuntu@<IC_URL>:~/crawler/
+    - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
+    - cd crawler
+    - sudo docker build -t crawler .
+Step 4: Wait until the DOS calls the IC later on!
 
 # Major step #4: Deploy MTS
 
@@ -102,4 +122,7 @@ Step 6: Deploy DMR (attention - by linking the DMR with the ILS & MTS, costs may
     - cd dmr/data_mart_refresher
     - sudo docker build -t dmr .
     - sudo docker run -d -e ILS_PUBLIC_ENDPOINT_URL=<ILS_PUBLIC_ENDPOINT_URL>:8001 -e MTS_EC2_INSTANCE_ID=<MTS_EC2_INSTANCE_ID> -e AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> -e AWS_ACCESS_KEY=<AWS_ACCESS_KEY> -e AWS_REGION=<AWS_REGION> -e IS_MTS_GPU_ENABLED=<False | True> -e DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=<DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS> -e DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=<DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS> -e DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=<DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS> -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING=100 -it data_mart_refresher
-    
+Step 7: Make sure the security groups of the EC2 instances are configured, otherwise tweak
+    - DOS/ILS/DMR sec. group: must allow access on DOS port 8002 from 0.0.0.0 (anywhere)
+    - MTS sec. group: must allow access from DMR EC2 instance
+    - IC sec. group: must allow access from DOS EC2 instance
