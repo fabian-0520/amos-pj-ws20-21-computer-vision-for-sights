@@ -37,14 +37,14 @@ Simply create a PostgreSQL instance on Amazon RDS and copy-paste the PGHOST, PGP
 Step 0: Set up a lightweight EC2 instance for the IC
 Step 1: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to ec2key.pem
 Step 2: Prepare IC folder structures and libraries through SSH
-    - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
+    - sudo ssh -i ~/Downloads/ec2key.pem ec2-user@<IC_IP>
     - sudo mkdir crawler
     - sudo chmod 777 crawler
     - exit
 Step 3: Deploy IC
     - delete venv and caches
-    - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/crawler ubuntu@<IC_URL>:~/crawler/
-    - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
+    - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/crawler ec2-user@<IC_URL>:~/crawler/
+    - sudo ssh -i ~/Downloads/ec2key.pem ec2-user@<IC_IP>
     - cd crawler
     - sudo docker build -t crawler .
 Step 4: Wait until the DOS calls the IC later on!

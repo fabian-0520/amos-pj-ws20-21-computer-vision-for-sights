@@ -433,7 +433,7 @@ if __name__ == "__main__":
         )
     )
 
-    sights = get_sights(region=_region)
+    sights = get_sights(region=_region, max_sights=_sights_limit)
     print("Sights: {0}".format(sights))
     crawler = AutoCrawler(
         skip_already_exist=_skip,
