@@ -124,6 +124,10 @@ def env_setup(monkeypatch):
     monkeypatch.setenv('PGDATABASE', 'test')
     monkeypatch.setenv('PGUSER', 'test')
     monkeypatch.setenv('PGPASSWORD', 'test')
+    monkeypatch.setenv('MAX_SIGHTS_PER_CITY', 'test_max_sights')
+    monkeypatch.setenv('MAX_IMAGES_PER_SIGHT', 'test_max_images')
+    monkeypatch.setenv('MAPS_KEY', 'test_key')
+    monkeypatch.setenv('IC_URL', 'test_ic_url')
 
 
 @pytest.fixture(scope='module')

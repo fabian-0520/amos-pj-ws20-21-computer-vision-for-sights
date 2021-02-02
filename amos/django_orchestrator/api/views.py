@@ -134,29 +134,3 @@ def get_index(request):
     This endpoint is only provided as a best practice.
     """
     return HttpResponse(HTTP_200_MESSAGE, 200)
-
-
-@api_view(["POST"])
-def trigger_image_crawler(request: Request) -> HttpResponse:
-    """Returns a default 200 HTTP code.
-
-    Parameters
-    ----------
-    request: Request
-        Request object.
-
-    Returns
-    -------
-    response: HttpResponse
-        Response object containing a default 200 status code.
-
-    Notes
-    -----
-    This endpoint triggers the image crawler with a given city
-    """
-
-    body_unicode = request.body.decode("utf-8")
-    body = json.loads(body_unicode)
-    city = body["city"]
-    handle_trigger_image_crawler(city)
-    return HttpResponse(HTTP_200_MESSAGE, 200)

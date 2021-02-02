@@ -6,7 +6,7 @@ How To: Deploying ILS, DOS, MTS, and DMR Services on AWS using EC2 (using macOS 
 - <IC_URL> := URL of the running EC2 instance of the crawler
 - <MAX_SIGHTS_PER_CITY> := maximum number of sights to support for a given city
 - <MAX_IMAGES_PER_SIGHT> := maximum number of images to crawl for a given sight
-- <MAPS_KEY> := Google Maps key used to retrieve the "top" sights , leading to better result quality
+- <GOOGLE_MAPS_KEY> := Google Maps key used to retrieve the "top" sights , leading to better result quality
 - <ILS_DOS_DMR_EC2_IP> := IP of the running EC2 instance for the ILS, DOS, and DMR
 - <ILS_DOS_DMR_EC2_URL> := URL of the running EC2 instance for the ILS, DOS, and DMR (always in the form "ec2-xxx-xxx-xxx-xxx.eu-central-1.compute.amazonaws.com", where xxx-xxx-xxx-xxx is the corresponding IP address)
 - <PG_HOST> := DWH host
@@ -114,7 +114,7 @@ Step 5: Deploy DOS
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<ILS_DOS_DMR_EC2_IP>
     - cd dos/django_orchestrator
     - sudo docker build -t dos .
-    - sudo docker run  -d -e PGHOST=<PGHOST> -e PGDATABASE=<PG_DATABASE> -e PGUSER=<PG_USER> -e PGPORT=<PG_PORT> -e PGPASSWORD=<PG_PASSWORD> -p 8002:8002 -it dos
+    - sudo docker run  -d -e PGHOST=<PGHOST> -e PGDATABASE=<PG_DATABASE> -e PGUSER=<PG_USER> -e PGPORT=<PG_PORT> -e PGPASSWORD=<PG_PASSWORD> -e IC_URL=<IC_URL> -e MAX_SIGHTS_PER_CITY=<MAX_SIGHTS_PER_CITY> -e MAX_IMAGES_PER_SIGHT=<MAX_IMAGES_PER_SIGHT> -e GOOGLE_MAPS_KEY=<GOOGLE_MAPS_KEY> -it dos -p 8002:8002 -it dos
 Step 6: Deploy DMR (attention - by linking the DMR with the ILS & MTS, costs may arise)
     - delete the venv, __pycache__, and .idea folders from your local DMR directory, along with any other unnecessary files (e.g. .coveragerc)
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/data_mart_refresher ubuntu@<ILS_DOS_DMR_EC2_URL>:~/dmr/

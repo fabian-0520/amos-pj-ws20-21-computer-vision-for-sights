@@ -1,6 +1,6 @@
 """This module contains the tests for the view_handler module of the api sub-app."""
 from api.view_handlers import handle_get_trained_city_model, handle_persist_sight_image, handle_add_new_city, \
-    handle_get_supported_cities, handle_get_latest_city_model_version
+    handle_get_supported_cities, handle_get_latest_city_model_version, _get_crawler_docker_run_command
 from mock import patch
 import pytest
 
@@ -38,13 +38,15 @@ def test_handle_persist_sight_image_invalid(in_memory_uploaded_file_mock):
         assert status == 400
 
 
-def test_handle_add_new_city():
-    with patch('api.view_handlers.is_city_existing', return_value=False):
-        _, status = handle_add_new_city('berlin')
-        assert status == 200
-
-
 def test_handle_get_supported_cities():
     with patch('api.view_handlers.exec_dql_query', return_value=[['berlin'], ['tokyo']]):
         content, status = handle_get_supported_cities()
         assert content == '{"cities": ["berlin", "tokyo"]}'
+
+
+def test_get_crawler_docker_run_command():
+    docker_run_command = _get_crawler_docker_run_command('shanghai')
+    assert docker_run_command.replace('\n', '') == 'docker run -d -e PGHOST=test -e PGDATABASE=test ' \
+                                                   '-e PGUSER=test -e PGPORT=test -e PGPASSWORD=test ' \
+                                                   '-e MAPS_KEY=test_key -it crawler shanghai ' \
+                                                   '--sights_limit=test_max_sights --limit=test_max_images'
