@@ -259,7 +259,7 @@ class AutoCrawler:
                     keyword, site_name
                 )
             )
-            self.download_images(keyword, links, site_name, max_count=self.limit)
+            self.download_images(keyword, links, site_name, max_count=int(self.limit))
 
             print("Done {} : {}".format(site_name, keyword))
 
@@ -433,7 +433,7 @@ if __name__ == "__main__":
         )
     )
 
-    sights = get_sights(region=_region, max_sights=_sights_limit)
+    sights = get_sights(region=_region, max_sights=int(_sights_limit))
     print("Sights: {0}".format(sights))
     crawler = AutoCrawler(
         skip_already_exist=_skip,

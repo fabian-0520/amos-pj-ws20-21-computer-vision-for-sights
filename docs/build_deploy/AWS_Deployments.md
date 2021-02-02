@@ -34,29 +34,31 @@ Simply create a PostgreSQL instance on Amazon RDS and copy-paste the PGHOST, PGP
 # Major step #2: Generate a global deployment SSH key on AWS to be reused for all components
 
 # Major step #3: Deploy IC
-Step 0: Set up a lightweight EC2 instance for the IC
+Step 0: Set up a lightweight Ubuntu EC2 instance for the IC
 Step 1: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to ec2key.pem
-Step 2: Prepare IC folder structures and libraries through SSH
-    - sudo ssh -i ~/Downloads/ec2key.pem ec2-user@<IC_IP>
+Step 2: Configure docker on the EC2 instance
+Step 3: Prepare IC folder structures and libraries through SSH
+    - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
     - sudo mkdir crawler
     - sudo chmod 777 crawler
     - exit
-Step 3: Deploy IC
+Step 4: Deploy IC
     - delete venv and caches
-    - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/crawler ec2-user@<IC_URL>:~/crawler/
-    - sudo ssh -i ~/Downloads/ec2key.pem ec2-user@<IC_IP>
+    - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/crawler ubuntu@<IC_URL>:~/crawler/
+    - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
     - cd crawler
     - sudo docker build -t crawler .
-Step 4: Wait until the DOS calls the IC later on!
+Step 5: Wait until the DOS calls the IC later on!
 
 # Major step #4: Deploy MTS
 
-Step 0: Set up an EC2 instance (at least P3) for the MTS that meets the following four criteria
+Step 0: Set up an EC2 instance (at least P3) for the MTS that meets the following five criteria
     1.) AMI running Ubuntu, NVidia Docker, CUDA, and PyTorch optimization, EBS as root device type for durable storage
         => e.g. "Deep Learning Base AMI (Ubuntu 18.04) Version 32.0 - ami-0d2d39cbe726f9230"
     2.) >= 80GiB of EBS storage allocated
     3.) at least one NVidia Volta GPU is assigned to the EC2 instance
     4.) auto-assign for public IP enabled
+    5.) docker configured
 Step 1: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to ec2key.pem
 Step 2: Prepare MTS folder structures and libraries through SSH
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<MTS_EC2_IP>
@@ -85,7 +87,8 @@ Step 1: Launch an EC2 instance for the DMR, ILS, and DMR components
         3.) security group allows custom TCP traffic on ports 8001, 8002 from 0.0.0.0/0 and ::/0 (anywhere)
             ![Alt text](https://i.ibb.co/xjZ6wtc/Screenshot-2021-01-12-at-16-55-30.png)    
 Step 2: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to "ec2key.pem"
-Step 3: Prepare folder structures and install Docker on EC2 instance through SSH
+Step 3: Configure docker
+Step 4: Prepare folder structures and install Docker on EC2 instance through SSH
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<ILS_DOS_DMR_EC2_IP>
     - sudo mkdir ils
     - sudo chmod 777 ils
@@ -99,7 +102,7 @@ Step 3: Prepare folder structures and install Docker on EC2 instance through SSH
     - sudo apt-get update
     - sudo apt-get install docker-ce docker-ce-cli containerd.io
     - exit
-Step 4: Deploy ILS
+Step 5: Deploy ILS
     - add <ILS_DOS_DMR_EC2_URL> and <ILS_DOS_DMR_EC2_URL>:8001 to the ALLOWED_HOSTS list in the settings.py file of the ILS
     - delete the venv, __pycache__, and .idea folders from your local ILS directory, along with any other unnecessary files (e.g. .coveragerc)
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/image_labelling_service ubuntu@<ILS_DOS_DMR_EC2_URL>:~/ils/
@@ -107,7 +110,7 @@ Step 4: Deploy ILS
     - cd ils/image_labelling_service
     - sudo docker build -t ils .
     - sudo docker run -d -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY=<MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY> -p 8001:8001 -it ils
-Step 5: Deploy DOS
+Step 6: Deploy DOS
     - add <ILS_DOS_DMR_EC2_URL> and <ILS_DOS_DMR_EC2_URL>:8002 to the ALLOWED_HOSTS list in the settings.py file of the DOS
     - delete the venv, __pycache__, and .idea folders from your local DOS directory, along with any other unnecessary files (e.g. .coveragerc)
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/django_orchestrator ubuntu@<ILS_DOS_DMR_EC2_URL>:~/dos/
@@ -115,14 +118,14 @@ Step 5: Deploy DOS
     - cd dos/django_orchestrator
     - sudo docker build -t dos .
     - sudo docker run  -d -e PGHOST=<PGHOST> -e PGDATABASE=<PG_DATABASE> -e PGUSER=<PG_USER> -e PGPORT=<PG_PORT> -e PGPASSWORD=<PG_PASSWORD> -e IC_URL=<IC_URL> -e MAX_SIGHTS_PER_CITY=<MAX_SIGHTS_PER_CITY> -e MAX_IMAGES_PER_SIGHT=<MAX_IMAGES_PER_SIGHT> -e GOOGLE_MAPS_KEY=<GOOGLE_MAPS_KEY> -it dos -p 8002:8002 -it dos
-Step 6: Deploy DMR (attention - by linking the DMR with the ILS & MTS, costs may arise)
+Step 7: Deploy DMR (attention - by linking the DMR with the ILS & MTS, costs may arise)
     - delete the venv, __pycache__, and .idea folders from your local DMR directory, along with any other unnecessary files (e.g. .coveragerc)
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/data_mart_refresher ubuntu@<ILS_DOS_DMR_EC2_URL>:~/dmr/
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<ILS_DOS_DMR_EC2_IP>
     - cd dmr/data_mart_refresher
     - sudo docker build -t dmr .
     - sudo docker run -d -e ILS_PUBLIC_ENDPOINT_URL=<ILS_PUBLIC_ENDPOINT_URL>:8001 -e MTS_EC2_INSTANCE_ID=<MTS_EC2_INSTANCE_ID> -e AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> -e AWS_ACCESS_KEY=<AWS_ACCESS_KEY> -e AWS_REGION=<AWS_REGION> -e IS_MTS_GPU_ENABLED=<False | True> -e DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=<DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS> -e DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=<DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS> -e DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=<DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS> -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING=100 -it data_mart_refresher
-Step 7: Make sure the security groups of the EC2 instances are configured, otherwise tweak
+Step 8: Make sure the security groups of the EC2 instances are configured, otherwise tweak
     - DOS/ILS/DMR sec. group: must allow access on DOS port 8002 from 0.0.0.0 (anywhere)
     - MTS sec. group: must allow access from DMR EC2 instance
     - IC sec. group: must allow access from DOS EC2 instance
