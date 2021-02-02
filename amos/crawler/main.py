@@ -150,7 +150,10 @@ class AutoCrawler:
             width, height = im.size
             with open("{}".format(file_path), "rb") as file:
                 insert_image(file.read(), width, height, link, region)
-            os.remove("{}".format(file_path))
+            try:
+                os.remove("{}".format(file_path))
+            except FileNotFoundError:
+                print("Image not found, can't be deleted")
         except Exception as e:
             print("Save failed - {}".format(e))
 
