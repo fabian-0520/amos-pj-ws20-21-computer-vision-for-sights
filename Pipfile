@@ -18,6 +18,7 @@ django-swagger-render = "*"
 image = "*"
 paramiko = "*"
 mock = "*"
+googlemaps = "*"
 
 [dev-packages]
 flake8 = "*"
