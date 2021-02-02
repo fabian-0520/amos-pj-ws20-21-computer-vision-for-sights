@@ -140,5 +140,5 @@ def _get_crawler_docker_run_command(city: str) -> str:
            f'-e PGPASSWORD={os.getenv("PGPASSWORD")} ' \
            f'-e MAPS_KEY={os.getenv("MAPS_KEY")} ' \
            f'-it crawler {city} ' \
-           f'--sights_limit={os.getenv("MAX_SIGHTS_PER_CITY")} ' \
+           f'--sights_limit={os.getenv("MAX_SIGHTS_PER_CITY").replace(" ", "%20")} ' \
            f'--limit={os.getenv("MAX_IMAGES_PER_SIGHT")}'
