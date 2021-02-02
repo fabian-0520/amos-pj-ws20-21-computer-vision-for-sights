@@ -99,7 +99,7 @@ def handle_add_new_city(city: str) -> Tuple[str, int]:
     http_status: int
         HTTP status code.
     """
-    if not is_city_existing(city) and city not in CRAWLER_TRIGGERED_FOR_CITIES:
+    if not is_city_existing(city.replace('_', ' ')) and city not in CRAWLER_TRIGGERED_FOR_CITIES:
         CRAWLER_TRIGGERED_FOR_CITIES.append(city)  # avoids triggering the crawler multiple times for a single city
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -140,5 +140,5 @@ def _get_crawler_docker_run_command(city: str) -> str:
            f'-e PGPASSWORD={os.getenv("PGPASSWORD")} ' \
            f'-e MAPS_KEY={os.getenv("MAPS_KEY")} ' \
            f'-it crawler {city} ' \
-           f'--sights_limit={os.getenv("MAX_SIGHTS_PER_CITY").replace(" ", "%20")} ' \
+           f'--sights_limit={os.getenv("MAX_SIGHTS_PER_CITY")} ' \
            f'--limit={os.getenv("MAX_IMAGES_PER_SIGHT")}'

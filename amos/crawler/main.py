@@ -433,7 +433,7 @@ if __name__ == "__main__":
         )
     )
 
-    sights = get_sights(region=_region.replace('%20', ' '), max_sights=int(_sights_limit))
+    sights = get_sights(region=_region.replace('_', ' '), max_sights=int(_sights_limit))
     print("Sights: {0}".format(sights))
     crawler = AutoCrawler(
         skip_already_exist=_skip,
@@ -445,6 +445,6 @@ if __name__ == "__main__":
         limit=_limit,
         keyword_list=sights,
         no_driver=_no_driver,
-        region=_region.replace('%20', ' '),
+        region=_region.replace('_', ' '),
     )
     crawler.do_crawling()

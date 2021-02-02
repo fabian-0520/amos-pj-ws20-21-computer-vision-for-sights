@@ -46,7 +46,7 @@ Step 4: Deploy IC
     - delete venv and caches
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/crawler ubuntu@<IC_URL>:~/crawler/
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
-    - cd crawler
+    - cd crawler/crawler
     - sudo docker build -t crawler .
 Step 5: Wait until the DOS calls the IC later on!
 
