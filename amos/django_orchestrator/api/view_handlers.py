@@ -105,8 +105,11 @@ def handle_add_new_city(city: str) -> Tuple[str, int]:
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(hostname=os.getenv("IC_URL"),
                            username='ubuntu',
-                           pkey=paramiko.RSAKey.from_private_key_file('../ec2key.pem'))
-        ssh_client.exec_command(_get_crawler_docker_run_command(city))
+                           pkey=paramiko.RSAKey.from_private_key_file('ec2key.pem'))
+        cmd = _get_crawler_docker_run_command(city)
+        print(f'Performing: {cmd} on remote image crawler {os.getenv("IC_URL")}')
+        stdin, stdout, stderr = ssh_client.exec_command(cmd)
+        print(f'Response: {stderr.readlines()}')
         ssh_client.close()
 
     return HTTP_200_MESSAGE, 200
@@ -132,7 +135,7 @@ def handle_get_supported_cities() -> Tuple[str, int]:
 
 
 def _get_crawler_docker_run_command(city: str) -> str:
-    return 'docker run -d ' \
+    return 'sudo docker run -d ' \
            f'-e PGHOST={os.getenv("PGHOST")} ' \
            f'-e PGDATABASE={os.getenv("PGDATABASE")} ' \
            f'-e PGUSER={os.getenv("PGUSER")} ' \

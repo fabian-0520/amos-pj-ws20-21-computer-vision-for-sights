@@ -46,7 +46,7 @@ def test_handle_get_supported_cities():
 
 def test_get_crawler_docker_run_command():
     docker_run_command = _get_crawler_docker_run_command('shanghai')
-    assert docker_run_command.replace('\n', '') == 'docker run -d -e PGHOST=test -e PGDATABASE=test ' \
+    assert docker_run_command.replace('\n', '') == 'sudo docker run -d -e PGHOST=test -e PGDATABASE=test ' \
                                                    '-e PGUSER=test -e PGPORT=test -e PGPASSWORD=test ' \
                                                    '-e MAPS_KEY=test_key -it crawler shanghai ' \
                                                    '--sights_limit=test_max_sights --limit=test_max_images'

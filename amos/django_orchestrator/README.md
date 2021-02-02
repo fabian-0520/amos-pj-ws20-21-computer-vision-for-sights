@@ -15,7 +15,7 @@ How to: run/deploy the service via Docker
    -e IC_URL=<IMAGE_CRAWLER_URL>
    -e MAX_SIGHTS_PER_CITY=<MAX_SIGHTS_PER_CITY>
    -e MAX_IMAGES_PER_SIGHT=<MAX_IMAGES_PER_SIGHT>
-   -e GOOGLE_MAPS_KEY=<GOOGLE_MAPS_KEY>
+   -e MAPS_KEY=<GOOGLE_MAPS_KEY>
    -p 8002:8002
    -it django_orchestrator
 5. Refer to 0.0.0.0:8002/swagger to get a nicely formatted overview of the supported communication protocol
