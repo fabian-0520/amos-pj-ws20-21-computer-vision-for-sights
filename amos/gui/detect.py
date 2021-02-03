@@ -164,9 +164,19 @@ class Detection:
                         if save_img or view_img:  # Add bbox to image
                             logging.debug('Prediction: {}; Confidence {}'.format(f'{names[int(cls)]}', f'{conf:.2f}'))
                             label = f'{names[int(cls)]} {conf:.2f}' if debug else f'{names[int(cls)]}'
-                            plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
+                            label_transformed = ''.join(map(lambda x: x if x.islower() else " " + x, label))
+                            plot_one_point(xyxy,
+                                           im0,
+                                           label=label_transformed,
+                                           color=colors[int(cls)],
+                                           point_thickness=None,
+                                           r=10)
                             if debug:
-                                plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                                plot_one_box(xyxy,
+                                             im0,
+                                             label=label_transformed,
+                                             color=colors[int(cls)],
+                                             line_thickness=3)
 
                 app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
                 app.Label_Bild.setPixmap(QPixmap(app.image))
