@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QStackedWidget,
     QLineEdit,
-	QCheckBox,
+	  QCheckBox,
     QSizePolicy,
 )
 from PyQt5 import QtGui
