@@ -99,7 +99,7 @@ def handle_add_new_city(city: str) -> Tuple[str, int]:
     http_status: int
         HTTP status code.
     """
-    if not is_city_existing(city.replace('_', ' ')) and city not in CRAWLER_TRIGGERED_FOR_CITIES:
+    if not is_city_existing(city) and city not in CRAWLER_TRIGGERED_FOR_CITIES:
         CRAWLER_TRIGGERED_FOR_CITIES.append(city)  # avoids triggering the crawler multiple times for a single city
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

@@ -29,7 +29,7 @@ def get_trained_city_model(request: Request, city: str) -> HttpResponse:
     response: HttpResponse
         Response object containing the trained model as a .pt file.
     """
-    response = handle_get_trained_city_model(city)
+    response = handle_get_trained_city_model(city.replace(' ', '_'))
     return HttpResponse(response[0], status=response[1])
 
 
@@ -49,7 +49,7 @@ def get_latest_city_model_version(request: Request, city: str) -> HttpResponse:
     response: HttpResponse
         Response object containing the latest model version.
     """
-    response = handle_get_latest_city_model_version(city)
+    response = handle_get_latest_city_model_version(city.replace(' ', '_'))
     return HttpResponse(response[0], status=response[1])
 
 
@@ -72,7 +72,7 @@ def persist_sight_image(request: Request, city: str) -> HttpResponse:
     image = request.FILES["image"] if "image" in request.FILES else None
     labels = request.FILES["labels"].read().decode("utf-8") if "labels" in request.FILES else None
 
-    response = handle_persist_sight_image(city, image, labels)
+    response = handle_persist_sight_image(city.replace(' ', '_'), image, labels)
     return HttpResponse(response[0], status=response[1])
 
 
@@ -92,7 +92,7 @@ def add_new_city(request: Request, city: str) -> HttpResponse:
     response: HttpResponse
         Response object containing a default 200 HTTP message.
     """
-    response = handle_add_new_city(city)
+    response = handle_add_new_city(city.replace(' ', '_'))
     return HttpResponse(response[0], status=response[1])
 
 
