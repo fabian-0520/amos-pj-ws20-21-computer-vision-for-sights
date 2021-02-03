@@ -221,6 +221,7 @@ class UiMainWindow(QWidget):
 				update_msg.exec_()
 
 			else:
+				self.model_selected = True
 				newest_vers_msg = QMessageBox()
 				newest_vers_msg.setWindowTitle("Ready for Detection!")
 				newest_vers_msg.setWindowIcon(QIcon("icon_logo.png"))
@@ -231,7 +232,7 @@ class UiMainWindow(QWidget):
 				newest_vers_msg.exec_()
 
 		else:
-			self.selected_model = False
+			self.model_selected = False
 
 	def handover_city(self, button) -> None:
 		"""Starts the download of the pre-trained model of the selected city.
