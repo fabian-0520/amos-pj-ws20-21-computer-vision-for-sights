@@ -19,9 +19,9 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from swagger_render.views import SwaggerUIView
 
-os.environ.setdefault('GOOGLE_APPLICATION_CREDENTIALS', './auth.json')  # path to included Google Vision API credentials
+os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS", "./auth.json")  # path to included Google Vision API credentials
 
 urlpatterns = [
-    path('api/', include('api.urls')),  # for backwards compatibility with the data mart refresher
-    path('swagger/', SwaggerUIView.as_view())
-] + static('/docs/', document_root='docs')
+    path("api/", include("api.urls")),  # for backwards compatibility with the data mart refresher
+    path("swagger/", SwaggerUIView.as_view()),
+] + static("/docs/", document_root="docs")

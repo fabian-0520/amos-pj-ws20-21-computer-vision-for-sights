@@ -148,7 +148,7 @@ class CollectLinks:
 
         links = self.remove_duplicates(links)
 
-        print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("google", keyword, len(links)))
+        print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("Pinterest", keyword, len(links)))
         self.browser.close()
         return links
 
@@ -204,7 +204,6 @@ class CollectLinks:
         links = self.remove_duplicates(links)
 
         print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("google", keyword, len(links)))
-        self.browser.close()
 
         return links
 
@@ -272,7 +271,6 @@ class CollectLinks:
         links = self.remove_duplicates(links)
 
         print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("google_full", keyword, len(links)))
-        self.browser.close()
 
         return links
 

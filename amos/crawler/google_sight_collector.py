@@ -17,13 +17,24 @@ def get_sights(region):
         return []
 
     # google places request
-    places_response = gmaps.places(search_query, language="de")
+    places_response_german = gmaps.places(search_query, language="de")
+    places_response_english = gmaps.places(search_query)
+
+    sight_list = get_sights_from_json(places_response_german) + get_sights_from_json(places_response_english)
+    sight_list = list(dict.fromkeys(sight_list))
+    print(sight_list)
+
+    return sight_list
+
+
+def get_sights_from_json(places_response: dict):
+    sight_list = []
     places_results = places_response["results"]
     if places_results:
         for i in range(len(places_results)):
             sight_name = places_results[i]["name"]
             sight_list.append(sight_name)
-
     else:
         print("Error: something went wrong with maps api")
+
     return sight_list
