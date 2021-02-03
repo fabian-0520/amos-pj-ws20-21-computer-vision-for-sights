@@ -10,7 +10,6 @@ import time
 from itertools import repeat
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
-import threading
 from threading import Thread
 
 import cv2
@@ -302,7 +301,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
                 n = 0
             time.sleep(0.01)  # wait time
         self.cap.release()
-        self.video = True
+        self.stream = True
 
     def __iter__(self):
         self.count = -1
@@ -312,7 +311,6 @@ class LoadStreams:  # multiple IP or RTSP cameras
         self.count += 1
         img0 = self.imgs.copy()
         if cv2.waitKey(1) == ord('q'):  # q to quit
-            print("bbb")
             self.cap.release()
             raise StopIteration
 
@@ -332,13 +330,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
         return 0  # 1E12 frames = 32 streams at 30 FPS for 30 years
 
     def kill_thread(self):
-        print("kill thread")
         self.stream = False
-        # threading.Event().set()
-        # self.cap.release()
-
-        # self.thread.raise_exception()
-        # self.thread.join()
 
 def img2label_paths(img_paths):
     # Define label paths as a function of image paths

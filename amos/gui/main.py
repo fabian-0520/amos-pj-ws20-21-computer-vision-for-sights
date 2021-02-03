@@ -1,11 +1,7 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import (
-    wipe_prediction_input_images,
-    Detection,
-    # get_current_prediction_output_path
-)
-
+from helper import wipe_prediction_input_images, get_current_prediction_output_path
 from label import ImageLabel
+from detect import Detection
 from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
@@ -49,6 +45,8 @@ class UiMainWindow(QWidget):
 	    Height of buttons
 	dist : int
 	    Distance to the edge of Widgets(Window/Button/Label...)
+	model_selected : bool
+		Shows whether a model is selected or not
 	"""
 
 	window_width = 800
@@ -56,7 +54,6 @@ class UiMainWindow(QWidget):
 	button_width = 180
 	button_height = 50
 	dist = 30
-	coordinates = []
 	model_selected = False
 
 	def __init__(self, parent) -> None:
@@ -157,7 +154,6 @@ class UiMainWindow(QWidget):
 
 		self.retranslateUi(main_window)
 		QMetaObject.connectSlotsByName(main_window)
-
 
 	def retranslateUi(self, main_window: QMainWindow) -> None:
 		"""Set the text initially for all items.
@@ -263,13 +259,13 @@ class UiMainWindow(QWidget):
 		stop = "Stop Detection"
 		window = "MainWindow"
 		city = self.Box_Stadt.currentText()
-		#start drag&drop image detection
+		# start drag&drop image detection
 		if self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == disable and \
 				self.Label_Bild.image != "logo.png":
-			#if no model selected
+			# if no model selected
 			if self.model_selected is False:
 				self.show_missing_model_popup()
-			#if model selected
+			# if model selected
 			else:
 				# retrieving image name
 				print(f"Starting detection of {self.Label_Bild.image}")
@@ -289,20 +285,22 @@ class UiMainWindow(QWidget):
 			self.Label_Bild.image = "logo.png"
 			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 			self.camera.start()
-		#if webcam activated
+		# if webcam activated
 		elif self.stacked_widget.currentIndex() == 1:
 			if self.Button_Detection.text() == start:
 				self.Button_Detection.setText(QCoreApplication.translate(window, stop))
 				if self.model_selected is False:
 					self.show_missing_model_popup()
-				#start webcam detection
+				# start webcam detection
 				else:
 					print("Video Detection Started")
 					self.camera.stop()
 					self.camera_viewfinder.hide()
 					self.stacked_widget.setCurrentIndex(0)
 					self.Label_Bild.show()
-					self.detection_thread = Thread(target=self.detector.detect, args=(self,), kwargs={'weights': 'weights/' + city + '.pt', 'source': '0', 'image_size': 160})
+					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
+												   kwargs={'weights': 'weights/' + city + '.pt', 'source': '0',
+														   'image_size': 160})
 					self.detection_thread.start()
 		else:
 			print("Drop a File or select a Webcam!")
