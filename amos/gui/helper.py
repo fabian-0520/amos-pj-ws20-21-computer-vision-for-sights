@@ -46,6 +46,8 @@ def get_current_prediction_output_path(prediction_output_base_path: str, image_n
 def update_dropdown(Box_Stadt: QComboBox) -> None:
     while True:
         sleep(30)
+        selected = Box_Stadt.currentText()
         Box_Stadt.clear()
         Box_Stadt.addItems(['Choose City'] + get_supported_cities())
+        Box_Stadt.setCurrentText(selected)
         Box_Stadt.update()

@@ -309,7 +309,7 @@ class UiMainWindow(QWidget):
 					self.prep_video_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
 												   kwargs={'weights': 'weights/' + city + '.pt', 'source': '0',
-														   'image_size': 160})
+														   'image_size': 736})
 					self.detection_thread.start()
 		else:
 			print("Drop a File or select a Webcam!")
