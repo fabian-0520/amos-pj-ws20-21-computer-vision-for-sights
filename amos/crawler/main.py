@@ -197,7 +197,7 @@ class AutoCrawler:
 
                 no_ext_path = "{}/{}/{}_{}".format(
                     self.download_path.replace('"', ""),
-                    keyword,
+                    keyword.replace(" ", "_"),
                     site_name,
                     str(index).zfill(4),
                 )
@@ -452,5 +452,6 @@ if __name__ == "__main__":
     # clear and remove download directory after crawling images
     try:
         shutil.rmtree("./download")
+        print("Download folder removed")
     except OSError as e:
         print("Download directory could not be deleted")
