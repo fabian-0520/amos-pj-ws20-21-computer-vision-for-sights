@@ -3,7 +3,7 @@ from typing import Optional
 import requests
 import os
 
-os.environ["API_ENDPOINT_URL"] = "http://ec2-35-158-44-78.eu-central-1.compute.amazonaws.com:8002"
+os.environ["API_ENDPOINT_URL"] = "http://ec2-18-159-48-86.eu-central-1.compute.amazonaws.com:8002"
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
 
@@ -45,10 +45,12 @@ def get_downloaded_model(city: str) -> Optional[bytes]:
 
 def get_dwh_model_version(city: str) -> int:
     """Returns the current model version in dwh.
+
     Parameters
     ----------
     city: str
         Name of the city.
+
     Returns
     -------
     version: int or None
@@ -60,6 +62,56 @@ def get_dwh_model_version(city: str) -> int:
     try:
         r = requests.get("{0}/api/cities/{1}/model/version".format(api_endpoint_url, city.upper()))
         return int(r.text)
+    except requests.exceptions.RequestException as e:
+        print(e)
+        return None
+
+def send_city_request(city:str) -> None:
+    """Sends city request to trigger training for new city.
+
+    Parameters
+    ----------
+    city: str
+        Name of the city.
+
+    Returns
+    -------
+    None
+
+    """
+    api_endpoint_url = os.environ["API_ENDPOINT_URL"]
+    try:
+        requests.post("{0}/api/cities".format(api_endpoint_url, city.upper()))
+        return None
+    except requests.exceptions.RequestException as e:
+        print(e)
+        return None
+
+def get_new_city() -> None:
+    """Returns all model names in dwh.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    model_names in .txt-file
+
+    """
+    api_endpoint_url = os.environ["API_ENDPOINT_URL"]
+    try:
+        cities = requests.get("{0}/api/cities".format(api_endpoint_url))
+        for c in cities:
+            file = open("weights/models.txt", "r")
+            lines = file.readlines()
+            file.close()
+            file = open("weights/models.txt", "w")
+            for line in lines:
+                if line.upper() != c.upper():
+                    file.write(line)
+            file.write(str(c.upper())+ "\n")
+            file.close()
     except requests.exceptions.RequestException as e:
         print(e)
         return None

@@ -175,6 +175,7 @@ pycocotools/*
 results*.txt
 gcp_test*.sh
 versions.txt
+models.txt
 
 # Datasets -------------------------------------------------------------------------------------------------------------
 coco/

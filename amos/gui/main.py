@@ -16,13 +16,14 @@ from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QStackedWidget,
+    QLineEdit
 )
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
+from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject, Qt
 
-from api_communication.api_handler import get_downloaded_model, get_dwh_model_version
+from api_communication.api_handler import get_downloaded_model, get_dwh_model_version, get_new_city, send_city_request
 
 import shutil
 import sys
@@ -53,7 +54,9 @@ class UiMainWindow(QWidget):
     window_width = 800
     window_height = 650
     button_width = 180
+    small_button_width = 50
     button_height = 50
+    textbox_height = 25
     dist = 30
     coordinates = []
 
@@ -71,7 +74,24 @@ class UiMainWindow(QWidget):
         self.Box_Stadt.setObjectName("Box_Stadt")
         self.Box_Stadt.addItem("")
         self.Box_Stadt.addItem("")
-        self.Box_Stadt.activated.connect(self.show_popup)
+        self.Box_Stadt.setItemData(1, "Update to see which new cities are available for detection.", Qt.ToolTipRole)
+        self.Box_Stadt.activated.connect(self.dropdown_select)
+
+        self.Text_City = QLineEdit(self.centralwidget)
+        self.Text_City.setGeometry(
+            QRect(self.dist + self.dist + self.button_width, self.dist, self.button_width, self.textbox_height))
+        self.Text_City.setObjectName("Text_City")
+        self.Text_City.setToolTip(
+            'Enter a city you wish to detect sights in that you cannot find in the dropdown on the left after updating.')
+
+        self.Button_City = QPushButton(self.centralwidget)
+        self.Button_City.setGeometry(
+            QRect(
+                self.dist + self.dist + self.button_width + self.button_width,
+                self.dist, self.small_button_width, self.textbox_height )
+        )
+        self.Button_City.setObjectName("Button_City")
+        self.Button_City.clicked.connect(self.request_city)
 
         self.Button_Detection = QPushButton(self.centralwidget)
         self.Button_Detection.setGeometry(
@@ -171,10 +191,39 @@ class UiMainWindow(QWidget):
         _translate = QCoreApplication.translate
         main_window.setWindowTitle(_translate(window, "SightScan"))
         self.Box_Stadt.setItemText(0, _translate(window, "Choose City"))
-        self.Box_Stadt.setItemText(1, _translate(window, "Berlin"))
+        self.Box_Stadt.setItemText(1, _translate(window, "Update"))
         self.Box_Camera_selector.setItemText(0, _translate(window, "Choose Webcam"))
         self.Button_Detection.setText(_translate(window, "Start Detection"))
         self.Button_Bild.setText(_translate(window, "Enable File Drop"))
+        self.Button_City.setText(_translate(window, "Request"))
+
+    def dropdown_select(self) -> None:
+        """Checks what option was chosen."""
+        if self.Box_Stadt.currentText() == 'Choose City':
+            print("nothing")
+
+        elif self.Box_Stadt.currentText() == 'Update':
+            if not os.path.exists("weights/models.txt"):
+                with open('weights/models.txt', 'w'):
+                    pass
+
+            get_new_city()
+            file = open("weights/models.txt", "r")
+            lines = file.readlines()
+            for line in lines:
+                self.Box_Stadt.addItem(""+ str(line))
+            file.close()
+
+            umsg = QMessageBox()
+            umsg.setWindowTitle("List updated")
+            umsg.setWindowIcon(QIcon("icon_logo.png"))
+            umsg.setText("The drop-down-menu is up to date")
+            umsg.setStandardButtons(QMessageBox.Ok)
+            umsg.setDefaultButton(QMessageBox.Ok)
+
+        else:
+            self.show_popup()
+
 
     def show_popup(self) -> None:
         """Shows a pop-up for confirming the download of the selected city."""
@@ -304,6 +353,23 @@ class UiMainWindow(QWidget):
         emsg.setDefaultButton(QMessageBox.Ok)
 
         emsg.exec_()
+
+    def request_city(self) -> None:
+        # Send entered city to dwh and show confirmation popup
+
+        city_request = self.Text_City.text().upper()
+        send_city_request(city_request)
+
+        cmsg = QMessageBox()
+        cmsg.setWindowTitle("Request confirmed")
+        cmsg.setWindowIcon(QIcon("icon_logo.png"))
+        cmsg.setText(
+            "Your city request for " + city_request + " has been sent to our database. " \
+            + "Your city will show up in the drop-down-menu on the left as soon as it is ready to detect sights.")
+        cmsg.setStandardButtons(QMessageBox.Ok)
+        cmsg.setDefaultButton(QMessageBox.Ok)
+
+        cmsg.exec_()
 
     def dragdrop(self) -> None:
         """Enables / disables Drag&Drop of images."""
