@@ -11,12 +11,12 @@ def get_sights(region, max_sights):
 
     maps_key = os.environ.get("MAPS_KEY")
     gmaps = googlemaps.Client(key=maps_key)
-    #Check if api key exist
+    # Check if api key exist
     if not maps_key:
         print("Error: no api key")
         return []
     
-    #google places request
+    # google places request
     places_response = gmaps.places(search_query)
     places_results = places_response['results']
     if places_results:
