@@ -255,7 +255,7 @@ class UiMainWindow(QWidget):
 	def detect_sights(self) -> None:
 		"""Starts detection for the dropped image or shown webcam video
 		with the downloaded model and displays the results in the label."""
-		city = self.Box_Stadt.currentText()
+		city = self.Box_Stadt.currentText().replace(' ', '_')
 
 		# start drag&drop image detection
 		if self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == DISABLE and \

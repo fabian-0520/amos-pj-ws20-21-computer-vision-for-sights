@@ -24,7 +24,7 @@ How To: Deploying ILS, DOS, MTS, and DMR Services on AWS using EC2 (using macOS 
 - <AWS_REGION>: AWS region (e.g. eu-central-1)
 - <MTS_EPOCHS>: number of epochs per MTS city training
 - <MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING>: minimum number of labelled images needed to trigger training
-- <DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS>: frequency for refreshing DWH data marts => set at least to 60 since refreshing is computationally intensive!
+- <DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS>: frequency for refreshing DWH data marts => set at least to 600 since refreshing is computationally intensive!
 - <DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS>: frequency for triggering model trainings => set at least to 300 since training needs time!
 - <DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS>: frequency for retrieving image labels
 
