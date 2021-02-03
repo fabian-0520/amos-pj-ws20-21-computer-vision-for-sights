@@ -1,7 +1,6 @@
 """This module contains helper functions for the main app module."""
 import os
 from time import sleep
-
 from PyQt5.QtWidgets import QComboBox
 from api_communication.api_handler import get_supported_cities
 
@@ -45,7 +44,8 @@ def get_current_prediction_output_path(prediction_output_base_path: str, image_n
 
 
 def update_dropdown(Box_Stadt: QComboBox) -> None:
-    sleep(30)
-    Box_Stadt.clear()
-    Box_Stadt.addItems(['Choose City'] + get_supported_cities())
-    Box_Stadt.update()
+    while True:
+        sleep(30)
+        Box_Stadt.clear()
+        Box_Stadt.addItems(['Choose City'] + get_supported_cities())
+        Box_Stadt.update()

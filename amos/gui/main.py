@@ -17,8 +17,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject, Qt
-
+from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 from api_communication.api_handler import get_downloaded_model, get_dwh_model_version, \
 	get_supported_cities, send_city_request
 import shutil
@@ -39,9 +38,9 @@ WINDOW = "MainWindow"
 class UiMainWindow(QWidget):
 	"""Main UI window of the application.
 
-    Attributes:
-    ----------
-    window_width: int
+	Attributes:
+	----------
+	window_width: int
         Width of the window
     window_height: int
         Height of the window
@@ -206,7 +205,6 @@ class UiMainWindow(QWidget):
 				with open('weights/versions.txt', 'w'):  # creating a version file
 					pass
 
-			print(city)
 			with open("weights/versions.txt", "r") as file:
 				for line in file:
 					elements = line.split("=")
@@ -264,7 +262,7 @@ class UiMainWindow(QWidget):
 		Parameters
 		----------
 		button:
-			Pushed button inside the popup
+			Pushed button inside the popup.
 		"""
 
 		if button.text() == "OK":
