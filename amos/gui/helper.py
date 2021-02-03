@@ -62,7 +62,6 @@ class Detection:
         """Creates new configured instance for the detection process."""
         self.detection = True
 
-
     def disable_detection(self) -> None:
         """Disables the detection process."""
         self.detection = False
@@ -190,7 +189,7 @@ class Detection:
                     for c in det[:, -1].unique():
                         n = (det[:, -1] == c).sum()  # detections per class
                         s += f'{n} {names[int(c)]}s, '  # add to string
-       
+
                     # Write results
                     for *xyxy, conf, cls in reversed(det):
                         if save_txt:  # Write to file
