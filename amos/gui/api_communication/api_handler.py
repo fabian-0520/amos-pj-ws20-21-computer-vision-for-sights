@@ -3,7 +3,7 @@ from typing import Optional
 import requests
 import os
 
-os.environ["API_ENDPOINT_URL"] = "http://ec2-35-158-44-78.eu-central-1.compute.amazonaws.com:8002"
+os.environ["API_ENDPOINT_URL"] = "http://ec2-18-184-167-84.eu-central-1.compute.amazonaws.com:8002"
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
 
