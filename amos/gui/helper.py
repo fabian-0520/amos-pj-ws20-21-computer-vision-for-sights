@@ -3,6 +3,7 @@ import os
 import argparse
 import time
 from pathlib import Path
+import logging
 
 import cv2
 import torch
@@ -152,7 +153,7 @@ class Detection:
         self.detection = True
 
 
-    def detect(self, app, weights='weights/Berlin.pt', source='data/images', image_size=640):
+    def detect(self, app, weights='weights/Berlin.pt', source='data/images', image_size=640, debug=False):
         """ Detects the image or video of the given source by using the specified weights.
 
         Parameters
@@ -279,8 +280,17 @@ class Detection:
 
                         if save_img or view_img:  # Add bbox to image
                             print('successfull')
-                            label = f'{names[int(cls)]} {conf:.2f}'
+                            # logs
+                            logging.debug('Prediction: {}; Confidence {}'.format(f'{names[int(cls)]}', f'{conf:.2f}'))
+
+                            if debug:
+                                label = f'{names[int(cls)]} {conf:.2f}'
+                            else:
+                                label = f'{names[int(cls)]}'
+
                             plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
+                            if debug:
+                                plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
                             #rgbImage = cv2.cvtColor(im0, cv2.COLOR_BGR2RGB)
                             #convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0],
                             #                 QImage.Format_RGB888)
@@ -294,6 +304,7 @@ class Detection:
                 time.sleep(1/60)
 
                 # Print time (inference + NMS)
+                logging.debug(f'{s}Done. ({t2 - t1:.3f}s)')
                 print(f'{s}Done. ({t2 - t1:.3f}s)')
 
                 # Stream results

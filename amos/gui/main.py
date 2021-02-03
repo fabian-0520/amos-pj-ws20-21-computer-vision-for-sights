@@ -5,6 +5,8 @@ from helper import (
     # get_current_prediction_output_path
 )
 
+from debug import *
+
 from label import ImageLabel
 from PyQt5.QtWidgets import (
     QWidget,
@@ -16,6 +18,9 @@ from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QStackedWidget,
+    QCheckBox,
+    QTextEdit,
+    QSizePolicy,
 )
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
@@ -24,9 +29,12 @@ from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 
 from api_communication.api_handler import get_downloaded_model, get_dwh_model_version
 
+from datetime import datetime
+
 import shutil
 import sys
 import os
+import logging
 from threading import Thread
 
 OUTPUT_PREDICTION_DIR = "./runs/detect/"
@@ -52,10 +60,12 @@ class UiMainWindow(QWidget):
 
     window_width = 800
     window_height = 650
+    debug_height = 200
     button_width = 180
     button_height = 50
     dist = 30
     coordinates = []
+    debug = False
 
     def __init__(self, parent) -> None:
         """Creates new configured instance of the UI's main window."""
@@ -138,6 +148,45 @@ class UiMainWindow(QWidget):
 
         self.Label_Bild = ImageLabel(self)
         self.Label_Bild.setGeometry(QRect(0, 0, self.window_width - (self.dist * 2), label_height))
+
+        self.checkBox = QCheckBox("Debug", self.centralwidget)
+        self.checkBox.setObjectName(u"checkBox")
+        self.checkBox.setGeometry(
+            QRect(
+                self.dist,
+                10,
+                70,
+                20)
+            )
+        self.checkBox.setChecked(False)
+        self.checkBox.stateChanged.connect(self.debug_click)
+
+        # Setup logging
+        fn = "logs/" + datetime.now().strftime('%d_%m_%Y__%H_%M_%S') + 'log.log'
+        f = '%(asctime)s :: %(levelname)s :: %(filename)s :: %(funcName)s :: %(lineno)d :: %(message)s'
+        self.textDebug = QTextEditLogger(self.centralwidget)
+        self.textDebug.setFormatter(logging.Formatter(f))
+        logging.basicConfig(filename=fn, format=f, level=logging.DEBUG)
+        logging.getLogger().addHandler(self.textDebug)
+
+        # Log Text Box in GUI
+        self.textDebug.widget.setObjectName(u"textEdit")
+        self.textDebug.widget.setEnabled(False)
+        self.textDebug.widget.setGeometry(
+            QRect
+            (
+                self.dist,
+                self.window_height,
+                self.window_width - 2 * self.dist,
+                self.debug_height - self.dist
+            )
+        )
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.textDebug.widget.sizePolicy().hasHeightForWidth())
+        self.textDebug.widget.setSizePolicy(sizePolicy)
+        self.textDebug.widget.setReadOnly(True)
 
         self.stacked_widget.addWidget(self.Label_Bild)
         self.stacked_widget.addWidget(self.camera_viewfinder)
@@ -273,7 +322,7 @@ class UiMainWindow(QWidget):
 
                 # start YOLO prediction
                 self.detector.enable_detection()
-                self.detector.detect1(self, weights='weights/' + city + '.pt')
+                self.detector.detect(self, weights='weights/' + city + '.pt', debug=self.debug)
         elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
             self.Button_Detection.setText(QCoreApplication.translate(window, start))
             self.detector.disable_detection()
@@ -288,7 +337,7 @@ class UiMainWindow(QWidget):
                     self.camera_viewfinder.hide()
                     self.stacked_widget.setCurrentIndex(0)
                     self.Label_Bild.show()
-                    self.detector.detect1(self, weights='weights/' + city + '.pt', source=0, image_size=160)
+                    self.detector.detect(self, weights='weights/' + city + '.pt', source=0, image_size=640, debug=self.debug)
                     self.stop_detection()
         else:
             print("Drop a File or select a Webcam!")
@@ -365,6 +414,16 @@ class UiMainWindow(QWidget):
         self.camera_viewfinder.show()
         # self.camera.start()
         self.detector.enable_detection()
+
+    def debug_click(self, state):
+        self.debug = bool(state)
+
+        if state:
+            main_window.resize(self.window_width, self.window_height + self.debug_height)
+            self.textDebug.widget.setEnabled(True)
+        else:
+            main_window.resize(self.window_width, self.window_height)
+            self.textDebug.widget.setEnabled(False)
 
 
 if __name__ == "__main__":

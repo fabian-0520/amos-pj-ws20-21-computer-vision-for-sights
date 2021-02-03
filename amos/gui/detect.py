@@ -16,7 +16,7 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 from main import setCoordinates
 
 
-def detect(save_img=False):
+def detect(save_img=False, debug=False):
     coordinates = []
     source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
@@ -112,7 +112,8 @@ def detect(save_img=False):
                     if save_img or view_img:  # Add bbox to image
                         label = '%s %.2f' % (names[int(cls)], conf)
                         plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=-1, r=10)
-                        # plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                        if debug:
+                            plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
 
             # Print time (inference + NMS)
             print('%sDone. (%.3fs)' % (s, t2 - t1))
