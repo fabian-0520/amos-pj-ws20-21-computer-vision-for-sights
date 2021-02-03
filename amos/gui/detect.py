@@ -163,18 +163,18 @@ class Detection:
 
                         if save_img or view_img:  # Add bbox to image
                             logging.debug('Prediction: {}; Confidence {}'.format(f'{names[int(cls)]}', f'{conf:.2f}'))
-                            label = f'{names[int(cls)]} {conf:.2f}' if debug else f'{names[int(cls)]}'
-                            label_transformed = ''.join(map(lambda x: x if x.islower() else " " + x, label))
+                            label = ''.join(map(lambda x: x if x.islower() else ' ' + x, names[int(cls)]))
+                            label = f'{label} {conf:.2f}' if debug else label
                             plot_one_point(xyxy,
                                            im0,
-                                           label=label_transformed,
+                                           label=label,
                                            color=colors[int(cls)],
                                            point_thickness=None,
                                            r=10)
                             if debug:
                                 plot_one_box(xyxy,
                                              im0,
-                                             label=label_transformed,
+                                             label=label,
                                              color=colors[int(cls)],
                                              line_thickness=3)
 
@@ -185,9 +185,5 @@ class Detection:
                 # Print time (inference + NMS)
                 logging.debug(f'{s}Done. ({t2 - t1:.3f}s)')
                 print(f'{s}Done. ({t2 - t1:.3f}s)')
-
-        if save_txt or save_img:
-            s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" \
-                if save_txt else ''
 
         print(f'Done. ({time.time() - t0:.3f}s)')

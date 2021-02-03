@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
 	QCheckBox,
     QSizePolicy,
 )
+from PyQt5 import QtGui
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
@@ -467,6 +468,9 @@ class UiMainWindow(QWidget):
 if __name__ == "__main__":
 	# starts the UI
 	app = QApplication(sys.argv)
+	app.setWindowIcon(QIcon('logo_exe_icon.ico'))
+	trayIcon = QtWidgets.QSystemTrayIcon(QtGui.QIcon("icon_logo.png"), app)
+	trayIcon.show()
 	main_window = QMainWindow()
 	ui = UiMainWindow(main_window)
 	main_window.show()
