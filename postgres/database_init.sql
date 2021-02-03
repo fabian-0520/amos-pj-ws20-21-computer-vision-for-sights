@@ -220,7 +220,7 @@ begin
 		temp_image_key := (select image_id from integration_layer.dim_sights_images where image_source = new.sight_image_data_source limit 1);
 
 	-- remove special characters from city name before insertion
-	formatted_city := (select UPPER(regexp_replace(NEW.sight_city,'[^-0-9A-Za-zÖÜÄßöüä ]','')));
+	formatted_city := (select UPPER(regexp_replace(NEW.sight_city,'[^-0-9A-Za-zÖÜÄßöüä_ ]','')));
 	
 	-- get city dimension table key
 	temp_city_key := (select city_id from integration_layer.dim_sights_cities where city_name = formatted_city limit 1);
@@ -301,7 +301,7 @@ create sequence if not exists trained_model_surrogate_key_sequuence;
 -- create load job for model pushes
 CREATE OR REPLACE FUNCTION load_models_into_dwh()
   RETURNS trigger as $$
-  	declare formatted_city VARCHAR(100) := (select UPPER(regexp_replace(NEW.city,'[^-0-9A-Za-zÖÜÄßöüä ]','')));
+  	declare formatted_city VARCHAR(100) := (select UPPER(regexp_replace(NEW.city,'[^-0-9A-Za-zÖÜÄßöüä_ ]','')));
 	declare temp_city_key INTEGER := NULL;   
 	declare temp_trained_model_key INTEGER := NULL;   
 	declare temp_timestamp_key INTEGER := NULL;   
