@@ -27,6 +27,7 @@ from api_communication.api_handler import get_downloaded_model, get_dwh_model_ve
 import shutil
 import sys
 import os
+import time
 from threading import Thread
 
 OUTPUT_PREDICTION_DIR = "./runs/detect/"
@@ -279,13 +280,15 @@ class UiMainWindow(QWidget):
 				shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 
 				# start YOLO prediction
-				self.detector.enable_detection()
 				self.detector.detect(self, weights='weights/' + city + '.pt')
-		# stop drag&drop image detection
+		# stop video detection
 		elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
 			self.Button_Detection.setText(QCoreApplication.translate(window, start))
-			self.detector.disable_detection()
 			self.stop_detection()
+			time.sleep(2)
+			self.Label_Bild.image = "logo.png"
+			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
+			self.camera.start()
 		#if webcam activated
 		elif self.stacked_widget.currentIndex() == 1:
 			if self.Button_Detection.text() == start:
@@ -299,10 +302,8 @@ class UiMainWindow(QWidget):
 					self.camera_viewfinder.hide()
 					self.stacked_widget.setCurrentIndex(0)
 					self.Label_Bild.show()
-					self.detector.enable_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,), kwargs={'weights': 'weights/' + city + '.pt', 'source': '0', 'image_size': 160})
 					self.detection_thread.start()
-
 		else:
 			print("Drop a File or select a Webcam!")
 
@@ -360,6 +361,7 @@ class UiMainWindow(QWidget):
 			self.stacked_widget.setCurrentIndex(0)
 			self.camera_viewfinder.hide()
 			self.Label_Bild.show()
+			time.sleep(2)
 			self.Label_Bild.image = "logo.png"
 			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		else:
@@ -373,12 +375,10 @@ class UiMainWindow(QWidget):
 			self.Button_Bild.setText(QCoreApplication.translate(window, enable))
 
 	def stop_detection(self) -> None:
-		print("reactivate cam !?")
-		self.Label_Bild.hide()
-		self.stacked_widget.setCurrentIndex(1)
-		self.camera_viewfinder.show()
-		self.camera.start()
 		self.detector.disable_detection()
+		self.stacked_widget.setCurrentIndex(1)
+		self.Label_Bild.hide()
+		self.camera_viewfinder.show()
 
 
 if __name__ == "__main__":

@@ -71,7 +71,6 @@ class Detection:
         """Enables the detection process."""
         self.detection = True
 
-
     def detect(self, app, weights='weights/Berlin.pt', source='data/images', image_size=640):
         """ Detects the image or video of the given source by using the specified weights.
 
@@ -150,7 +149,8 @@ class Detection:
         for path, img, im0s, vid_cap in dataset:
             if self.detection is False:
                 print("kill")
-                # dataset.kill_thread()
+                dataset.kill_thread()
+                self.detection = True
                 break
             img = torch.from_numpy(img).to(device)
             img = img.half() if half else img.float()  # uint8 to fp16/32

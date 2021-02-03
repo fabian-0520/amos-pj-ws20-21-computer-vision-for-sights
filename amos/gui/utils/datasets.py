@@ -259,6 +259,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def __init__(self, sources='streams.txt', img_size=640):
         self.mode = 'images'
         self.img_size = img_size
+        self.stream = True
 
         if os.path.isfile(sources):
             with open(sources, 'r') as f:
@@ -292,10 +293,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def update(self, index, cap):
         # Read next stream frame in a daemon thread
         n = 0
-        while self.cap.isOpened():
-            if cv2.waitKey(1) & 0xFF ==ord('q'):
-                print("aaa")
-                break
+        while self.cap.isOpened() and self.stream is True:
             n += 1
             # _, self.imgs[index] = cap.read()
             self.cap.grab()
@@ -304,6 +302,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
                 n = 0
             time.sleep(0.01)  # wait time
         self.cap.release()
+        self.video = True
 
     def __iter__(self):
         self.count = -1
@@ -334,8 +333,9 @@ class LoadStreams:  # multiple IP or RTSP cameras
 
     def kill_thread(self):
         print("kill thread")
+        self.stream = False
         # threading.Event().set()
-        self.cap.release()
+        # self.cap.release()
 
         # self.thread.raise_exception()
         # self.thread.join()
