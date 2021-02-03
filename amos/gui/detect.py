@@ -1,4 +1,5 @@
 import argparse
+import logging
 import time
 from pathlib import Path
 
@@ -30,7 +31,7 @@ class Detection:
         """Enables the detection process."""
         self.detection = True
 
-    def detect(self, app, weights='weights/Berlin.pt', source='data/images', image_size=640):
+    def detect(self, app, weights, source='data/images', image_size=736, debug=False):
         """ Detects the image or video of the given source by using the specified weights.
 
         Parameters
@@ -41,6 +42,8 @@ class Detection:
             Source of the detection. 0 for webcam.
         image_size: int
             Inference size (pixels).
+        debug: bool
+            Whether the debug mode is on.
         """
         print(f'Detecting using weights: {weights}')
         source = str(source)
@@ -159,13 +162,18 @@ class Detection:
                                 f.write(('%g ' * len(line)).rstrip() % line + '\n')
 
                         if save_img or view_img:  # Add bbox to image
-                            print('successfull')
-                            label = f'{names[int(cls)]} {conf:.2f}'
+                            logging.debug('Prediction: {}; Confidence {}'.format(f'{names[int(cls)]}', f'{conf:.2f}'))
+                            label = f'{names[int(cls)]} {conf:.2f}' if debug else f'{names[int(cls)]}'
                             plot_one_point(xyxy, im0, label=label, color=colors[int(cls)], point_thickness=None, r=10)
+                            if debug:
+                                plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
 
                 app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
                 app.Label_Bild.setPixmap(QPixmap(app.image))
                 time.sleep(1/60)
+
+                # Print time (inference + NMS)
+                logging.debug(f'{s}Done. ({t2 - t1:.3f}s)')
                 print(f'{s}Done. ({t2 - t1:.3f}s)')
 
         if save_txt or save_img:
