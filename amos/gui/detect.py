@@ -42,6 +42,7 @@ class Detection:
         image_size: int
             Inference size (pixels).
         """
+        print(f'Detecting using weights: {weights}')
         source = str(source)
         imgsz = image_size
         save_img = True

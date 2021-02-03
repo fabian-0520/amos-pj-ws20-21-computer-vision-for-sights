@@ -4,7 +4,7 @@ import requests
 import os
 import json
 
-os.environ["API_ENDPOINT_URL"] = "http://ec2-3-127-203-51.eu-central-1.compute.amazonaws.com:8002"
+os.environ["API_ENDPOINT_URL"] = "http://ec2-3-120-190-249.eu-central-1.compute.amazonaws.com:8002"
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
 
@@ -57,9 +57,9 @@ def get_dwh_model_version(city: str) -> int:
 
     """
     api_endpoint_url = os.environ["API_ENDPOINT_URL"]
-    print("{0}/api/cities/{1}/model/version".format(api_endpoint_url, city.upper()))
+    print("{0}/api/cities/{1}/model/version".format(api_endpoint_url, city))
     try:
-        r = requests.get("{0}/api/cities/{1}/model/version".format(api_endpoint_url, city.upper()))
+        r = requests.get("{0}/api/cities/{1}/model/version".format(api_endpoint_url, city))
         return int(r.text)
     except requests.exceptions.RequestException as e:
         print(e)
