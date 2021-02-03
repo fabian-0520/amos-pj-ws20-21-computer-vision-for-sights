@@ -1,11 +1,7 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import (
-    wipe_prediction_input_images,
-    Detection,
-    # get_current_prediction_output_path
-)
-
+from helper import wipe_prediction_input_images, get_current_prediction_output_path
 from label import ImageLabel
+from detect import Detection
 from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
@@ -22,8 +18,7 @@ from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 
-from api_communication.api_handler import get_downloaded_model, get_dwh_model_version
-
+from api_communication.api_handler import get_downloaded_model, get_dwh_model_version, get_supported_cities
 import shutil
 import sys
 import os
@@ -32,6 +27,11 @@ from threading import Thread
 
 OUTPUT_PREDICTION_DIR = "./runs/detect/"
 INPUT_PREDICTION_DIR = "./data/images"
+START = "Start Detection"
+STOP = "Stop Detection"
+ENABLE = "Enable File Drop"
+DISABLE = "Disable File Drop"
+WINDOW = "MainWindow"
 
 
 class UiMainWindow(QWidget):
@@ -49,6 +49,8 @@ class UiMainWindow(QWidget):
 	    Height of buttons
 	dist : int
 	    Distance to the edge of Widgets(Window/Button/Label...)
+	model_selected : bool
+		Shows whether a model is selected or not
 	"""
 
 	window_width = 800
@@ -56,7 +58,6 @@ class UiMainWindow(QWidget):
 	button_width = 180
 	button_height = 50
 	dist = 30
-	coordinates = []
 	model_selected = False
 
 	def __init__(self, parent) -> None:
@@ -73,8 +74,6 @@ class UiMainWindow(QWidget):
 		self.Box_Stadt = QComboBox(self.centralwidget)
 		self.Box_Stadt.setGeometry(QRect(self.dist, self.dist, self.button_width, self.button_height))
 		self.Box_Stadt.setObjectName("Box_Stadt")
-		self.Box_Stadt.addItem("")
-		self.Box_Stadt.addItem("")
 		self.Box_Stadt.activated.connect(self.show_popup)
 
 		self.Button_Detection = QPushButton(self.centralwidget)
@@ -158,7 +157,6 @@ class UiMainWindow(QWidget):
 		self.retranslateUi(main_window)
 		QMetaObject.connectSlotsByName(main_window)
 
-
 	def retranslateUi(self, main_window: QMainWindow) -> None:
 		"""Set the text initially for all items.
 
@@ -167,42 +165,42 @@ class UiMainWindow(QWidget):
 		main_window: QMainWindow
 		    The instance of the prepared application window
 		"""
-		window = "main_window"
 		_translate = QCoreApplication.translate
-		main_window.setWindowTitle(_translate(window, "SightScan"))
-		self.Box_Stadt.setItemText(0, _translate(window, "Choose City"))
-		self.Box_Stadt.setItemText(1, _translate(window, "Berlin"))
-		self.Box_Camera_selector.setItemText(0, _translate(window, "Choose Webcam"))
-		self.Button_Detection.setText(_translate(window, "Start Detection"))
-		self.Button_Bild.setText(_translate(window, "Enable File Drop"))
+		main_window.setWindowTitle(_translate(WINDOW, "SightScan"))
+		self.Box_Stadt.addItems(['Choose City'] + get_supported_cities())
+		self.Box_Camera_selector.setItemText(0, _translate(WINDOW, "Choose Webcam"))
+		self.Button_Detection.setText(_translate(WINDOW, START))
+		self.Button_Bild.setText(_translate(WINDOW, ENABLE))
 
 	def show_popup(self) -> None:
 		"""Shows a pop-up for confirming the download of the selected city."""
-		if self.Box_Stadt.currentText() != "Choose City":
-			downloaded_version = -1
-			#if not os.path.exists("weights/versions.txt"):
-			#    with open('weights/versions.txt', 'w'):
-			#        pass
-			#with open("weights/versions.txt", "r") as file:
-			#    for line in file:
-			#        elements = line.split("=")
-			#        if elements[0].upper() == self.Box_Stadt.currentText().upper():
-			#            downloaded_version = int(elements[1])
-			#            break
+		city_pretty_print = self.Box_Stadt.currentText()
+		city = self.Box_Stadt.currentText().replace(' ', '_').upper()
 
-			#latest_version = get_dwh_model_version(self.Box_Stadt.currentText())
-			# print(latest_version)
-			# print(downloaded_version)
+		if city != "CHOOSE_CITY":
+			downloaded_version = -1  # initialization
+			if not os.path.exists("weights/versions.txt"):
+			    with open('weights/versions.txt', 'w'):
+			        pass
+			print(city)
+			with open("weights/versions.txt", "r") as file:
+			    for line in file:
+			        elements = line.split("=")
+			        if elements[0].upper() == city.upper():
+			            downloaded_version = int(elements[1])
+			            break
+
+			latest_version = get_dwh_model_version(city)
 
 			if downloaded_version == -1:
 				msg = QMessageBox()
 				msg.setWindowTitle("Download City")
 				msg.setWindowIcon(QIcon("icon_logo.png"))
-				msg.setText("Do you want to download " + self.Box_Stadt.currentText() + "?")
+				msg.setText("Do you want to download " + city_pretty_print + "?")
 				msg.setIcon(QMessageBox.Question)
 				msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
 				msg.setDefaultButton(QMessageBox.Ok)
-				msg.setInformativeText("When downloaded sights of " + self.Box_Stadt.currentText() + " can be detected.")
+				msg.setInformativeText("When downloaded, sights of " + city_pretty_print + " can be detected.")
 				msg.buttonClicked.connect(self.handover_city)
 
 				msg.exec_()
@@ -211,7 +209,7 @@ class UiMainWindow(QWidget):
 				update_msg = QMessageBox()
 				update_msg.setWindowTitle("Update available")
 				update_msg.setWindowIcon(QIcon("icon_logo.png"))
-				update_msg.setText("Do you want to download an update for " + self.Box_Stadt.currentText() + "?")
+				update_msg.setText("Do you want to download an update for " + city + "?")
 				update_msg.setIcon(QMessageBox.Question)
 				update_msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
 				update_msg.setDefaultButton(QMessageBox.Ok)
@@ -226,7 +224,7 @@ class UiMainWindow(QWidget):
 				newest_vers_msg = QMessageBox()
 				newest_vers_msg.setWindowTitle("Ready for Detection!")
 				newest_vers_msg.setWindowIcon(QIcon("icon_logo.png"))
-				newest_vers_msg.setText("You can start detecting sights in " + self.Box_Stadt.currentText() + "!")
+				newest_vers_msg.setText("You can start detecting sights in " + city_pretty_print + "!")
 				newest_vers_msg.setStandardButtons(QMessageBox.Ok)
 				newest_vers_msg.setDefaultButton(QMessageBox.Ok)
 
@@ -245,64 +243,50 @@ class UiMainWindow(QWidget):
 		"""
 
 		if button.text() == "OK":
-			city = self.Box_Stadt.currentText()
+			city = self.Box_Stadt.currentText().replace(' ', '_')
 			self.model_selected = True
-			# print(city)
-			#model = get_downloaded_model(city)
-			#if model is not None:
-			#    with open("weights/" + city + ".pt", "wb+") as file:
-			#        file.write(model)
+			model = get_downloaded_model(city)
+			if model is not None:
+			    with open("weights/" + city + ".pt", "wb+") as file:
+			        file.write(model)
 		elif button.text() == "Cancel":
 			self.Box_Stadt.setCurrentIndex(0)
 
 	def detect_sights(self) -> None:
 		"""Starts detection for the dropped image or shown webcam video
 		with the downloaded model and displays the results in the label."""
-		disable = "Disable File Drop"
-		start = "Start Detection"
-		stop = "Stop Detection"
-		window = "MainWindow"
 		city = self.Box_Stadt.currentText()
-		#start drag&drop image detection
-		if self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == disable and \
+
+		# start drag&drop image detection
+		if self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == DISABLE and \
 				self.Label_Bild.image != "logo.png":
-			#if no model selected
+			# if no model selected
 			if self.model_selected is False:
 				self.show_missing_model_popup()
-			#if model selected
+			# if model selected
 			else:
-				# retrieving image name
 				print(f"Starting detection of {self.Label_Bild.image}")
-				# image_index = self.Label_Bild.image.rfind("/")
-				# image_name = self.Label_Bild.image[image_index:]
-				# stage images for prediction
 				wipe_prediction_input_images(INPUT_PREDICTION_DIR)
 				shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
-
-				# start YOLO prediction
 				self.detector.detect(self, weights='weights/' + city + '.pt')
 		# stop video detection
-		elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == stop:
-			self.Button_Detection.setText(QCoreApplication.translate(window, start))
-			self.stop_detection()
+		elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == STOP:
+			self.stop_video_detection()
 			time.sleep(2)
-			self.Label_Bild.image = "logo.png"
-			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
-			self.camera.start()
-		#if webcam activated
+			self.reactivate_cam()
+		# if webcam activated
 		elif self.stacked_widget.currentIndex() == 1:
-			if self.Button_Detection.text() == start:
-				self.Button_Detection.setText(QCoreApplication.translate(window, stop))
+			if self.Button_Detection.text() == START:
+				self.Button_Detection.setText(QCoreApplication.translate(WINDOW, STOP))
 				if self.model_selected is False:
 					self.show_missing_model_popup()
-				#start webcam detection
+				# start webcam detection
 				else:
 					print("Video Detection Started")
-					self.camera.stop()
-					self.camera_viewfinder.hide()
-					self.stacked_widget.setCurrentIndex(0)
-					self.Label_Bild.show()
-					self.detection_thread = Thread(target=self.detector.detect, args=(self,), kwargs={'weights': 'weights/' + city + '.pt', 'source': '0', 'image_size': 160})
+					self.prep_video_detection()
+					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
+												   kwargs={'weights': 'weights/' + city + '.pt', 'source': '0',
+														   'image_size': 160})
 					self.detection_thread.start()
 		else:
 			print("Drop a File or select a Webcam!")
@@ -321,10 +305,7 @@ class UiMainWindow(QWidget):
 
 	def dragdrop(self) -> None:
 		"""Enables / disables Drag&Drop of images."""
-		disable = "Disable File Drop"
-		enable = "Enable File Drop"
-		window = "MainWindow"
-		if self.Button_Bild.text() == enable:
+		if self.Button_Bild.text() == ENABLE:
 			self.Label_Bild.setAcceptDrops(True)
 			self.Label_Bild.setText("\n\n Drop Image here \n\n")
 			self.Label_Bild.setStyleSheet(
@@ -334,14 +315,14 @@ class UiMainWindow(QWidget):
 				}
 			"""
 			)
-			self.Button_Bild.setText(QCoreApplication.translate(window, disable))
-		elif self.Button_Bild.text() == disable:
+			self.Button_Bild.setText(QCoreApplication.translate(WINDOW, DISABLE))
+		elif self.Button_Bild.text() == DISABLE:
 			self.Label_Bild.setAcceptDrops(False)
 			self.Label_Bild.setText("")
 			self.Label_Bild.setStyleSheet("")
 			self.Label_Bild.image = "logo.png"
 			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
-			self.Button_Bild.setText(QCoreApplication.translate(window, enable))
+			self.Button_Bild.setText(QCoreApplication.translate(WINDOW, ENABLE))
 
 	def select_camera(self, i):
 		"""Starts the selected camera. If "Choose webcam" is selected, it stops the camera.
@@ -351,13 +332,10 @@ class UiMainWindow(QWidget):
 		i:
 		    Index of the chosen camera.
 		"""
-		enable = "Enable File Drop"
-		start = "Start Detection"
-		window = "MainWindow"
 		if i == 0:
 			self.camera.stop()
 			self.detector.disable_detection()
-			self.Button_Detection.setText(QCoreApplication.translate(window, start))
+			self.Button_Detection.setText(QCoreApplication.translate(WINDOW, START))
 			self.stacked_widget.setCurrentIndex(0)
 			self.camera_viewfinder.hide()
 			self.Label_Bild.show()
@@ -372,13 +350,25 @@ class UiMainWindow(QWidget):
 			self.camera.setViewfinder(self.camera_viewfinder)
 			self.camera.error.connect(lambda: self.alert(self.camera.errorString()))
 			self.camera.start()
-			self.Button_Bild.setText(QCoreApplication.translate(window, enable))
+			self.Button_Bild.setText(QCoreApplication.translate(WINDOW, ENABLE))
 
-	def stop_detection(self) -> None:
+	def prep_video_detection(self) -> None:
+		self.camera.stop()
+		self.camera_viewfinder.hide()
+		self.stacked_widget.setCurrentIndex(0)
+		self.Label_Bild.show()
+
+	def stop_video_detection(self) -> None:
+		self.Button_Detection.setText(QCoreApplication.translate(WINDOW, START))
 		self.detector.disable_detection()
 		self.stacked_widget.setCurrentIndex(1)
 		self.Label_Bild.hide()
 		self.camera_viewfinder.show()
+
+	def reactivate_cam(self) -> None:
+		self.Label_Bild.image = "logo.png"
+		self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
+		self.camera.start()
 
 
 if __name__ == "__main__":
