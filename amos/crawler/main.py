@@ -48,18 +48,18 @@ class Sites:
 
 class AutoCrawler:
     def __init__(
-        self,
-        skip_already_exist=True,
-        n_threads=4,
-        do_google=True,
-        download_path="download",
-        full_resolution=False,
-        face=False,
-        no_gui=False,
-        limit=0,
-        no_driver=False,
-        keyword_list="['Brandenburger Tor', 'Alexanderplatz']",
-        region="Berlin",
+            self,
+            skip_already_exist=True,
+            n_threads=4,
+            do_google=True,
+            download_path="download",
+            full_resolution=False,
+            face=False,
+            no_gui=False,
+            limit=0,
+            no_driver=False,
+            keyword_list="['Brandenburger Tor', 'Alexanderplatz']",
+            region="Berlin",
     ):
         """
         :param skip_already_exist: Skips keyword already downloaded before. This is needed when re-downloading.
@@ -138,7 +138,7 @@ class AutoCrawler:
 
     @staticmethod
     def save_object_to_file(
-        link, site_name, object, file_path, region, is_base64=False
+            link, site_name, object, file_path, region, is_base64=False
     ):
         try:
             with open("{}".format(file_path), "wb") as file:
@@ -164,7 +164,7 @@ class AutoCrawler:
         return data
 
     def download_images(self, keyword, links, site_name, max_count=0):
-        self.make_dir("{}/{}".format(self.download_path, keyword.replace('"', "")))
+        self.make_dir("{}/{}".format(self.download_path, keyword.replace('"', "").replace(" ", "_")))
         total = len(links)
         success_count = 0
 
@@ -370,8 +370,8 @@ if __name__ == "__main__":
         type=str,
         default="auto",
         help="No GUI mode. Acceleration for full_resolution mode. "
-        "But unstable on thumbnail mode. "
-        'Default: "auto" - false if full=false, true if full=true',
+             "But unstable on thumbnail mode. "
+             'Default: "auto" - false if full=false, true if full=true',
     )
     parser.add_argument(
         "--limit",
@@ -449,3 +449,8 @@ if __name__ == "__main__":
         region=_region_escaped,
     )
     crawler.do_crawling()
+    # clear and remove download directory after crawling images
+    try:
+        shutil.rmtree("./download")
+    except OSError as e:
+        print("Download directory could not be deleted")
