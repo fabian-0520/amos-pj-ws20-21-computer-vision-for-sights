@@ -162,7 +162,10 @@ class UiMainWindow(QWidget):
         self.checkBox.stateChanged.connect(self.debug_click)
 
         # Setup logging
+
         fn = "logs/" + datetime.now().strftime('%d_%m_%Y__%H_%M_%S') + 'log.log'
+        new_file = open(fn, "w+")
+        new_file.close()
         f = '%(asctime)s :: %(levelname)s :: %(filename)s :: %(funcName)s :: %(lineno)d :: %(message)s'
         self.textDebug = QTextEditLogger(self.centralwidget)
         self.textDebug.setFormatter(logging.Formatter(f))
