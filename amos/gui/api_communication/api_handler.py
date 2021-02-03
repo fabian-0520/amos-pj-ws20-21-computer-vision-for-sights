@@ -66,6 +66,28 @@ def get_dwh_model_version(city: str) -> int:
         return None
 
 
+def send_city_request(city: str) -> None:
+    """Sends city request to trigger training for new city.
+
+    Parameters
+    ----------
+    city: str
+        Name of the city.
+
+    Returns
+    -------
+    None
+
+    """
+    api_endpoint_url = os.environ["API_ENDPOINT_URL"]
+    try:
+        requests.post("{0}/api/cities/{1}/add".format(api_endpoint_url, city.upper()))
+        return None
+    except requests.exceptions.RequestException as e:
+        print(e)
+        return None
+
+
 def get_supported_cities() -> List[str]:
     """Retrieves the supported city names.
 

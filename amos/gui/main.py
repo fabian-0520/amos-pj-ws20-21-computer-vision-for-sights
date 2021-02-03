@@ -1,5 +1,5 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import wipe_prediction_input_images, get_current_prediction_output_path
+from helper import wipe_prediction_input_images, update_dropdown
 from label import ImageLabel
 from detect import Detection
 from PyQt5.QtWidgets import (
@@ -12,13 +12,15 @@ from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QStackedWidget,
+    QLineEdit
 )
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
+from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject, Qt
 
-from api_communication.api_handler import get_downloaded_model, get_dwh_model_version, get_supported_cities
+from api_communication.api_handler import get_downloaded_model, get_dwh_model_version, \
+	get_supported_cities, send_city_request
 import shutil
 import sys
 import os
@@ -37,28 +39,29 @@ WINDOW = "MainWindow"
 class UiMainWindow(QWidget):
 	"""Main UI window of the application.
 
-	Attributes:
-	----------
-	window_width : int
-	    Width of the window
-	window_height : int
-	    Height of the window
-	button_width : int
-	    Width of buttons
-	button_height : int
-	    Height of buttons
-	dist : int
-	    Distance to the edge of Widgets(Window/Button/Label...)
-	model_selected : bool
-		Shows whether a model is selected or not
-	"""
-
-	window_width = 800
+    Attributes:
+    ----------
+    window_width: int
+        Width of the window
+    window_height: int
+        Height of the window
+    button_width: int
+        Width of buttons
+    button_height: int
+        Height of buttons
+    dist: int
+        Distance to the edge of Widgets(Window/Button/Label...)
+    model_selected: bool
+        Shows whether a model is selected or not
+    """
 	window_height = 650
+	window_width = 800
 	button_width = 180
 	button_height = 50
 	dist = 30
 	model_selected = False
+	textbox_height = 25
+	small_button_width = 100
 
 	def __init__(self, parent) -> None:
 		"""Creates new configured instance of the UI's main window."""
@@ -68,13 +71,31 @@ class UiMainWindow(QWidget):
 		main_window.resize(self.window_width, self.window_height)
 		self.centralwidget = QWidget(main_window)
 		self.centralwidget.setObjectName("centralwidget")
-
 		self.detector = Detection()
 
 		self.Box_Stadt = QComboBox(self.centralwidget)
 		self.Box_Stadt.setGeometry(QRect(self.dist, self.dist, self.button_width, self.button_height))
 		self.Box_Stadt.setObjectName("Box_Stadt")
-		self.Box_Stadt.activated.connect(self.show_popup)
+		self.Box_Stadt.activated.connect(self.on_dropdown_selected)
+		# dynamic city updates
+		supported_cities_updater = Thread(target=update_dropdown, daemon=True, args=(self.Box_Stadt,))
+		supported_cities_updater.start()
+
+		self.Text_City = QLineEdit(self.centralwidget)
+		self.Text_City.setGeometry(
+			QRect(self.dist + self.dist + self.button_width, self.dist, self.button_width, self.textbox_height))
+		self.Text_City.setObjectName("Text_City")
+		self.Text_City.setToolTip(
+			'Enter a city you wish to detect sights in that you cannot find in the dropdown on the left after updating.')
+
+		self.Button_City = QPushButton(self.centralwidget)
+		self.Button_City.setGeometry(
+			QRect(
+				self.dist + self.dist + self.button_width + self.button_width,
+				self.dist, self.small_button_width, self.textbox_height)
+		)
+		self.Button_City.setObjectName("Button_City")
+		self.Button_City.clicked.connect(self.request_city)
 
 		self.Button_Detection = QPushButton(self.centralwidget)
 		self.Button_Detection.setGeometry(
@@ -171,24 +192,27 @@ class UiMainWindow(QWidget):
 		self.Box_Camera_selector.setItemText(0, _translate(WINDOW, "Choose Webcam"))
 		self.Button_Detection.setText(_translate(WINDOW, START))
 		self.Button_Bild.setText(_translate(WINDOW, ENABLE))
+		self.Button_City.setText(_translate(WINDOW, "Add City"))
 
-	def show_popup(self) -> None:
+	def on_dropdown_selected(self) -> None:
 		"""Shows a pop-up for confirming the download of the selected city."""
 		city_pretty_print = self.Box_Stadt.currentText()
 		city = self.Box_Stadt.currentText().replace(' ', '_').upper()
 
 		if city != "CHOOSE_CITY":
 			downloaded_version = -1  # initialization
+
 			if not os.path.exists("weights/versions.txt"):
-			    with open('weights/versions.txt', 'w'):  # creating a version file
-			        pass
+				with open('weights/versions.txt', 'w'):  # creating a version file
+					pass
+
 			print(city)
 			with open("weights/versions.txt", "r") as file:
-			    for line in file:
-			        elements = line.split("=")
-			        if elements[0].upper() == city:
-			            downloaded_version = int(elements[1])
-			            break
+				for line in file:
+					elements = line.split("=")
+					if elements[0].upper() == city:
+						downloaded_version = int(elements[1])
+						break
 
 			latest_version = get_dwh_model_version(city)
 
@@ -240,7 +264,7 @@ class UiMainWindow(QWidget):
 		Parameters
 		----------
 		button:
-		    Pushed button inside the popup
+			Pushed button inside the popup
 		"""
 
 		if button.text() == "OK":
@@ -248,8 +272,8 @@ class UiMainWindow(QWidget):
 			self.model_selected = True
 			model = get_downloaded_model(city)
 			if model is not None:
-			    with open("weights/" + city + ".pt", "wb+") as file:
-			        file.write(model)
+				with open("weights/" + city + ".pt", "wb+") as file:
+					file.write(model)
 		elif button.text() == "Cancel":
 			self.Box_Stadt.setCurrentIndex(0)
 
@@ -304,6 +328,19 @@ class UiMainWindow(QWidget):
 
 		emsg.exec_()
 
+	def request_city(self) -> None:
+		# Send entered city to dwh and show confirmation popup
+		city_request = self.Text_City.text().upper()
+		send_city_request(city_request)
+
+		cmsg = QMessageBox()
+		cmsg.setWindowTitle("Request confirmed")
+		cmsg.setWindowIcon(QIcon("icon_logo.png"))
+		cmsg.setText("Your request to add support for " + city_request + " has been sent to our backend.")
+		cmsg.setStandardButtons(QMessageBox.Ok)
+		cmsg.setDefaultButton(QMessageBox.Ok)
+		cmsg.exec_()
+
 	def dragdrop(self) -> None:
 		"""Enables / disables Drag&Drop of images."""
 		if self.Button_Bild.text() == ENABLE:
@@ -331,7 +368,7 @@ class UiMainWindow(QWidget):
 		Parameters
 		----------
 		i:
-		    Index of the chosen camera.
+			Index of the chosen camera.
 		"""
 		if i == 0:
 			self.camera.stop()
