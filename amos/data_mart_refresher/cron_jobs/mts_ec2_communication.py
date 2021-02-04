@@ -33,30 +33,6 @@ def is_mts_ec2_instance_running() -> bool:
            response['InstanceStatuses'][0]['InstanceState']['Name'] == 'running'
 
 
-def stop_mts_ec2_instance_after_training(city: str) -> None:
-    """Stops the MTS EC2 instance after successful training.
-
-    Parameters
-    ----------
-    city: str
-        Name of the city the MTS currently trains for.
-    """
-    training_completed_query = f"""
-        SELECT count(*)
-        FROM data_mart_layer.current_trained_models
-        WHERE upper(city_name) = '{city.upper()}'
-    """
-    while exec_sql(training_completed_query, return_result=True) == 0:
-        sleep(60)
-
-    ec2_client.stop_instances(
-        InstanceIds=[os.environ['MTS_EC2_INSTANCE_ID']],
-        Hibernate=False,
-        DryRun=False,
-        Force=False
-    )
-
-
 def trigger_mts_training(city: str) -> None:
     """Triggers the MTS for training based on the given city.
 
@@ -72,7 +48,7 @@ def trigger_mts_training(city: str) -> None:
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh_client.connect(hostname=public_url,
                        username='ubuntu',
-                       pkey=paramiko.RSAKey.from_private_key_file('../ec2key.pem'))
+                       pkey=paramiko.RSAKey.from_private_key_file('ec2key.pem'))
     ssh_client.exec_command(_get_start_command(city))
     ssh_client.close()
 

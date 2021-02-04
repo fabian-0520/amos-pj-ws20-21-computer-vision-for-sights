@@ -10,7 +10,6 @@ import time
 from itertools import repeat
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
-import threading
 from threading import Thread
 
 import cv2
@@ -259,6 +258,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def __init__(self, sources='streams.txt', img_size=640):
         self.mode = 'images'
         self.img_size = img_size
+        self.stream = True
 
         if os.path.isfile(sources):
             with open(sources, 'r') as f:
@@ -272,13 +272,13 @@ class LoadStreams:  # multiple IP or RTSP cameras
         for i, s in enumerate(sources):
             # Start the thread to read frames from the video stream
             print('%g/%g: %s... ' % (i + 1, n, s), end='')
-            cap = cv2.VideoCapture(eval(s) if s.isnumeric() else s)
-            assert cap.isOpened(), 'Failed to open %s' % s
-            w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = cap.get(cv2.CAP_PROP_FPS) % 100
-            _, self.imgs[i] = cap.read()  # guarantee first frame
-            self.thread = Thread(target=self.update, args=([i, cap]), daemon=True)
+            self.cap = cv2.VideoCapture(eval(s) if s.isnumeric() else s)
+            assert self.cap.isOpened(), 'Failed to open %s' % s
+            w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = self.cap.get(cv2.CAP_PROP_FPS) % 100
+            _, self.imgs[i] = self.cap.read()  # guarantee first frame
+            self.thread = Thread(target=self.update, args=([i, self.cap]), daemon=True)
             print(' success (%gx%g at %.2f FPS).' % (w, h, fps))
             self.thread.start()
         print('')  # newline
@@ -292,14 +292,16 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def update(self, index, cap):
         # Read next stream frame in a daemon thread
         n = 0
-        while cap.isOpened():
+        while self.cap.isOpened() and self.stream is True:
             n += 1
             # _, self.imgs[index] = cap.read()
-            cap.grab()
+            self.cap.grab()
             if n == 4:  # read every 4th frame
-                _, self.imgs[index] = cap.retrieve()
+                _, self.imgs[index] = self.cap.retrieve()
                 n = 0
             time.sleep(0.01)  # wait time
+        self.cap.release()
+        self.stream = True
 
     def __iter__(self):
         self.count = -1
@@ -309,7 +311,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
         self.count += 1
         img0 = self.imgs.copy()
         if cv2.waitKey(1) == ord('q'):  # q to quit
-            cv2.destroyAllWindows()
+            self.cap.release()
             raise StopIteration
 
         # Letterbox
@@ -328,12 +330,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
         return 0  # 1E12 frames = 32 streams at 30 FPS for 30 years
 
     def kill_thread(self):
-        print("kill thread")
-        threading.Event().set()
-        self.thread.join()
-
-        # self.thread.raise_exception()
-        # self.thread.join()
+        self.stream = False
 
 def img2label_paths(img_paths):
     # Define label paths as a function of image paths

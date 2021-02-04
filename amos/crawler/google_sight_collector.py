@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def get_sights(region):
+def get_sights(region, max_sights):
     sight_list = []
     search_query = "sights " + str(region)
 
@@ -36,5 +36,4 @@ def get_sights_from_json(places_response: dict):
             sight_list.append(sight_name)
     else:
         print("Error: something went wrong with maps api")
-
-    return sight_list
+    return sight_list[:max_sights]

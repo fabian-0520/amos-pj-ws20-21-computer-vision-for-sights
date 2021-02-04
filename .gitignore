@@ -394,3 +394,6 @@ fabric.properties
 
 # MTS
 amos/mts/yolov5/runs
+
+# secret RSA keys
+**/*.pem

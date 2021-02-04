@@ -3,8 +3,8 @@ repos:
     rev: 3.8.4  # Use the ref you want to point at
     hooks:
       - id: flake8
-        args: ['--count', '--show-source', '--statistics', '--max-complexity=10', '--max-line-length=127', '--ignore=W503,W504,W293,W391,E127']
-        exclude: ^amos/(mts/|gui/(utils|models|detect.py|helper.py)|crawler/collect_links.py)
+        args: ['--count', '--show-source', '--statistics', '--max-complexity=10', '--max-line-length=127', '--ignore=W503,W504,W293,W391,E127,E101,W191,E126,E117,E128']
+        exclude: ^amos/(mts/|gui/(utils|models|detect.py)|crawler/collect_links.py)
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
