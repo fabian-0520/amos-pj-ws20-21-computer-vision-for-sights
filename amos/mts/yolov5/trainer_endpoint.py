@@ -204,7 +204,7 @@ def persist_training_data() -> None:
 
     if len(city) > 0:
         print(f"Starting image download for {city}")
-        images = load_images_for_city(city)
+        images = load_images_for_city(city)  # list of tuples with: image file + bounding box
         print(f"Fetched {len(images)} images")
         sight_names = save_images(images)
         generate_training_config_yaml(sight_names)
@@ -240,13 +240,13 @@ def preprocess_label(label: str, city: str) -> str:
 
 
 def replace_labels(labels: List[str]):
-    """
-    Replaces labels with their respective indexes
+    """Replaces labels with their respective indexes.
+
     Parameters
     ----------
-    labels: the list of label strings
-    -------
 
+    labels: list[str]
+        List of label strings.
     """
     _dir = '../training_data/labels'
     for file in os.listdir("../training_data/labels"):
@@ -329,6 +329,7 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
         if ext is None:
             print("Skipped image, couldn't read")
             continue
+
         try:
             image_file = open("../training_data/images/" + str(index) + "." + ext, "wb")
             image_file.write(pair[0])
@@ -336,6 +337,7 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
         except IOError as exception:
             print(exception)
             continue
+
         # create label file
         try:
             label_file = open("../training_data/labels/" + str(index) + ".txt", "w")
