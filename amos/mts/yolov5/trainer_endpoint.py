@@ -6,10 +6,14 @@ import re
 import shutil
 from io import BytesIO
 from itertools import combinations
+from math import ceil
 from typing import Optional, Tuple, List, Dict
 from fuzzywuzzy import fuzz
 from psycopg2 import connect
 from psycopg2._psycopg import Binary
+
+
+MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST = 100
 
 
 def config():
@@ -142,8 +146,8 @@ def generate_training_config_yaml(sights: List[str]) -> None:
     yaml.close()
 
 
-def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
-    """Loads all images with corresponding labels for a given city.
+def get_image_ids_to_load_for_city(city_name: str) -> Optional[List[int]]:
+    """Loads all ids of images with corresponding labels for a given city.
 
     Parameters
     ----------
@@ -152,9 +156,68 @@ def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
 
     Returns
     -------
-    The list of tuples with an image file and the corresponding label .txt file.
+    image_ids: list[int]
+        List of image ids to load.
     """
-    query = f"select image_file, image_labels from data_mart_layer.images_{city_name}"
+    query = f"select image_id from data_mart_layer.images_{city_name} where image_labels is not null"
+    return list(
+        map(
+            lambda result: result[0],
+            exec_dql_query(query, True)
+        )
+    )
+
+
+def get_raw_labels_for_city(city_name: str, image_ids: List[int]) -> List[str]:
+    """Returns a flattened list of all available raw labels for the given set of image ids.
+
+    Parameters
+    ----------
+    city_name: str
+        Name of the city to train for.
+    image_ids: int
+        Image ids.
+
+    Returns
+    -------
+    available_raw_labels: list[str]
+        Available raw labels.
+    """
+    final_labels_list = []
+    query = f"select image_labels from data_mart_layer.images_{city_name} where image_id in {tuple(image_ids)}"
+    result = list(
+        filter(
+            lambda res: res is not None,
+            map(
+                lambda _res: _res[0] if len(_res) > 0 else None,
+                exec_dql_query(query, True)
+            )
+        )
+    )
+    for bounding_box_encoding in result:
+        for parsed_box in parse_bounding_box_string(bounding_box_encoding):
+            final_labels_list.append(parsed_box[1])
+
+    return final_labels_list
+
+
+def load_images(city_name: str, image_ids: List[int]) -> List[Tuple[bytes, str]]:
+    """Loads all images including labels for the given image ids and city.
+
+    Parameters
+    ----------
+    city_name: str
+        The name of the city the request is performed for.
+    image_ids: list[int]
+        Ids of the images to download.
+
+    Returns
+    -------
+    images_to_download: list[tuple[bytes, str]]
+        List of tuples with the image and the corresponding labels.
+    """
+    query = f"select image_file, image_labels from data_mart_layer.images_{city_name} " \
+            f"where image_id in {tuple(image_ids)}"
     return exec_dql_query(query, True)
 
 
@@ -204,9 +267,9 @@ def persist_training_data() -> None:
 
     if len(city) > 0:
         print(f"Starting image download for {city}")
-        images = load_images_for_city(city)  # list of tuples with: image file + bounding box
-        print(f"Fetched {len(images)} images")
-        sight_names = save_images(images)
+        image_ids = get_image_ids_to_load_for_city(city)  # list of tuples with: image file + bounding box
+        print(f"About to fetch {len(image_ids)} images")
+        sight_names = save_images(city, image_ids)
         generate_training_config_yaml(sight_names)
     else:
         raise ValueError('No city passed!')
@@ -248,6 +311,7 @@ def replace_labels(labels: List[str]):
     labels: list[str]
         List of label strings.
     """
+    print("Replacing labels with corresponding indices.")
     _dir = '../training_data/labels'
     for file in os.listdir("../training_data/labels"):
         with open(_dir + "/" + file) as _file:
@@ -295,33 +359,36 @@ def retrieve_label_mappings(label_list: List[str], city: str) -> Dict[str, str]:
     return mapping_table
 
 
-def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
-    """Sorts the fetched images (according to their labels) into
-    correct directories and generates a final labels list.
+def persist_image_and_labels_batch(images: List[Tuple[bytes, str]], label_mapping: Dict[str, str],
+                                   final_sight_list: List[str]) -> int:
+    """Persists a given batch of actual image files and their associated labels.
 
     Parameters
     ----------
-    image_label_tuples: list[tuple[bytes, str]]
-        List in which each item corresponds to an image and its bounding box encoding.
+    images: list[tuple[bytes, str]]
+        List containing the images and labels.
+    label_mapping: dict[str, str]
+        Label mapping table to eliminate poor labels.
+    final_sight_list: list[str]
+        Final list of sights needed for later yaml file creation.
 
     Returns
     -------
-    sight_list: list[str]
-        Final label list.
+    success_count: int
+        How many images were persisted successfully out of the given batch.
     """
-    prepare_directories_for_training()
-    sight_list, success_count = [], 0
+    success_count = 0
 
-    for pair in image_label_tuples:
+    for pair in images:
         if pair[0] is None or pair[1] is None:
             continue
         label_data = parse_bounding_box_string(pair[1])
         file_string = ""
         for label in label_data:
-            sight_name = label[1]
+            sight_name = label_mapping[label[1]]
             file_string += label[0]
-            if sight_name not in sight_list:
-                sight_list.append(sight_name)
+            if sight_name not in final_sight_list:
+                final_sight_list.append(sight_name)
         # create image file
         index = len(glob.glob("../training_data/images/*")) + 1
         with BytesIO(pair[0]) as _file:
@@ -347,13 +414,43 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
             print(exception)
             continue
         success_count += 1
-    print("replacing labels...")
-    replace_labels(sight_list)
-    print(f"The final sight list: {sight_list}")
-    print(
-        f"Downloaded {len(image_label_tuples)}, {success_count} were successfully saved"
-    )
-    return sight_list
+
+    return success_count
+
+
+def save_images(city: str, image_ids_to_load: List[int]) -> List[str]:
+    """Fetches the images (according to their labels) into
+    correct directories and generates a final labels list.
+
+    Parameters
+    ----------
+    city: str
+        City to perform the training for.
+    image_ids_to_load: list[int]
+        List in which each item corresponds to an image and its bounding box encoding.
+
+    Returns
+    -------
+    sight_list: list[str]
+        Final label list.
+    """
+    prepare_directories_for_training()
+    n_download_iterations = ceil(len(image_ids_to_load)/MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST)
+    label_mappings = {}  # TODO
+    success_count, final_sight_list = 0, []
+
+    for current_download in range(n_download_iterations):
+        start_idx = current_download * MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST
+        end_idx = start_idx + MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST
+        images = load_images(city, image_ids_to_load[start_idx:end_idx])
+        persist_image_and_labels_batch(images, label_mappings, final_sight_list)
+
+    replace_labels(final_sight_list)
+    print(f"Final sight list: {final_sight_list}")
+    print(f"Downloaded {len(image_ids_to_load)} labelled images of which {success_count} were successfully saved "
+          f"({round(success_count/len(image_ids_to_load), ndigits=3)*100:.2f}%).")
+
+    return final_sight_list
 
 
 def upload_trained_model() -> None:
