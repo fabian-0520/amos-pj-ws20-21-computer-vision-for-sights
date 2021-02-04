@@ -1,14 +1,15 @@
+"""This module contains the trainer endpoint which is the main orchestrator for the MTS model training process."""
+import glob
+import imghdr
+import os
+import re
+import shutil
 from io import BytesIO
 from itertools import combinations
 from typing import Optional, Tuple, List, Dict
 from fuzzywuzzy import fuzz
 from psycopg2 import connect
 from psycopg2._psycopg import Binary
-import glob
-import imghdr
-import os
-import re
-import shutil
 
 
 def config():
@@ -24,17 +25,17 @@ def config():
     ReferenceError
         If a required environment variable has not been found.
     """
-    db, params = {}, ["host", "port", "database", "user", "password"]
+    database_params, params = {}, ["host", "port", "database", "user", "password"]
 
     for param in params:
         env_variable_name = "PG{0}".format(param.upper())
         env_variable = os.getenv(env_variable_name)
         if env_variable is not None:
-            db[param] = env_variable
+            database_params[param] = env_variable
         else:
             raise ReferenceError(f"Environment Variable {env_variable_name} not found")
 
-    return db
+    return database_params
 
 
 def cleanup():
@@ -47,22 +48,83 @@ def cleanup():
     """
     try:
         shutil.rmtree("../training_data")
-    except OSError as e:
-        print("Error deleting training data: %s" % e.strerror)
+    except OSError as exception:
+        print("Error deleting training data: %s" % exception.strerror)
 
     try:
         shutil.rmtree("./runs")
-    except OSError as e:
-        print("Error deleting runs: %s" % e.strerror)
+    except OSError as exception:
+        print("Error deleting runs: %s" % exception.strerror)
 
     try:
         os.remove("tmp.pt")
-    except OSError as e:
-        print("Error deleting tmp.pt: %s" % e.strerror)
+    except OSError as exception:
+        print("Error deleting tmp.pt: %s" % exception.strerror)
+
+
+def exec_dml_query(dml_query: str, filling_parameters: Optional[Tuple]) -> None:
+    """Inserts a trained weights file into the PostgreSQL database corresponding to the source hash.
+
+    Parameters
+    ----------
+    dml_query: str
+        SQL DML string.
+    filling_parameters: tuple[object] or None
+        Object to inject into the empty string, None if the dml query is already filled.
+    """
+    with connect(**config()) as connection:
+        connection.autocommit = True
+        with connection.cursor() as cursor:
+            try:
+                if filling_parameters is None:
+                    cursor.execute(dml_query)
+                else:
+                    cursor.execute(dml_query, filling_parameters)
+                connection.commit()
+            except Exception as exc:
+                print("Error executing SQL: %s" % exc)
+            finally:
+                cursor.close()
+
+
+def exec_dql_query(postgres_sql_string: str, return_result=False) -> Optional[object]:
+    """Executes a given PostgreSQL query on the data warehouse and potentially returns the query result.
+
+    Parameters
+    ----------
+    postgres_sql_string: str
+        PostgreSQL query to evaluate in the external DHW.
+    return_result: bool, default=False
+        Whether to return the query result.
+
+    Returns
+    -------
+    result: str or None
+        Query result.
+    """
+    result = None
+    with connect(**config()) as connection:
+        connection.autocommit = True
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute(postgres_sql_string)
+                connection.commit()
+                cursor_result = cursor.fetchall()
+                result = (
+                    cursor_result
+                    if (return_result and cursor_result is not None)
+                    else return_result
+                )
+            except Exception as exc:
+                print("Error executing SQL: %s" % exc)
+            finally:
+                cursor.close()
+    return result
 
 
 def generate_training_config_yaml(sights: List[str]) -> None:
-    """Generates a .yaml configuration file which is used to generate classes and other information for model training.
+    """Generates a .yaml configuration file which is used to generate classes and
+    other information for model training.
 
     Parameters
     ----------
@@ -110,24 +172,23 @@ def parse_bounding_box_string(labels_string: str) -> List[Tuple[str, str]]:
     label_list: list[tuple[str, str]]
         List containing tuples of bounding box encoding and their label.
     """
-    decimal_places = 6
-    labels = re.findall("\\((.*?)\\)", labels_string)
-    label_list = []
+    label_list, labels = [], re.findall("\\((.*?)\\)", labels_string)
     for label in labels:
-        elements = label.split(",")
-        _label = elements[-1].title().replace(" ", "").replace("\\", "").replace('"', "")
+        box_encoding_elements = label.split(",")
+        _label = box_encoding_elements[-1].title().replace(" ", "").replace("\\", "").replace('"', "")
         re.sub(r"[^\x00-\x7F]+", "", _label)  # replace non-ascii characters inside label
 
         # parse coordinates
-        ul_x, lr_x = float(elements[0]), float(elements[2])
-        ul_y, lr_y = 1 - float(elements[1]), 1 - float(elements[3])  # Yolov5's y coordinate system is flipped!
-        x_width = round(abs(lr_x - ul_x), ndigits=decimal_places)  # abs for higher fault tolerance
-        y_height = round(abs(ul_y - lr_y), ndigits=decimal_places)  # rounding speeds up model training
-        x_center = round(ul_x + x_width/2, ndigits=decimal_places)
-        y_center = round(ul_y + y_height/2, ndigits=decimal_places)
+        ul_x, lr_x = float(box_encoding_elements[0]), float(box_encoding_elements[2])
+        # Yolov5's y coordinate system is flipped!
+        ul_y, lr_y = 1 - float(box_encoding_elements[1]), 1 - float(box_encoding_elements[3])
+        x_width = round(abs(lr_x - ul_x), ndigits=6)  # abs for higher fault tolerance
+        y_height = round(abs(ul_y - lr_y), ndigits=6)  # rounding speeds up model training
+        x_center = round(ul_x + x_width/2, ndigits=6)
+        y_center = round(ul_y + y_height/2, ndigits=6)
 
-        label_string = f"{_label} {x_center} {y_center} {x_width} {y_height}\n"
-        label_list.append((label_string, _label))
+        # persist the results
+        label_list.append((f"{_label} {x_center} {y_center} {x_width} {y_height}\n", _label))
     return label_list
 
 
@@ -189,14 +250,14 @@ def replace_labels(labels: List[str]):
     """
     _dir = '../training_data/labels'
     for file in os.listdir("../training_data/labels"):
-        with open(_dir + "/" + file) as f:
+        with open(_dir + "/" + file) as _file:
             text = ""
-            for line in f.readlines():
+            for line in _file.readlines():
                 sections = line.split(" ")
                 text += str(labels.index(sections[0])) + " " + " ".join(sections[1:])
 
-        with open(_dir + "/" + file, "w") as f:
-            f.write(text)
+        with open(_dir + "/" + file, "w") as _file:
+            _file.write(text)
 
 
 def retrieve_label_mappings(label_list: List[str], city: str) -> Dict[str, str]:
@@ -226,7 +287,7 @@ def retrieve_label_mappings(label_list: List[str], city: str) -> Dict[str, str]:
             mapping_table[label_2] = label_1  # label_2: replaced by new mapping label_1
         elif label_2_processed in label_1_processed:
             mapping_table[label_1] = label_2  # label_1: replaced by new mapping label_2
-        elif fuzz.ratio(label_1_processed, label_2_processed) > 0.85 * 100:  # TODO replace function
+        elif fuzz.ratio(label_1_processed, label_2_processed) >= 0.9 * 100:
             label_mapping = (label_1, label_2) if len(label_1_processed) > len(label_2_processed) \
                 else (label_2, label_1)
             mapping_table[label_mapping[0]] = label_mapping[1]
@@ -263,8 +324,8 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
                 sight_list.append(sight_name)
         # create image file
         index = len(glob.glob("../training_data/images/*")) + 1
-        with BytesIO(pair[0]) as f:
-            ext = imghdr.what(f)
+        with BytesIO(pair[0]) as _file:
+            ext = imghdr.what(_file)
         if ext is None:
             print("Skipped image, couldn't read")
             continue
@@ -272,16 +333,16 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
             image_file = open("../training_data/images/" + str(index) + "." + ext, "wb")
             image_file.write(pair[0])
             image_file.close()
-        except IOError as e:
-            print(e)
+        except IOError as exception:
+            print(exception)
             continue
         # create label file
         try:
             label_file = open("../training_data/labels/" + str(index) + ".txt", "w")
             label_file.write(file_string)
             label_file.close()
-        except IOError as e:
-            print(e)
+        except IOError as exception:
+            print(exception)
             continue
         success_count += 1
     print("replacing labels...")
@@ -319,66 +380,6 @@ def upload_trained_model() -> None:
         exec_dml_query(dml_query, (city, Binary(data), image_count))
     else:
         raise ValueError('No city passed!')
-
-
-def exec_dml_query(dml_query: str, filling_parameters: Optional[Tuple]) -> None:
-    """Inserts a trained weights file into the PostgreSQL database corresponding to the source hash.
-
-    Parameters
-    ----------
-    dml_query: str
-        SQL DML string.
-    filling_parameters: tuple[object] or None
-        Object to inject into the empty string, None if the dml query is already filled.
-    """
-    with connect(**config()) as connection:
-        connection.autocommit = True
-        with connection.cursor() as cursor:
-            try:
-                if filling_parameters is None:
-                    cursor.execute(dml_query)
-                else:
-                    cursor.execute(dml_query, filling_parameters)
-                connection.commit()
-            except Exception as exc:
-                print("Error executing SQL: %s" % exc)
-            finally:
-                cursor.close()
-
-
-def exec_dql_query(postgres_sql_string: str, return_result=False) -> Optional[object]:
-    """Executes a given PostgreSQL query on the data warehouse and potentially returns the query result.
-
-    Parameters
-    ----------
-    postgres_sql_string: str
-        PostgreSQL query to evaluate in the external DHW.
-    return_result: bool, default=False
-        Whether to return the query result.
-
-    Returns
-    -------
-    result: str or None
-        Query result.
-    """
-    result = None
-    with connect(**config()) as connection:
-        connection.autocommit = True
-        with connection.cursor() as cursor:
-            try:
-                cursor.execute(postgres_sql_string)
-                connection.commit()
-                cursor_result = cursor.fetchall()
-                result = (
-                    cursor_result
-                    if (return_result and cursor_result is not None)
-                    else return_result
-                )
-            except Exception as exc:
-                print("Error executing SQL: %s" % exc)
-            finally:
-                cursor.close()
-    return result
 
 
 if __name__ == "__main__":
