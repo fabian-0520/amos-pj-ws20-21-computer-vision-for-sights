@@ -266,7 +266,7 @@ def persist_training_data() -> None:
     city = os.getenv("city", "")
 
     if len(city) > 0:
-        print(f"Starting image download for {city}...")
+        print(f"Starting image download for {city.replace('_', ' ').title()}...")
         image_ids = get_image_ids_to_load_for_city(city)  # list of tuples with: image file + bounding box
         print(f"About to fetch {len(image_ids)} labelled images...")
         sight_names = save_images(city, image_ids)
@@ -386,7 +386,7 @@ def persist_image_and_labels_batch(images: List[Tuple[bytes, str]], label_mappin
         file_string = ""
         for label in label_data:
             sight_name = label_mapping[label[1]]
-            file_string += label[0]
+            file_string += label[0].replace(label[1], sight_name)
             if sight_name not in final_sight_list:
                 final_sight_list.append(sight_name)
         # create image file
@@ -394,7 +394,7 @@ def persist_image_and_labels_batch(images: List[Tuple[bytes, str]], label_mappin
         with BytesIO(pair[0]) as _file:
             ext = imghdr.what(_file)
         if ext is None:
-            print("Skipped image, couldn't read")
+            print("Skipped image due to unknown or proprietary format.")
             continue
 
         try:
@@ -445,6 +445,12 @@ def save_images(city: str, image_ids_to_load: List[int]) -> List[str]:
         images = load_images(city, image_ids_to_load[start_idx:end_idx])
         success_count += persist_image_and_labels_batch(images, label_mappings, final_sight_list)
 
+    final_sight_list = list(
+        map(
+            lambda raw_sight: label_mappings[raw_sight],
+            final_sight_list
+        )
+    )
     replace_labels(final_sight_list)
     print(f"Final sight list: {final_sight_list}")
     print(f"Downloaded {len(image_ids_to_load)} labelled images of which {success_count} were successfully saved "
