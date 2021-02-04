@@ -246,10 +246,11 @@ class AutoCrawler:
                 print("Invalid Site Code")
                 links = []
 
-            links = links + collect.pinterest(keyword, region, add_url)
-
-            print("Downloading images from collected links... {} from {}".format(keyword, site_name))
-            self.download_images(keyword, links, site_name, max_count=self.limit)
+            print("Google Links:", len(links))
+            links = links + collect.pinterest(keyword, region, add_url, self.limit)
+            print("Total Links:", len(links))
+            print("Downloading images from {} collected links... {} from {}".format(len(links), keyword, site_name))
+            self.download_images(keyword, links, site_name, max_count=len(links))
 
             print("Done {} : {}".format(site_name, keyword))
 
