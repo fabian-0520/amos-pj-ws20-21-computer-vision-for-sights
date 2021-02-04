@@ -79,7 +79,7 @@ def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
     label_list = []
     for label in labels:
         elements = label.split(",")
-        _label = elements[-1].replace(" ", "").replace("\\", "").replace('"', "")
+        _label = elements[-1].title().replace(" ", "").replace("\\", "").replace('"', "")
         re.sub(r"[^\x00-\x7F]+", "", _label)  # replace non-ascii characters inside label
 
         # parse coordinates
