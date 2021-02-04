@@ -24,7 +24,7 @@ def get_sights(region, max_sights):
     sight_list = list(dict.fromkeys(sight_list))
     print(sight_list)
 
-    return sight_list
+    return sight_list[:max_sights]
 
 
 def get_sights_from_json(places_response: dict):
@@ -36,4 +36,4 @@ def get_sights_from_json(places_response: dict):
             sight_list.append(sight_name)
     else:
         print("Error: something went wrong with maps api")
-    return sight_list[:max_sights]
+    return sight_list
