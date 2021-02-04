@@ -1,35 +1,49 @@
-import argparse
+from io import BytesIO
+from itertools import combinations
+from typing import Optional, Tuple, List, Dict
+from fuzzywuzzy import fuzz
+from psycopg2 import connect
+from psycopg2._psycopg import Binary
 import glob
 import imghdr
 import os
 import re
 import shutil
-from io import BytesIO
-from typing import Optional, Tuple, List
-
-from psycopg2 import connect
-from psycopg2._psycopg import Binary
 
 
-def persist_training_data() -> None:
+def config():
+    """Reads environment variables needed as DWH access parameters and returns them as a parsed dictionary.
+
+    Returns
+    -------
+    db: dict[str, str]
+        Parsed dictionary containing the DWH connection parameters.
+
+    Raises
+    ------
+    ReferenceError
+        If a required environment variable has not been found.
     """
-    Generic method to load images, store them and generate a config file for training
-    """
-    city = os.getenv("city", "")
+    db, params = {}, ["host", "port", "database", "user", "password"]
 
-    if len(city) > 0:
-        print(f"Starting image download for {city}")
-        images = load_images_for_city(city)
-        print(f"Fetched {len(images)} images")
-        sight_names = save_images(images)
-        generate_training_config_yaml(sight_names)
-    else:
-        raise Exception('No city passed!')
+    for param in params:
+        env_variable_name = "PG{0}".format(param.upper())
+        env_variable = os.getenv(env_variable_name)
+        if env_variable is not None:
+            db[param] = env_variable
+        else:
+            raise ReferenceError(f"Environment Variable {env_variable_name} not found")
+
+    return db
 
 
 def cleanup():
-    """
-    Cleans up created training data directory and its contents.
+    """Cleans up created training data directory and its contents.
+
+    Raises
+    ------
+    OSError
+        If any deletions went wrong.
     """
     try:
         shutil.rmtree("../training_data")
@@ -47,32 +61,54 @@ def cleanup():
         print("Error deleting tmp.pt: %s" % e.strerror)
 
 
-def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
+def generate_training_config_yaml(sights: List[str]) -> None:
+    """Generates a .yaml configuration file which is used to generate classes and other information for model training.
+
+    Parameters
+    ----------
+    sights: list[str]
+        List of sight classes used for training the model.
     """
-    Loads all images with corresponding labels for a given city
+    yaml = open("./sight_training_config.yaml", "w")
+    yaml.write("# train and val data\n")
+    yaml.write("train: ../training_data/images\n")
+    yaml.write("val: ../training_data/images\n\n")
+    yaml.write("# number of classes\n")
+    yaml.write("nc: " + str(len(sights)) + "\n\n")
+    yaml.write("# class names\n")
+    yaml.write("names: [" + ",".join(sights) + "]")
+    yaml.close()
+
+
+def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
+    """Loads all images with corresponding labels for a given city.
+
     Parameters
     ----------
     city_name: str
-        The name of the city the request is performed
+        The name of the city the request is performed.
 
     Returns
     -------
-    The list of tuples with an image file and the corresponding label .txt file
+    The list of tuples with an image file and the corresponding label .txt file.
     """
     query = f"select image_file, image_labels from data_mart_layer.images_{city_name}"
-    return exec_sql_query(query, True)
+    return exec_dql_query(query, True)
 
 
-def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
-    """
-    parses a custom postgres label entity string into a tuple of label name and a label line in a label file
+def parse_bounding_box_string(labels_string: str) -> List[Tuple[str, str]]:
+    """Parses a custom DWH bounding box string into potentially multiple tuples of
+    bounding box encoding and label name.
+
     Parameters
     ----------
-    labels_string
+    labels_string: str
+        String containing the bounding box string.
 
     Returns
     -------
-    List of tuples of [label_line (str), label_name (str)]
+    label_list: list[tuple[str, str]]
+        List containing tuples of bounding box encoding and their label.
     """
     decimal_places = 6
     labels = re.findall("\\((.*?)\\)", labels_string)
@@ -95,6 +131,53 @@ def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
     return label_list
 
 
+def persist_training_data() -> None:
+    """Generic method to load images, store them and generate a config file for training.
+
+    Raises
+    ------
+    ValueError
+        If no city has been passed.
+    """
+    city = os.getenv("city", "")
+
+    if len(city) > 0:
+        print(f"Starting image download for {city}")
+        images = load_images_for_city(city)
+        print(f"Fetched {len(images)} images")
+        sight_names = save_images(images)
+        generate_training_config_yaml(sight_names)
+    else:
+        raise ValueError('No city passed!')
+
+
+def prepare_directories_for_training():
+    """Prepares the directory for training"""
+    try:
+        os.makedirs("../training_data/images")
+        os.makedirs("../training_data/labels")
+    except FileExistsError:
+        print("Directories exist")
+
+
+def preprocess_label(label: str, city: str) -> str:
+    """Returns the pre-processed sight label of a given city.
+
+    Parameters
+    ----------
+    label: str
+        Raw label.
+    city: str
+        City the label belongs to.
+
+    Returns
+    -------
+    preprocessed_label: str
+        Pre-processed label.
+    """
+    return re.sub('[^A-Z]+', '', label.upper()).replace(f'{city}', '')
+
+
 def replace_labels(labels: List[str]):
     """
     Replaces labels with their respective indexes
@@ -104,42 +187,74 @@ def replace_labels(labels: List[str]):
     -------
 
     """
-    dir = '../training_data/labels'
+    _dir = '../training_data/labels'
     for file in os.listdir("../training_data/labels"):
-        with open(dir + "/" + file) as f:
+        with open(_dir + "/" + file) as f:
             text = ""
             for line in f.readlines():
                 sections = line.split(" ")
                 text += str(labels.index(sections[0])) + " " + " ".join(sections[1:])
 
-        with open(dir + "/" + file, "w") as f:
+        with open(_dir + "/" + file, "w") as f:
             f.write(text)
 
 
-def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
-    """
-    Sorts fetched images according to their labels into correct directories and accordingly generates labels
+def retrieve_label_mappings(label_list: List[str], city: str) -> Dict[str, str]:
+    """Returns the label mappings for a given list of labels and the according cities.
+
     Parameters
     ----------
-    image_label_tuples: list of tuples of image, label file
+    label_list: list[str]
+        Available raw labels.
+    city: str
+        City to train on.
 
     Returns
     -------
-    The list of labels
+    mapping_table: dict[str, str]
+        Mapping table containing the raw label as keys and the labels to be mapped to as values.
     """
-    sight_list = []
-    # create directories for training and test data
-    try:
-        os.makedirs("../training_data/images")
-        os.makedirs("../training_data/labels")
-    except FileExistsError:
-        print("Directories exist")
+    city_preprocessed = re.sub('[^A-Z]+', '', city.upper())
+    mapping_table = dict(zip(label_list, label_list))
 
-    success_count = 0
+    for tpl in combinations(label_list, 2):  # removes replicated pairs
+        label_1, label_2 = tpl
+        label_1_processed = preprocess_label(label_1, city_preprocessed)
+        label_2_processed = preprocess_label(label_2, city_preprocessed)
+
+        if label_1_processed in label_2_processed:  # retain abstracted labels more
+            mapping_table[label_2] = label_1  # label_2: replaced by new mapping label_1
+        elif label_2_processed in label_1_processed:
+            mapping_table[label_1] = label_2  # label_1: replaced by new mapping label_2
+        elif fuzz.ratio(label_1_processed, label_2_processed) > 0.85 * 100:  # TODO replace function
+            label_mapping = (label_1, label_2) if len(label_1_processed) > len(label_2_processed) \
+                else (label_2, label_1)
+            mapping_table[label_mapping[0]] = label_mapping[1]
+
+    return mapping_table
+
+
+def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
+    """Sorts the fetched images (according to their labels) into
+    correct directories and generates a final labels list.
+
+    Parameters
+    ----------
+    image_label_tuples: list[tuple[bytes, str]]
+        List in which each item corresponds to an image and its bounding box encoding.
+
+    Returns
+    -------
+    sight_list: list[str]
+        Final label list.
+    """
+    prepare_directories_for_training()
+    sight_list, success_count = [], 0
+
     for pair in image_label_tuples:
         if pair[0] is None or pair[1] is None:
             continue
-        label_data = parse_label_string(pair[1])
+        label_data = parse_bounding_box_string(pair[1])
         file_string = ""
         for label in label_data:
             sight_name = label[1]
@@ -178,27 +293,13 @@ def save_images(image_label_tuples: List[Tuple[bytes, str]]) -> List[str]:
     return sight_list
 
 
-def generate_training_config_yaml(sights: List[str]) -> None:
-    """
-    Generates a .yaml configuration file which is used to generate classes and other information for model training.
-    Parameters
-    ----------
-    sights: the list of sight classes used for training the model
-    """
-    yaml = open("./sight_training_config.yaml", "w")
-    yaml.write("# train and val data\n")
-    yaml.write("train: ../training_data/images\n")
-    yaml.write("val: ../training_data/images\n\n")
-    yaml.write("# number of classes\n")
-    yaml.write("nc: " + str(len(sights)) + "\n\n")
-    yaml.write("# class names\n")
-    yaml.write("names: [" + ",".join(sights) + "]")
-    yaml.close()
-
-
 def upload_trained_model() -> None:
-    """
-    Optimizes the trained model runs into a file and uploads it with corresponding data
+    """Reads the previously trained model runs and uploads it to the DWH.
+
+    Raises
+    ------
+    ValueError
+        If no readily trained city model is available.
     """
     city = os.getenv("city", "")
 
@@ -217,17 +318,44 @@ def upload_trained_model() -> None:
         # execute query to upload weights
         exec_dml_query(dml_query, (city, Binary(data), image_count))
     else:
-        raise Exception('No city passed!')
+        raise ValueError('No city passed!')
 
 
-def exec_sql_query(postgres_sql_string: str, return_result=False) -> Optional[object]:
-    """Executes a given PostgreSQL string on the data warehouse and potentially returns the query result.
+def exec_dml_query(dml_query: str, filling_parameters: Optional[Tuple]) -> None:
+    """Inserts a trained weights file into the PostgreSQL database corresponding to the source hash.
+
+    Parameters
+    ----------
+    dml_query: str
+        SQL DML string.
+    filling_parameters: tuple[object] or None
+        Object to inject into the empty string, None if the dml query is already filled.
+    """
+    with connect(**config()) as connection:
+        connection.autocommit = True
+        with connection.cursor() as cursor:
+            try:
+                if filling_parameters is None:
+                    cursor.execute(dml_query)
+                else:
+                    cursor.execute(dml_query, filling_parameters)
+                connection.commit()
+            except Exception as exc:
+                print("Error executing SQL: %s" % exc)
+            finally:
+                cursor.close()
+
+
+def exec_dql_query(postgres_sql_string: str, return_result=False) -> Optional[object]:
+    """Executes a given PostgreSQL query on the data warehouse and potentially returns the query result.
+
     Parameters
     ----------
     postgres_sql_string: str
         PostgreSQL query to evaluate in the external DHW.
     return_result: bool, default=False
         Whether to return the query result.
+
     Returns
     -------
     result: str or None
@@ -251,54 +379,6 @@ def exec_sql_query(postgres_sql_string: str, return_result=False) -> Optional[ob
             finally:
                 cursor.close()
     return result
-
-
-def exec_dml_query(dml_query: str, filling_parameters: Optional[Tuple]) -> None:
-    """Inserts a trained weights file into the PostgreSQL database corresponding to the source hash.
-    Parameters
-    ----------
-    dml_query: str
-        SQL DML string.
-    filling_parameters: tuple[object] or None
-        Object to inject into the empty string, None if the dml query is already filled.
-    """
-    with connect(**config()) as connection:
-        connection.autocommit = True
-        with connection.cursor() as cursor:
-            try:
-                if filling_parameters is None:
-                    cursor.execute(dml_query)
-                else:
-                    cursor.execute(dml_query, filling_parameters)
-                connection.commit()
-            except Exception as exc:
-                print("Error executing SQL: %s" % exc)
-            finally:
-                cursor.close()
-
-
-def config():
-    """Reads environment variables needed for the DWH access parameters and returns them as a parsed dictionary.
-
-    Returns
-    -------
-    db: dict
-        Parsed dictionary containing the DWH connection parameters.
-    """
-
-    db = {}
-
-    params = ["host", "port", "database", "user", "password"]
-
-    for param in params:
-        env_variable_name = "PG{0}".format(param.upper())
-        env_variable = os.getenv(env_variable_name)
-        if env_variable is not None:
-            db[param] = env_variable
-        else:
-            raise ReferenceError(f"Environment Variable {env_variable_name} not found")
-
-    return db
 
 
 if __name__ == "__main__":

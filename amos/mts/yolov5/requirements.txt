@@ -1,6 +1,6 @@
 # pip install -r requirements.txt
 
-# base ----------------------------------------
+# base
 Cython
 matplotlib>=3.2.2
 numpy>=1.18.5
@@ -13,19 +13,19 @@ torch==1.7.1
 torchvision>=0.8.1
 tqdm>=4.41.0
 
-# logging -------------------------------------
+# logging
 # wandb
 
-# plotting ------------------------------------
+# plotting
 seaborn>=0.11.0
 pandas
 
-# export --------------------------------------
+# export
 # coremltools==4.0
 # onnx>=1.8.0
 # scikit-learn==0.19.2  # for coreml quantization
 
-# extras --------------------------------------
+# extras
 thop  # FLOPS computation
 pycocotools>=2.0  # COCO mAP
 
@@ -36,3 +36,7 @@ psycopg2-binary
 pytest
 # yaml creation
 pyYaml
+
+# label corrections
+python-Levenshtein
+fuzzywuzzy

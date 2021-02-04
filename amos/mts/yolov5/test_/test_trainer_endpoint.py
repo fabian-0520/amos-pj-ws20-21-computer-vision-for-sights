@@ -6,7 +6,7 @@ import sys
 sys.path.append('./..')
 from yolov5.trainer_endpoint import (
     generate_training_config_yaml,
-    parse_label_string, persist_training_data, cleanup,
+    parse_bounding_box_string, persist_training_data, cleanup,
 )
 
 
@@ -44,7 +44,7 @@ class MTSTestCase(unittest.TestCase):
     def test_string_parser(self):
         example_string = '{"(0.135,0.725,0.825,0.015,\\"Brandenburger Tor\\")",' \
                          '"(0.1,0.5,0.3,0.2,\\"Siegessäule\\")"}'
-        labels = parse_label_string(example_string)
+        labels = parse_bounding_box_string(example_string)
         self.assertEqual(2, len(labels))
         self.assertEqual("BrandenburgerTor 0.48 0.63 0.69 0.71\n", labels[0][0])
         self.assertEqual("Siegessäule 0.2 0.65 0.2 0.3\n", labels[1][0])
