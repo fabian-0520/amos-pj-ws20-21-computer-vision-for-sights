@@ -183,7 +183,7 @@ def get_raw_labels_for_city(city_name: str, image_ids: List[int]) -> List[str]:
     available_raw_labels: list[str]
         Available raw labels.
     """
-    final_labels_list = []
+    final_labels_list = set()
     query = f"select image_labels from data_mart_layer.images_{city_name} where image_id in {tuple(image_ids)}"
     result = list(
         filter(
@@ -196,9 +196,9 @@ def get_raw_labels_for_city(city_name: str, image_ids: List[int]) -> List[str]:
     )
     for bounding_box_encoding in result:
         for parsed_box in parse_bounding_box_string(bounding_box_encoding):
-            final_labels_list.append(parsed_box[1])
+            final_labels_list.add(parsed_box[1])
 
-    return final_labels_list
+    return list(final_labels_list)
 
 
 def load_images(city_name: str, image_ids: List[int]) -> List[Tuple[bytes, str]]:
@@ -266,9 +266,9 @@ def persist_training_data() -> None:
     city = os.getenv("city", "")
 
     if len(city) > 0:
-        print(f"Starting image download for {city}")
+        print(f"Starting image download for {city}...")
         image_ids = get_image_ids_to_load_for_city(city)  # list of tuples with: image file + bounding box
-        print(f"About to fetch {len(image_ids)} images")
+        print(f"About to fetch {len(image_ids)} labelled images...")
         sight_names = save_images(city, image_ids)
         generate_training_config_yaml(sight_names)
     else:
@@ -435,15 +435,15 @@ def save_images(city: str, image_ids_to_load: List[int]) -> List[str]:
         Final label list.
     """
     prepare_directories_for_training()
-    n_download_iterations = ceil(len(image_ids_to_load)/MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST)
-    label_mappings = {}  # TODO
+    n_download_iterations = int(ceil(len(image_ids_to_load)/MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST))
+    label_mappings = retrieve_label_mappings(get_raw_labels_for_city(city, image_ids_to_load), city)
     success_count, final_sight_list = 0, []
 
     for current_download in range(n_download_iterations):
         start_idx = current_download * MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST
         end_idx = start_idx + MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST
         images = load_images(city, image_ids_to_load[start_idx:end_idx])
-        persist_image_and_labels_batch(images, label_mappings, final_sight_list)
+        success_count += persist_image_and_labels_batch(images, label_mappings, final_sight_list)
 
     replace_labels(final_sight_list)
     print(f"Final sight list: {final_sight_list}")
