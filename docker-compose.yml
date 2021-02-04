@@ -9,8 +9,7 @@ services:
     image: crawler:v1
     build: ./amos/crawler
     environment:
-      - apikey=${apikey}
-      - maps_key=${maps_key}
+      - MAPS_KEY=${maps_key}
       - PGHOST=${PGHOST}
       - PGDATABASE=${PGDATABASE}
       - PGPORT=${PGPORT}

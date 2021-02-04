@@ -41,6 +41,11 @@ def cleanup():
     except OSError as e:
         print("Error deleting runs: %s" % e.strerror)
 
+    try:
+        os.remove("tmp.pt")
+    except OSError as e:
+        print("Error deleting tmp.pt: %s" % e.strerror)
+
 
 def load_images_for_city(city_name: str) -> Optional[List[Tuple[bytes, str]]]:
     """

@@ -59,6 +59,24 @@ paths:
           description: "Invalid request format."
         "500":
           description: "Unexpected server error."
+  /cities/{cityName}/add:
+    post:
+      tags:
+        - "cities"
+      summary: "Inserts a new city into the desired city prediction list in the DWH."
+      operationId: "insertCity"
+      parameters:
+        - in: path
+          name: cityName
+          required: true
+          description: "Name of the city to add."
+      responses:
+        "200":
+          description: "Operation successful."
+        "400":
+          description: "Invalid request format."
+        "500":
+          description: "Unexpected server error."
   /cities/{cityName}/model:
     get:
       tags:

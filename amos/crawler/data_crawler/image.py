@@ -17,7 +17,7 @@ def insert_image(
         sql,
         (
             sight_image,
-            sight_city,
+            sight_city.replace(" ", "_"),  # DWH does not accept spaces in city names
             sight_image_width,
             sight_image_height,
             sight_image_data_source,

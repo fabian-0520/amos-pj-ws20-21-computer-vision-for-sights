@@ -61,7 +61,7 @@ def is_city_existing(city: str) -> bool:
     """
     cities_query = "SELECT DISTINCT(city_name) AS city_name FROM integration_layer.dim_sights_cities"
     cities = set(map(lambda _city: _city[0].upper(), exec_dql_query(cities_query, return_result=True)))
-    return city.upper().replace("-", " ") in cities
+    return city.upper() in cities
 
 
 def _is_valid_image_file(image: InMemoryUploadedFile) -> bool:

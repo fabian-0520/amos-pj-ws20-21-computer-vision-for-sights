@@ -2,41 +2,63 @@ How To: Deploying ILS, DOS, MTS, and DMR Services on AWS using EC2 (using macOS 
 ========================================================================================= 
 
 # Needed variables for deployment (to be initialized when doing the deployment)
-- <ILS_DOS_DMR_EC2_IP> := IP of the running EC2 instance
-- <ILS_DOS_DMR_EC2_URL> := URL of the running EC2 instance (always in the form "ec2-xxx-xxx-xxx-xxx.eu-central-1.compute.amazonaws.com", where xxx-xxx-xxx-xxx is the corresponding IP address)
+- <IC_IP> := IP of the running EC2 instance of the crawler
+- <IC_URL> := URL of the running EC2 instance of the crawler
+- <MAX_SIGHTS_PER_CITY> := maximum number of sights to support for a given city
+- <MAX_IMAGES_PER_SIGHT> := maximum number of images to crawl for a given sight
+- <MAPS_KEY> := Google Maps key used to retrieve the "top" sights , leading to better result quality
+- <ILS_DOS_DMR_EC2_IP> := IP of the running EC2 instance for the ILS, DOS, and DMR
+- <ILS_DOS_DMR_EC2_URL> := URL of the running EC2 instance for the ILS, DOS, and DMR (always in the form "ec2-xxx-xxx-xxx-xxx.eu-central-1.compute.amazonaws.com", where xxx-xxx-xxx-xxx is the corresponding IP address)
 - <PG_HOST> := DWH host
 - <PG_DATABASE> := DWH database
 - <PG_USER> := DWH user
 - <PG_PORT> := DWH port
 - <PG_PASSWORD> := DWH password
-- <MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY> := max. number of allowed Vision API calls for each new supported city that has yet no labels in the DWH
-- <ILS_PUBLIC_ENDPOINT_URL>: Image Labelling Service (ILS) endpoint URL for retrieving labels
+- <MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY> := max. number of allowed Vision API calls for each new supported city that has yet no labels in the DWH; make sure this parameter is at least as big as <MAX_SIGHTS_PER_CITY>*<MAX_IMAGES_PER_SIGHT>
+- <ILS_PUBLIC_ENDPOINT_URL>: Image Labelling Service (ILS) endpoint URL for retrieving labels, with http:// prefix
 - <MTS_EC2_INSTANCE_ID>: instance ID of the MTS EC2 instance
 - <MTS_EC2_IP>: initial IP of the MTS EC2 instance right after deployment (changes over time)
 - <MTS_EC2_URL>: initial URL of the MTS EC2 instance right after deployment (changes over time)
 - <AWS_ACCESS_KEY_ID>: ID of AWS access key (needed for MTS access)
 - <AWS_ACCESS_KEY>: AWS access key (needed for MTS access)
 - <AWS_REGION>: AWS region (e.g. eu-central-1)
-- <IS_MTS_GPU_ENABLED>: whether the deployed MTS has GPU access
+- <MTS_EPOCHS>: number of epochs per MTS city training
 - <MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING>: minimum number of labelled images needed to trigger training
-- <DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS>: frequency for refreshing DWH data marts => set at least to 60 since refreshing is computationally intensive!
+- <DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS>: frequency for refreshing DWH data marts => set at least to 600 since refreshing is computationally intensive!
 - <DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS>: frequency for triggering model trainings => set at least to 300 since training needs time!
 - <DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS>: frequency for retrieving image labels
 
 # Major step #1: Deploy DWH
+Simply create a PostgreSQL instance on Amazon RDS and copy-paste the PGHOST, PGPORT, PGDATABASE, PGUSER, and PGPASSWORD parameters
 
 # Major step #2: Generate a global deployment SSH key on AWS to be reused for all components
 
 # Major step #3: Deploy IC
+Step 0: Set up a lightweight Ubuntu EC2 instance for the IC
+Step 1: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to ec2key.pem
+Step 2: Configure docker on the EC2 instance
+Step 3: Prepare IC folder structures and libraries through SSH
+    - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
+    - sudo mkdir crawler
+    - sudo chmod 777 crawler
+    - exit
+Step 4: Deploy IC
+    - delete venv and caches
+    - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/crawler ubuntu@<IC_URL>:~/crawler/
+    - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
+    - cd crawler/crawler
+    - sudo docker build -t crawler .
+Step 5: Wait until the DOS calls the IC later on!
 
 # Major step #4: Deploy MTS
 
-Step 0: Set up an EC2 instance (at least P3) for the MTS that meets the following four criteria
+Step 0: Set up an EC2 instance (at least P3) for the MTS that meets the following five criteria
     1.) AMI running Ubuntu, NVidia Docker, CUDA, and PyTorch optimization, EBS as root device type for durable storage
         => e.g. "Deep Learning Base AMI (Ubuntu 18.04) Version 32.0 - ami-0d2d39cbe726f9230"
     2.) >= 80GiB of EBS storage allocated
     3.) at least one NVidia Volta GPU is assigned to the EC2 instance
     4.) auto-assign for public IP enabled
+    5.) docker configured
 Step 1: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to ec2key.pem
 Step 2: Prepare MTS folder structures and libraries through SSH
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<MTS_EC2_IP>
@@ -65,7 +87,8 @@ Step 1: Launch an EC2 instance for the DMR, ILS, and DMR components
         3.) security group allows custom TCP traffic on ports 8001, 8002 from 0.0.0.0/0 and ::/0 (anywhere)
             ![Alt text](https://i.ibb.co/xjZ6wtc/Screenshot-2021-01-12-at-16-55-30.png)    
 Step 2: Place your global SSH key for accessing the EC2 instance in your Downloads folder and rename it to "ec2key.pem"
-Step 3: Prepare folder structures and install Docker on EC2 instance through SSH
+Step 3: Configure docker
+Step 4: Prepare folder structures and install Docker on EC2 instance through SSH
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<ILS_DOS_DMR_EC2_IP>
     - sudo mkdir ils
     - sudo chmod 777 ils
@@ -79,7 +102,7 @@ Step 3: Prepare folder structures and install Docker on EC2 instance through SSH
     - sudo apt-get update
     - sudo apt-get install docker-ce docker-ce-cli containerd.io
     - exit
-Step 4: Deploy ILS
+Step 5: Deploy ILS
     - add <ILS_DOS_DMR_EC2_URL> and <ILS_DOS_DMR_EC2_URL>:8001 to the ALLOWED_HOSTS list in the settings.py file of the ILS
     - delete the venv, __pycache__, and .idea folders from your local ILS directory, along with any other unnecessary files (e.g. .coveragerc)
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/image_labelling_service ubuntu@<ILS_DOS_DMR_EC2_URL>:~/ils/
@@ -87,19 +110,22 @@ Step 4: Deploy ILS
     - cd ils/image_labelling_service
     - sudo docker build -t ils .
     - sudo docker run -d -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY=<MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY> -p 8001:8001 -it ils
-Step 5: Deploy DOS
+Step 6: Deploy DOS
     - add <ILS_DOS_DMR_EC2_URL> and <ILS_DOS_DMR_EC2_URL>:8002 to the ALLOWED_HOSTS list in the settings.py file of the DOS
     - delete the venv, __pycache__, and .idea folders from your local DOS directory, along with any other unnecessary files (e.g. .coveragerc)
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/django_orchestrator ubuntu@<ILS_DOS_DMR_EC2_URL>:~/dos/
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<ILS_DOS_DMR_EC2_IP>
     - cd dos/django_orchestrator
     - sudo docker build -t dos .
-    - sudo docker run  -d -e PGHOST=<PGHOST> -e PGDATABASE=<PG_DATABASE> -e PGUSER=<PG_USER> -e PGPORT=<PG_PORT> -e PGPASSWORD=<PG_PASSWORD> -p 8002:8002 -it dos
-Step 6: Deploy DMR (attention - by linking the DMR with the ILS & MTS, costs may arise)
+    - sudo docker run  -d -e PGHOST=<PGHOST> -e PGDATABASE=<PG_DATABASE> -e PGUSER=<PG_USER> -e PGPORT=<PG_PORT> -e PGPASSWORD=<PG_PASSWORD> -e IC_URL=<IC_URL> -e MAX_SIGHTS_PER_CITY=<MAX_SIGHTS_PER_CITY> -e MAX_IMAGES_PER_SIGHT=<MAX_IMAGES_PER_SIGHT> -e MAPS_KEY=<MAPS_KEY> -p 8002:8002 -it dos
+Step 7: Deploy DMR (attention - by linking the DMR with the ILS & MTS, costs may arise)
     - delete the venv, __pycache__, and .idea folders from your local DMR directory, along with any other unnecessary files (e.g. .coveragerc)
     - sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/data_mart_refresher ubuntu@<ILS_DOS_DMR_EC2_URL>:~/dmr/
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<ILS_DOS_DMR_EC2_IP>
     - cd dmr/data_mart_refresher
     - sudo docker build -t dmr .
-    - sudo docker run -d -e ILS_PUBLIC_ENDPOINT_URL=<ILS_PUBLIC_ENDPOINT_URL>:8001 -e MTS_EC2_INSTANCE_ID=<MTS_EC2_INSTANCE_ID> -e AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> -e AWS_ACCESS_KEY=<AWS_ACCESS_KEY> -e AWS_REGION=<AWS_REGION> -e IS_MTS_GPU_ENABLED=<False | True> -e DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=<DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS> -e DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=<DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS> -e DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=<DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS> -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING=100 -it data_mart_refresher
-    
+    - sudo docker run -d -e ILS_PUBLIC_ENDPOINT_URL=<ILS_PUBLIC_ENDPOINT_URL>:8001 -e MTS_EC2_INSTANCE_ID=<MTS_EC2_INSTANCE_ID> -e AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> -e AWS_ACCESS_KEY=<AWS_ACCESS_KEY> -e AWS_REGION=<AWS_REGION> -e MTS_EPOCHS=<MTS_EPOCHS> -e DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=<DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS> -e DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=<DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS> -e DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=<DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS> -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING=<MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING> -it dmr
+Step 8: Make sure the security groups of the EC2 instances are configured, otherwise tweak
+    - DOS/ILS/DMR sec. group: must allow access on DOS port 8002 from 0.0.0.0 (anywhere)
+    - MTS sec. group: must allow access from DMR EC2 instance
+    - IC sec. group: must allow access from DOS EC2 instance

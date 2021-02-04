@@ -25,6 +25,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import os.path as osp
 
+
 class CollectLinks:
     def __init__(self, no_gui=False, no_driver=False):
         executable = ""
@@ -37,7 +38,7 @@ class CollectLinks:
             executable = "./chromedriver/chromedriver_linux"
         elif platform.system() == "Darwin":
             print("Detected OS : Mac")
-            executable = "./chromedriver/chromedriver_mac"
+            executable = "./chromedriver/chromedriver_mac88"
         else:
             raise OSError("Unknown OS Type")
 
@@ -50,6 +51,7 @@ class CollectLinks:
         if no_gui:
             chrome_options.add_argument("--headless")
         if no_driver:
+
             self.browser = webdriver.Chrome(chrome_options=chrome_options)
         else:
             self.browser = webdriver.Chrome(executable, chrome_options=chrome_options)
@@ -108,8 +110,50 @@ class CollectLinks:
     def remove_duplicates(_list):
         return list(dict.fromkeys(_list))
 
+    def pinterest(self, keyword, region, add_url=""):
+        sight_keyword = str(region + " " + keyword)
+        url = "https://www.pinterest.de/search/pins/?q="
+        self.browser.get("{0}{1}".format(url, sight_keyword))
+
+        time.sleep(1)
+
+        print("Scrolling down")
+
+        elem = self.browser.find_element_by_tag_name("body")
+
+        try:
+            for i in range(60):
+                elem.send_keys(Keys.PAGE_DOWN)
+                time.sleep(0.2)
+
+        except ElementNotVisibleException:
+            pass
+
+        print("Scraping links")
+
+        links = []
+
+        for img in self.browser.find_elements(By.TAG_NAME, "img"):
+            try:
+
+                # self.highlight(img)
+                src: str = img.get_attribute("src")
+
+                # Google seems to preload 20 images as base64
+                src = src.replace("/236x/", "/564x/")
+                links.append(src)
+
+            except Exception as e:
+                print("[Exception occurred while collecting links from google] {}".format(e))
+
+        links = self.remove_duplicates(links)
+
+        print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("Pinterest", keyword, len(links)))
+        self.browser.close()
+        return links
+
     def google(self, keyword, region, add_url=""):
-        sight_keyword = str(region + ' ' + keyword)
+        sight_keyword = str(region + " " + keyword)
         self.browser.get("https://www.google.com/search?q={}&source=lnms&tbm=isch{}".format(sight_keyword, add_url))
 
         time.sleep(1)
@@ -160,13 +204,12 @@ class CollectLinks:
         links = self.remove_duplicates(links)
 
         print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("google", keyword, len(links)))
-        self.browser.close()
 
         return links
 
     def google_full(self, keyword, region, add_url="", limit=5000):
         print("[Full Resolution Mode]")
-        sight_keyword = str(region + ' ' + keyword)
+        sight_keyword = str(region + " " + keyword)
         self.browser.get("https://www.google.com/search?q={}&tbm=isch{}".format(sight_keyword, add_url))
         time.sleep(1)
 
@@ -228,7 +271,6 @@ class CollectLinks:
         links = self.remove_duplicates(links)
 
         print("Collect links done. Site: {}, Keyword: {}, Total: {}".format("google_full", keyword, len(links)))
-        self.browser.close()
 
         return links
 
