@@ -1,5 +1,7 @@
+import io
 from typing import Tuple
 import pytest
+from PIL import Image
 
 
 class CursorMock:
@@ -131,6 +133,16 @@ def connection_mock():
 @pytest.fixture(scope='module')
 def connection_exception_mock():
     return ConnectionExceptionMock()
+
+
+@pytest.fixture(scope='function')
+def image_mock():
+    file = io.BytesIO()
+    image = Image.new('RGBA', size=(1337, 1338), color=(155, 0, 0))
+    image.save(file, 'png')
+    file.name = 'test.png'
+    file.seek(0)
+    return file.read()
 
 
 @pytest.fixture(scope='module')

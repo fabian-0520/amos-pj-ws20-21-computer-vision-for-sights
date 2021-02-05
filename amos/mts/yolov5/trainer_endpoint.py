@@ -74,16 +74,24 @@ def parse_label_string(labels_string: str) -> List[Tuple[str, str]]:
     -------
     List of tuples of [label_line (str), label_name (str)]
     """
+    decimal_places = 6
     labels = re.findall("\\((.*?)\\)", labels_string)
     label_list = []
     for label in labels:
         elements = label.split(",")
-        label = elements[-1]
-        re.sub(r"[^\x00-\x7F]+", "", label)  # replace non-ascii characters inside label
-        label_string = label.replace(" ", "") + " " + " ".join(elements[:-1]) + "\n"
-        label_string = label_string.replace('"', "").replace("\\", "")
-        label = label.replace('"', "").replace("\\", "").replace(" ", "")
-        label_list.append((label_string, label))
+        _label = elements[-1].title().replace(" ", "").replace("\\", "").replace('"', "")
+        re.sub(r"[^\x00-\x7F]+", "", _label)  # replace non-ascii characters inside label
+
+        # parse coordinates
+        ul_x, lr_x = float(elements[0]), float(elements[2])
+        ul_y, lr_y = 1 - float(elements[1]), 1 - float(elements[3])  # Yolov5's y coordinate system is flipped!
+        x_width = round(abs(lr_x - ul_x), ndigits=decimal_places)  # abs for higher fault tolerance
+        y_height = round(abs(ul_y - lr_y), ndigits=decimal_places)  # rounding speeds up model training
+        x_center = round(ul_x + x_width/2, ndigits=decimal_places)
+        y_center = round(ul_y + y_height/2, ndigits=decimal_places)
+
+        label_string = f"{_label} {x_center} {y_center} {x_width} {y_height}\n"
+        label_list.append((label_string, _label))
     return label_list
 
 

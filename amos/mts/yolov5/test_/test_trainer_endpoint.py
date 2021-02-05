@@ -42,12 +42,12 @@ class MTSTestCase(unittest.TestCase):
         cleanup()
 
     def test_string_parser(self):
-        example_string = '{"(11,11,21,21,\\"Brandenburger Tor\\")","(15,15,25,25,\\"Siegessäule\\")"}'
+        example_string = '{"(0.135,0.725,0.825,0.015,\\"Brandenburger Tor\\")",' \
+                         '"(0.1,0.5,0.3,0.2,\\"Siegessäule\\")"}'
         labels = parse_label_string(example_string)
-        print(labels[0][0])
         self.assertEqual(2, len(labels))
-        self.assertEqual("BrandenburgerTor 11 11 21 21\n", labels[0][0])
-        self.assertEqual("Siegessäule", labels[1][1])
+        self.assertEqual("BrandenburgerTor 0.48 0.63 0.69 0.71\n", labels[0][0])
+        self.assertEqual("Siegessäule 0.2 0.65 0.2 0.3\n", labels[1][0])
 
 
 if __name__ == "__main__":
