@@ -1,4 +1,5 @@
 """This module contains the trainer endpoint which is the main orchestrator for the MTS model training process."""
+import argparse
 import glob
 import imghdr
 import os
@@ -96,8 +97,13 @@ def parse_bounding_boxes_encoding(labels_string: str) -> List[Tuple[str, str]]:
     return label_list
 
 
-def persist_training_data() -> None:
+def persist_training_data(min_number_of_images_per_label: int = 30) -> None:
     """Generic method to load images, store them and generate a config file for training.
+
+    Parameters
+    ----------
+    min_number_of_images_per_label: int, default=30
+        Minimum number of images per label.
 
     Raises
     ------
@@ -108,7 +114,7 @@ def persist_training_data() -> None:
 
     if len(city) > 0:
         print(f"Investigating the data warehouse image contents for city {city.replace('_', ' ').title()}...")
-        sight_names = _retrieve_images_and_labels(city)
+        sight_names = _retrieve_images_and_labels(city, min_number_of_images_per_label)
         generate_training_config_yaml(sight_names)
     else:
         raise ValueError('No city passed!')
@@ -142,8 +148,8 @@ def upload_trained_model() -> None:
         raise ValueError('No city passed!')
 
 
-def _compute_actual_image_ids_to_load(city_name: str, label_mappings: Dict[str, str]) \
-        -> Tuple[List[int], List[str]]:
+def _compute_actual_image_ids_to_load(city_name: str, label_mappings: Dict[str, str],
+                                      min_number_of_images_per_label: int) -> Tuple[List[int], List[str]]:
     """Returns the relevant image ids to load after too sparse classes have been sorted out.
 
     Parameters
@@ -152,6 +158,8 @@ def _compute_actual_image_ids_to_load(city_name: str, label_mappings: Dict[str, 
         Name of the city to train on.
     label_mappings: dict[str, str]
         Mappings between raw and final label.
+    min_number_of_images_per_label: int
+        Minimum number of images per label.
 
     Returns
     -------
@@ -182,7 +190,7 @@ def _compute_actual_image_ids_to_load(city_name: str, label_mappings: Dict[str, 
         sleep(0.1)  # delay to increase robustness
         if label_image_ids_cache is not None:
             belonging_ids = list(sum(label_image_ids_cache, ()))
-            if len(belonging_ids) >= int(os.getenv("MIN_NUMBER_OF_LABELS_PER_CLASS", "30")):
+            if len(belonging_ids) >= int(min_number_of_images_per_label):
                 image_ids += belonging_ids
             else:
                 labels_excluded_from_training += raw_labels
@@ -522,7 +530,7 @@ def _replace_labels_in_label_files_with_index(labels: List[str]):
             _file.write(text)
 
 
-def _retrieve_images_and_labels(city: str) -> List[str]:
+def _retrieve_images_and_labels(city: str, min_number_of_images_per_label: int) -> List[str]:
     """Fetches the images (according to their labels) into
     correct directories and generates a final labels list.
 
@@ -530,6 +538,8 @@ def _retrieve_images_and_labels(city: str) -> List[str]:
     ----------
     city: str
         City to perform the training for.
+    min_number_of_images_per_label: int
+        Minimum number of images per label.
 
     Returns
     -------
@@ -541,7 +551,9 @@ def _retrieve_images_and_labels(city: str) -> List[str]:
     # retrieve relevant image ids for partitioned processing
     image_ids_to_load = _get_all_loadable_image_ids(city)  # list of tuples with: image file + bounding box
     label_mappings = _retrieve_label_mappings_raw_to_final(_get_raw_persisted_labels(city, image_ids_to_load), city)
-    image_ids_to_load, excluded_raw_labels = _compute_actual_image_ids_to_load(city, label_mappings)
+    image_ids_to_load, excluded_raw_labels = _compute_actual_image_ids_to_load(city,
+                                                                               label_mappings,
+                                                                               min_number_of_images_per_label)
 
     # retrieve and save relevant images including their labels
     n_download_iterations = int(ceil(len(image_ids_to_load)/MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST))
@@ -574,4 +586,7 @@ def _retrieve_images_and_labels(city: str) -> List[str]:
 
 
 if __name__ == "__main__":
-    persist_training_data()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--min_images_per_label', type=str, default='30', help='min. number of images per label')
+    opt = parser.parse_args()
+    persist_training_data(opt.min_images_per_label)

@@ -34,8 +34,6 @@ psycopg2-binary
 
 # testing
 pytest
-# yaml creation
-pyYaml
 
 # label corrections
 python-Levenshtein
