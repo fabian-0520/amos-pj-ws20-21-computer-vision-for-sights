@@ -492,9 +492,12 @@ def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> D
         label_1_processed = _preprocess_raw_label(label_1, city_preprocessed)
         label_2_processed = _preprocess_raw_label(label_2, city_preprocessed)
 
-        if label_1_processed in label_2_processed:  # retain abstracted labels more
+        if len(label_1_processed) == 0 or len(label_2_processed) == 0:
+            continue
+
+        if label_1_processed in label_2_processed and label_1_processed != label_2_processed:  # retain abstracted labels more
             mapping_table[label_2] = label_1  # label_2: replaced by new mapping label_1
-        elif label_2_processed in label_1_processed:
+        elif label_2_processed in label_1_processed and label_1_processed != label_2_processed:
             mapping_table[label_1] = label_2  # label_1: replaced by new mapping label_2
         elif fuzz.ratio(label_1_processed, label_2_processed) >= 0.9 * 100:
             label_mapping = (label_1, label_2) if len(label_1_processed) > len(label_2_processed) \
@@ -589,4 +592,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--min_images_per_label', type=str, default='30', help='min. number of images per label')
     opt = parser.parse_args()
-    persist_training_data(opt.min_images_per_label)
+    persist_training_data(10)
