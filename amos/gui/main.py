@@ -1,5 +1,5 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import wipe_prediction_input_images, update_dropdown
+from helper import wipe_prediction_input_images, update_dropdown, filterCity
 from label import ImageLabel
 from detect import Detection
 from debug import *
@@ -375,17 +375,28 @@ class UiMainWindow(QWidget):
 		emsg.exec_()
 
 	def request_city(self) -> None:
-		# Send entered city to dwh and show confirmation popup
-		city_request = self.Text_City.text().upper()
-		send_city_request(city_request)
+		# Send entered city to dwh and show confirmation popup if the city name is known
+		city_input = self.Text_City.text()
+		city_request = city_input.upper()
+		if len(filterCity(city_input)) == 1:
+			send_city_request(city_request)
 
-		cmsg = QMessageBox()
-		cmsg.setWindowTitle("Request confirmed")
-		cmsg.setWindowIcon(QIcon("icon_logo.png"))
-		cmsg.setText("Your request to add support for " + city_request + " has been sent to our backend.")
-		cmsg.setStandardButtons(QMessageBox.Ok)
-		cmsg.setDefaultButton(QMessageBox.Ok)
-		cmsg.exec_()
+			cmsg = QMessageBox()
+			cmsg.setWindowTitle("Request confirmed")
+			cmsg.setWindowIcon(QIcon("icon_logo.png"))
+			cmsg.setText("Your request to add support for " + city_request + " has been sent to our backend.")
+			cmsg.setStandardButtons(QMessageBox.Ok)
+			cmsg.setDefaultButton(QMessageBox.Ok)
+			cmsg.exec_()
+		else:
+			cmsg = QMessageBox()
+			cmsg.setWindowTitle("Unknown city name")
+			cmsg.setWindowIcon(QIcon("icon_logo.png"))
+			cmsg.setText("The typed city name is not known. Please check the spelling.")
+			cmsg.setIcon(QMessageBox.Warning)
+			cmsg.setStandardButtons(QMessageBox.Ok)
+			cmsg.setDefaultButton(QMessageBox.Ok)
+			cmsg.exec_()
 
 	def dragdrop(self) -> None:
 		"""Enables / disables Drag&Drop of images."""
