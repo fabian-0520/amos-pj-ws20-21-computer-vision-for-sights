@@ -3,6 +3,7 @@ import os
 from time import sleep
 from PyQt5.QtWidgets import QComboBox
 from api_communication.api_handler import get_supported_cities
+from geotext import GeoText as filterString
 
 
 def wipe_prediction_input_images(images_base_path: str) -> None:
@@ -51,3 +52,21 @@ def update_dropdown(Box_Stadt: QComboBox) -> None:
         Box_Stadt.addItems(['Choose City'] + get_supported_cities())
         Box_Stadt.setCurrentText(selected)
         Box_Stadt.update()
+
+
+def filterCity(input_city: str) -> str:
+    """Returns the list of filtered cities from input string.
+
+    Parameters
+    ----------
+    input_city: str
+        Input string.
+
+    Returns
+    -------
+    result: List[str]
+        Result of city filtering.
+    """
+    # input_city = string.capwords(input_city.lower())
+    result = filterString(input_city).cities
+    return result

@@ -4,7 +4,7 @@ import requests
 import os
 import json
 
-os.environ["API_ENDPOINT_URL"] = "http://ec2-18-159-48-86.eu-central-1.compute.amazonaws.com:8002"
+os.environ["API_ENDPOINT_URL"] = "http://ec2-3-120-39-132.eu-central-1.compute.amazonaws.com:8002"
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
 
