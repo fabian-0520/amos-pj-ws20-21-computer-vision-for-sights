@@ -182,7 +182,7 @@ def _compute_actual_image_ids_to_load(city_name: str, label_mappings: Dict[str, 
         sleep(0.1)  # delay to increase robustness
         if label_image_ids_cache is not None:
             belonging_ids = list(sum(label_image_ids_cache, ()))
-            if len(belonging_ids) > 10:  # TODO env. var.
+            if len(belonging_ids) >= int(os.getenv("MIN_NUMBER_OF_LABELS_PER_CLASS", "30")):
                 image_ids += belonging_ids
             else:
                 labels_excluded_from_training += raw_labels
@@ -493,6 +493,10 @@ def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> D
                 else (label_2, label_1)
             mapping_table[label_mapping[0]] = label_mapping[1]
 
+    for key, value in mapping_table.items():
+        if key != value:
+            print(f'Mapping identified: old label {key} -> new label {value}.')
+
     return mapping_table
 
 
@@ -549,7 +553,8 @@ def _retrieve_images_and_labels(city: str) -> List[str]:
         start_idx = current_download * MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST
         end_idx = start_idx + MAX_IMAGES_DOWNLOADED_PER_SINGLE_DATABASE_REQUEST
         images = _load_images_from_ids(city, image_ids_to_load[start_idx:end_idx])
-        success_count += _persist_image_and_label_files_batch(images, label_mappings, excluded_raw_labels, final_sights_set)
+        success_count += _persist_image_and_label_files_batch(images, label_mappings,
+                                                              excluded_raw_labels, final_sights_set)
 
     # map raw to final labels
     final_sights_list = list(
@@ -559,11 +564,11 @@ def _retrieve_images_and_labels(city: str) -> List[str]:
         )
     )
     _replace_labels_in_label_files_with_index(final_sights_list)
-    print(f"Image/label retrieval result:\n{'-'*30}\n"
+    print(f"\nImage/label retrieval result:\n{'-'*30}\n"
           f"Downloaded {len(image_ids_to_load)} relevant images "
           f"of which {success_count} were successfully saved "
           f"({round(success_count/len(image_ids_to_load), ndigits=3)*100:.2f}%). "
-          f"Final sights list: {final_sights_list} ({len(final_sights_list)} classes).")
+          f"Final sights list:\n{final_sights_list} ({len(final_sights_list)} classes).")
 
     return final_sights_list
 
