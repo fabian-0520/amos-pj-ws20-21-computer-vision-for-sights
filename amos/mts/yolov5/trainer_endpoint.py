@@ -602,4 +602,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--min_images_per_label', type=str, default='30', help='min. number of images per label')
     opt = parser.parse_args()
-    persist_training_data(10)
+    persist_training_data(opt.min_images_per_label)
