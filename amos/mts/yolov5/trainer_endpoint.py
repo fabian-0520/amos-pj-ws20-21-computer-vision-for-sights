@@ -306,15 +306,13 @@ def _get_all_loadable_image_ids(city_name: str) -> Optional[List[int]]:
     )
 
 
-def _get_raw_persisted_labels(city_name: str, image_ids: List[int]) -> List[str]:
+def _get_raw_persisted_labels(city_name: str) -> List[str]:
     """Returns a flattened list of all available raw labels for the given set of image ids.
 
     Parameters
     ----------
     city_name: str
         Name of the city to train for.
-    image_ids: int
-        Image ids.
 
     Returns
     -------
@@ -322,7 +320,7 @@ def _get_raw_persisted_labels(city_name: str, image_ids: List[int]) -> List[str]
         Available raw labels.
     """
     final_labels_list = set()
-    query = f"select image_labels from data_mart_layer.images_{city_name} where image_id in {tuple(image_ids)}"
+    query = f"select image_labels from data_mart_layer.images_{city_name} where image_labels is not null"
     result = list(
         filter(
             lambda res: res is not None,
@@ -562,7 +560,7 @@ def _retrieve_images_and_labels(city: str, min_number_of_images_per_label: int) 
 
     # retrieve relevant image ids for partitioned processing
     image_ids_to_load = _get_all_loadable_image_ids(city)  # list of tuples with: image file + bounding box
-    label_mappings = _retrieve_label_mappings_raw_to_final(_get_raw_persisted_labels(city, image_ids_to_load), city)
+    label_mappings = _retrieve_label_mappings_raw_to_final(_get_raw_persisted_labels(city), city)
     print_label_mappings(label_mappings)
     image_ids_to_load, excluded_raw_labels = _compute_actual_image_ids_to_load(city,
                                                                                label_mappings,

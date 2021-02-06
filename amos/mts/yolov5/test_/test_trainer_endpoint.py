@@ -136,7 +136,7 @@ class MTSHelperTestCase(unittest.TestCase):
         example_boxes = '{"(0.136,0.725,0.825,0.015,\\"Timessquare\\")",' \
                         '"(0.1,0.5,0.3,0.2,\\"Centralpark\\")"}'
         with patch(f'{MODULE_PATH}._exec_dql_query', return_value=[(example_boxes,)]):
-            persisted_labels = _get_raw_persisted_labels('new_york', [1])
+            persisted_labels = _get_raw_persisted_labels('new_york')
             assert 'Timessquare' in persisted_labels
             assert 'Centralpark' in persisted_labels
 
