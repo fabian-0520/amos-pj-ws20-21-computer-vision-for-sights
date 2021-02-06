@@ -68,7 +68,7 @@ class UiMainWindow(QWidget):
 	model_selected = False
 	textbox_height = 25
 	small_button_width = 100
-	small_button_height = 25
+	small_button_height = 30
 	debug_height = 200
 	debug = False
 
@@ -91,7 +91,7 @@ class UiMainWindow(QWidget):
 
 		self.Text_City = QLineEdit(self.centralwidget)
 		self.Text_City.setGeometry(
-			QRect(self.dist + self.dist + self.button_width, self.dist,
+			QRect(self.dist + self.dist + self.button_width, self.dist+10,
 			self.button_width, self.textbox_height))
 		self.Text_City.setObjectName("Text_City")
 		self.Text_City.setToolTip(
@@ -100,7 +100,7 @@ class UiMainWindow(QWidget):
 		self.Button_City = QPushButton(self.centralwidget)
 		self.Button_City.setGeometry(
 			QRect(
-				int(2.3*self.dist) + self.button_width + self.button_width, self.dist,
+				int(2.3*self.dist) + self.button_width + self.button_width, self.dist+8,
 				self.small_button_width, self.small_button_height)
 		)
 		self.Button_City.setObjectName("Button_City")
