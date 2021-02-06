@@ -463,7 +463,7 @@ def _preprocess_raw_label(label: str, city: str) -> str:
     preprocessed_label: str
         Pre-processed label.
     """
-    return re.sub('[^A-Z0-9]+', '', label.upper()).replace(f'{city.replace("_", "").upper()}', '')
+    return re.sub('[^A-Z0-9]+', '', label.upper()).replace(f'{city}', '')
 
 
 def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> Dict[str, str]:
@@ -482,7 +482,7 @@ def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> D
         Mapping table containing the raw label as keys and the labels to be mapped to as values.
     """
     print('Computing mappings for duplicate/ambiguous labels...')
-    city_preprocessed = re.sub('[^A-Z]+', '', city.upper())
+    city_preprocessed = re.sub('[^A-Z]+', '', city.upper()).replace("_", "")
     mapping_table = dict(zip(label_list, label_list))
 
     for tpl in combinations(label_list, 2):  # removes replicated pairs
@@ -493,9 +493,9 @@ def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> D
         if len(label_1_processed) == 0 or len(label_2_processed) == 0:
             continue
 
-        if label_1_processed in label_2_processed and label_1_processed != label_2_processed:  # retain abstracted labels more
+        if _is_label_directly_replaceable(label_2_processed, label_1_processed, label_1, city_preprocessed):
             mapping_table[label_2] = label_1  # label_2: replaced by new mapping label_1
-        elif label_2_processed in label_1_processed and label_1_processed != label_2_processed:
+        elif _is_label_directly_replaceable(label_1_processed, label_2_processed, label_2, city_preprocessed):
             mapping_table[label_1] = label_2  # label_1: replaced by new mapping label_2
         elif fuzz.ratio(label_1_processed, label_2_processed) >= 0.9 * 100:
             label_mapping = (label_1, label_2) if len(label_1_processed) > len(label_2_processed) \
@@ -503,6 +503,36 @@ def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> D
             mapping_table[label_mapping[0]] = label_mapping[1]
 
     return mapping_table
+
+
+def _is_label_directly_replaceable(query_label_processed: str, potential_new_label_processed: str,
+                                   potential_raw_new_label: str, city_processed: str) -> bool:
+    """Returns whether a given query label is directly replaceable by the potential passed (new) label
+    (meaning without any fuzzy matching).
+
+    Parameters
+    ----------
+    query_label_processed: str
+        Query label (processed).
+    potential_new_label_processed: str
+        Potential new label (processed).
+    potential_raw_new_label: str
+        Potential new label (unprocessed).
+    city_processed: str
+        City name (processed).
+
+    Returns
+    -------
+    is_replaceable: bool
+        Whether the given query label is indeed replaceable by the potential new, passed label.
+    """
+    return all([
+        potential_new_label_processed in query_label_processed,  # new label should be an abstraction [less info]
+        query_label_processed != potential_new_label_processed,  # replacement cannot be the same
+        len(potential_raw_new_label) > 6,  # new label should be useful instead of being too short
+        potential_new_label_processed not in [city_processed, city_processed + 'CITY', 'CITY' + city_processed]
+        # e.g. NewYorkArtMuseum should NOT be replaced by NewYork (city itself) => too general
+    ])
 
 
 def _replace_labels_in_label_files_with_index(labels: List[str]):
@@ -559,7 +589,6 @@ def _retrieve_images_and_labels(city: str, min_number_of_images_per_label: int) 
     _init_directories_for_training()
 
     # retrieve relevant image ids for partitioned processing
-    image_ids_to_load = _get_all_loadable_image_ids(city)  # list of tuples with: image file + bounding box
     label_mappings = _retrieve_label_mappings_raw_to_final(_get_raw_persisted_labels(city), city)
     print_label_mappings(label_mappings)
     image_ids_to_load, excluded_raw_labels = _compute_actual_image_ids_to_load(city,
