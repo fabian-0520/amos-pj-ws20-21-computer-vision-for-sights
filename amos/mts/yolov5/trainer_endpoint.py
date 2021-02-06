@@ -448,22 +448,20 @@ def _persist_single_image_and_label_file(image: bytes, labels_file_content: str)
     return True
 
 
-def _preprocess_raw_label(label: str, city: str) -> str:
+def _preprocess_raw_label(label: str) -> str:
     """Returns the pre-processed sight label of a given city.
 
     Parameters
     ----------
     label: str
         Raw label.
-    city: str
-        City the label belongs to.
 
     Returns
     -------
     preprocessed_label: str
         Pre-processed label.
     """
-    return re.sub('[^A-Z0-9]+', '', label.upper()).replace(f'{city}', '')
+    return re.sub('[^A-Z0-9]+', '', label.upper())
 
 
 def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> Dict[str, str]:
@@ -482,13 +480,13 @@ def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> D
         Mapping table containing the raw label as keys and the labels to be mapped to as values.
     """
     print('Computing mappings for duplicate/ambiguous labels...')
-    city_preprocessed = re.sub('[^A-Z]+', '', city.upper()).replace("_", "")
+    city_preprocessed = re.sub('[^A-Z]+', '', city.upper().replace('_', ''))
     mapping_table = dict(zip(label_list, label_list))
 
     for tpl in combinations(label_list, 2):  # removes replicated pairs
         label_1, label_2 = tpl
-        label_1_processed = _preprocess_raw_label(label_1, city_preprocessed)
-        label_2_processed = _preprocess_raw_label(label_2, city_preprocessed)
+        label_1_processed = _preprocess_raw_label(label_1)
+        label_2_processed = _preprocess_raw_label(label_2)
 
         if len(label_1_processed) == 0 or len(label_2_processed) == 0:
             continue
@@ -526,10 +524,11 @@ def _is_label_directly_replaceable(query_label_processed: str, potential_new_lab
     is_replaceable: bool
         Whether the given query label is indeed replaceable by the potential new, passed label.
     """
+    rm_city = lambda s: s.upper().replace(city_processed, '').replace('CITY', '')
     return all([
-        potential_new_label_processed in query_label_processed,  # new label should be an abstraction [less info]
-        query_label_processed != potential_new_label_processed,  # replacement cannot be the same
-        len(potential_raw_new_label) > 6,  # new label should be useful instead of being too short
+        rm_city(potential_new_label_processed) in rm_city(query_label_processed),  # new label should be an abstraction [less info]
+        rm_city(query_label_processed) != rm_city(potential_new_label_processed),  # replacement cannot be the same
+        len(rm_city(potential_raw_new_label)) > 9,  # new label should be useful instead of being too short
         potential_new_label_processed not in [city_processed, city_processed + 'CITY', 'CITY' + city_processed]
         # e.g. NewYorkArtMuseum should NOT be replaced by NewYork (city itself) => too general
     ])
