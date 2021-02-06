@@ -49,7 +49,7 @@ def update_dropdown(Box_Stadt: QComboBox) -> None:
         sleep(30)
         selected = Box_Stadt.currentText()
         Box_Stadt.clear()
-        Box_Stadt.addItems(['Choose City'] + get_supported_cities())
+        Box_Stadt.addItems(['Choose City'] + initialize_cities())
         Box_Stadt.setCurrentText(selected)
         Box_Stadt.update()
 
@@ -70,3 +70,18 @@ def filterCity(input_city: str) -> str:
     # input_city = string.capwords(input_city.lower())
     result = filterString(input_city).cities
     return result
+
+def initialize_cities() -> list:
+    """Returns a list of all supported cities with which points of interest can be detected. 
+    If there is a connection to the DOS, the cities in our DWH are returned.
+    Otherwise the locally available cities are returned.
+    """
+    if get_supported_cities() != []:
+        supported_cities = get_supported_cities()
+    else:
+        supported_cities = []
+        for filename in os.listdir('weights'):
+            if filename.endswith(".pt"):
+                pretty_modelname = filename[:-3].replace("_", " ").title()
+                supported_cities.append(pretty_modelname)
+    return supported_cities

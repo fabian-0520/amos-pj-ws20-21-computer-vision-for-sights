@@ -1,5 +1,5 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import wipe_prediction_input_images, update_dropdown, filterCity
+from helper import wipe_prediction_input_images, update_dropdown, filterCity, initialize_cities
 from label import ImageLabel
 from detect import Detection
 from debug import *
@@ -28,6 +28,7 @@ from datetime import datetime
 import shutil
 import sys
 import os
+from pathlib import Path
 import time
 import logging
 from threading import Thread
@@ -97,7 +98,7 @@ class UiMainWindow(QWidget):
 		self.Button_City = QPushButton(self.centralwidget)
 		self.Button_City.setGeometry(
 			QRect(
-				self.dist + self.dist + self.button_width + self.button_width,
+				int(2.3*self.dist) + self.button_width + self.button_width,
 				self.dist, self.small_button_width, self.textbox_height)
 		)
 		self.Button_City.setObjectName("Button_City")
@@ -235,7 +236,7 @@ class UiMainWindow(QWidget):
 		"""
 		_translate = QCoreApplication.translate
 		main_window.setWindowTitle(_translate(WINDOW, "SightScan"))
-		self.Box_Stadt.addItems(['Choose City'] + get_supported_cities())
+		self.Box_Stadt.addItems(['Choose City'] + initialize_cities())
 		self.Box_Camera_selector.setItemText(0, _translate(WINDOW, "Choose Webcam"))
 		self.Button_Detection.setText(_translate(WINDOW, START))
 		self.Button_Bild.setText(_translate(WINDOW, ENABLE))
@@ -247,59 +248,66 @@ class UiMainWindow(QWidget):
 		city = self.Box_Stadt.currentText().replace(' ', '_').upper()
 
 		if city != "CHOOSE_CITY":
-			downloaded_version = -1  # initialization
+			# if no connection to dos
+			if get_supported_cities() == []:
+				print('no connection to dos')
 
-			if not os.path.exists("weights/versions.txt"):
-				with open('weights/versions.txt', 'w'):  # creating a version file
-					pass
-
-			with open("weights/versions.txt", "r") as file:
-				for line in file:
-					elements = line.split("=")
-					if elements[0].upper() == city:
-						downloaded_version = int(elements[1])
-						break
-
-			latest_version = get_dwh_model_version(city)
-
-			if downloaded_version == -1:
-				msg = QMessageBox()
-				msg.setWindowTitle("Download City")
-				msg.setWindowIcon(QIcon("icon_logo.png"))
-				msg.setText("Do you want to download " + city_pretty_print + "?")
-				msg.setIcon(QMessageBox.Question)
-				msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
-				msg.setDefaultButton(QMessageBox.Ok)
-				msg.setInformativeText("When downloaded, sights of " + city_pretty_print + " can be detected.")
-				msg.buttonClicked.connect(self.handover_city)
-
-				msg.exec_()
-
-			elif latest_version > downloaded_version:
-				update_msg = QMessageBox()
-				update_msg.setWindowTitle("Update available")
-				update_msg.setWindowIcon(QIcon("icon_logo.png"))
-				update_msg.setText("Do you want to download an update for " + city + "?")
-				update_msg.setIcon(QMessageBox.Question)
-				update_msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
-				update_msg.setDefaultButton(QMessageBox.Ok)
-				update_msg.setInformativeText(
-					"Updated cities can detect sights faster and more accurately. If you choose not to download, the " +
-					"detection will still work.")
-				update_msg.buttonClicked.connect(self.handover_city)
-
-				update_msg.exec_()
-
+			# if connection to dos
 			else:
-				self.model_selected = True
-				newest_vers_msg = QMessageBox()
-				newest_vers_msg.setWindowTitle("Ready for Detection!")
-				newest_vers_msg.setWindowIcon(QIcon("icon_logo.png"))
-				newest_vers_msg.setText("You can start detecting sights in " + city_pretty_print + "!")
-				newest_vers_msg.setStandardButtons(QMessageBox.Ok)
-				newest_vers_msg.setDefaultButton(QMessageBox.Ok)
+				downloaded_version = -1  # initialization
 
-				newest_vers_msg.exec_()
+				Path("weights").mkdir(mode=0o700, exist_ok=True)
+
+				if not os.path.exists("weights/versions.txt"):
+					with open('weights/versions.txt', 'w'):  # creating a version file
+						pass
+
+				with open("weights/versions.txt", "r") as file:
+					for line in file:
+						elements = line.split("=")
+						if elements[0].upper() == city:
+							downloaded_version = int(elements[1])
+							break
+
+				latest_version = get_dwh_model_version(city)
+
+				if downloaded_version == -1:
+					msg = QMessageBox()
+					msg.setWindowTitle("Download City")
+					msg.setWindowIcon(QIcon("icon_logo.png"))
+					msg.setText("Do you want to download " + city_pretty_print + "?")
+					msg.setIcon(QMessageBox.Question)
+					msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
+					msg.setDefaultButton(QMessageBox.Ok)
+					msg.setInformativeText("When downloaded, sights of " + city_pretty_print + " can be detected.")
+					msg.buttonClicked.connect(self.handover_city)
+
+					msg.exec_()
+
+				elif latest_version > downloaded_version:
+					update_msg = QMessageBox()
+					update_msg.setWindowTitle("Update available")
+					update_msg.setWindowIcon(QIcon("icon_logo.png"))
+					update_msg.setText("Do you want to download an update for " + city + "?")
+					update_msg.setIcon(QMessageBox.Question)
+					update_msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
+					update_msg.setDefaultButton(QMessageBox.Ok)
+					update_msg.setInformativeText(
+						"Updated cities can detect sights faster and more accurately. If you choose not to download, the " +
+						"detection will still work.")
+					update_msg.buttonClicked.connect(self.handover_city)
+
+					update_msg.exec_()
+
+			self.model_selected = True
+			newest_vers_msg = QMessageBox()
+			newest_vers_msg.setWindowTitle("Ready for Detection!")
+			newest_vers_msg.setWindowIcon(QIcon("icon_logo.png"))
+			newest_vers_msg.setText("You can start detecting sights in " + city_pretty_print + "!")
+			newest_vers_msg.setStandardButtons(QMessageBox.Ok)
+			newest_vers_msg.setDefaultButton(QMessageBox.Ok)
+
+			newest_vers_msg.exec_()
 
 		else:
 			self.model_selected = False
@@ -357,7 +365,7 @@ class UiMainWindow(QWidget):
 					self.prep_video_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
 												   kwargs={'weights': 'weights/' + city + '.pt', 'source': '0',
-														   'image_size': 736, 'debug': self.debug})
+														   'image_size': 608, 'debug': self.debug})
 					self.detection_thread.start()
 		else:
 			print("Drop a File or select a Webcam!")
@@ -384,7 +392,7 @@ class UiMainWindow(QWidget):
 			cmsg = QMessageBox()
 			cmsg.setWindowTitle("Request confirmed")
 			cmsg.setWindowIcon(QIcon("icon_logo.png"))
-			cmsg.setText("Your request to add support for " + city_request + " has been sent to our backend.")
+			cmsg.setText("Your request to add support for " + city_input + " has been sent to our backend.")
 			cmsg.setStandardButtons(QMessageBox.Ok)
 			cmsg.setDefaultButton(QMessageBox.Ok)
 			cmsg.exec_()
@@ -427,6 +435,8 @@ class UiMainWindow(QWidget):
 		i:
 			Index of the chosen camera.
 		"""
+		self.Label_Bild.image = "logo.png"
+		self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		if i == 0:
 			self.camera.stop()
 			self.detector.disable_detection()
@@ -435,8 +445,6 @@ class UiMainWindow(QWidget):
 			self.camera_viewfinder.hide()
 			self.Label_Bild.show()
 			time.sleep(2)
-			self.Label_Bild.image = "logo.png"
-			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		else:
 			self.camera_viewfinder.show()
 			self.stacked_widget.setCurrentIndex(1)
