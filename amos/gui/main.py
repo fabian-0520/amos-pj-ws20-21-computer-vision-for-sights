@@ -68,6 +68,7 @@ class UiMainWindow(QWidget):
 	model_selected = False
 	textbox_height = 25
 	small_button_width = 100
+	small_button_height = 25
 	debug_height = 200
 	debug = False
 
@@ -90,7 +91,8 @@ class UiMainWindow(QWidget):
 
 		self.Text_City = QLineEdit(self.centralwidget)
 		self.Text_City.setGeometry(
-			QRect(self.dist + self.dist + self.button_width, self.dist, self.button_width, self.textbox_height))
+			QRect(self.dist + self.dist + self.button_width, self.dist,
+			self.button_width, self.textbox_height))
 		self.Text_City.setObjectName("Text_City")
 		self.Text_City.setToolTip(
 			'Enter a city you wish to detect sights in that you cannot find in the dropdown on the left after updating.')
@@ -98,8 +100,8 @@ class UiMainWindow(QWidget):
 		self.Button_City = QPushButton(self.centralwidget)
 		self.Button_City.setGeometry(
 			QRect(
-				int(2.3*self.dist) + self.button_width + self.button_width,
-				self.dist, self.small_button_width, self.textbox_height)
+				int(2.3*self.dist) + self.button_width + self.button_width, self.dist,
+				self.small_button_width, self.small_button_height)
 		)
 		self.Button_City.setObjectName("Button_City")
 		self.Button_City.clicked.connect(self.request_city)
@@ -167,12 +169,25 @@ class UiMainWindow(QWidget):
 		self.Label_Bild = ImageLabel(self)
 		self.Label_Bild.setGeometry(QRect(0, 0, self.window_width - (self.dist * 2), label_height))
 
+		self.checkBox = QCheckBox("Help improving SightScan's detection quality", self.centralwidget)
+		self.checkBox.setObjectName(u"improvement")
+		self.checkBox.setGeometry(
+            QRect(
+                int(self.dist*3.5),
+                5,
+                300,
+                20)
+            )
+		self.checkBox.setChecked(False)
+		#self.checkBox.stateChanged.connect(self.improve_quality)
+
+
 		self.checkBox = QCheckBox("Debug", self.centralwidget)
 		self.checkBox.setObjectName(u"checkBox")
 		self.checkBox.setGeometry(
             QRect(
                 self.dist,
-                10,
+                5,
                 70,
                 20)
             )
