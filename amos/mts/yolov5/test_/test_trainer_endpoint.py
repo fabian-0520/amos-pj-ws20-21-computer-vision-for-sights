@@ -166,7 +166,7 @@ class MTSHelperTestCase(unittest.TestCase):
             assert 'StatueOfLiberty' in final_sight_list
 
     def test_preprocess_raw_label(self) -> None:
-        assert _preprocess_raw_label('Hollywood Sign Los Angeles', 'Los_Angeles') == 'HOLLYWOODSIGN'
+        assert _preprocess_raw_label('HollywoodSignLos_Angeles') == 'HOLLYWOODSIGNLOSANGELES'
 
     def test_retrieve_label_mappings_raw_to_final(self) -> None:
         label_list = ['THISISANAWEFULLYLONGSHENZENSIGHTLABEL.',
