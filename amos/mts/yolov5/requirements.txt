@@ -33,6 +33,8 @@ pycocotools>=2.0  # COCO mAP
 psycopg2-binary
 
 # testing
+coverage
+mock
 pytest
 
 # label corrections

@@ -465,7 +465,7 @@ def _preprocess_raw_label(label: str, city: str) -> str:
     preprocessed_label: str
         Pre-processed label.
     """
-    return re.sub('[^A-Z0-9]+', '', label.upper()).replace(f'{city}', '')
+    return re.sub('[^A-Z0-9]+', '', label.upper()).replace(f'{city.replace("_", "").upper()}', '')
 
 
 def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> Dict[str, str]:
@@ -504,10 +504,6 @@ def _retrieve_label_mappings_raw_to_final(label_list: List[str], city: str) -> D
                 else (label_2, label_1)
             mapping_table[label_mapping[0]] = label_mapping[1]
 
-    for key, value in mapping_table.items():
-        if key != value:
-            print(f'Mapping identified: old label {key} -> new label {value}.')
-
     return mapping_table
 
 
@@ -533,6 +529,19 @@ def _replace_labels_in_label_files_with_index(labels: List[str]):
             _file.write(text)
 
 
+def print_label_mappings(mapping_table: Dict[str, str]) -> None:
+    """Merely prints the identified label mappings.
+
+    Parameters
+    ----------
+    mapping_table: dict[str, str]
+        Label map containing the original, raw labels as keys and their mapping as values.
+    """
+    for key, value in mapping_table.items():
+        if key != value:
+            print(f'Mapping identified: old label {key} -> new label {value}.')
+
+
 def _retrieve_images_and_labels(city: str, min_number_of_images_per_label: int) -> List[str]:
     """Fetches the images (according to their labels) into
     correct directories and generates a final labels list.
@@ -554,6 +563,7 @@ def _retrieve_images_and_labels(city: str, min_number_of_images_per_label: int) 
     # retrieve relevant image ids for partitioned processing
     image_ids_to_load = _get_all_loadable_image_ids(city)  # list of tuples with: image file + bounding box
     label_mappings = _retrieve_label_mappings_raw_to_final(_get_raw_persisted_labels(city, image_ids_to_load), city)
+    print_label_mappings(label_mappings)
     image_ids_to_load, excluded_raw_labels = _compute_actual_image_ids_to_load(city,
                                                                                label_mappings,
                                                                                min_number_of_images_per_label)
