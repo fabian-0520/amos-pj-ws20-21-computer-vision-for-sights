@@ -125,13 +125,11 @@ def handle_get_supported_cities() -> Tuple[str, int]:
     http_status: int
         HTTP status code.
     """
-    cities_query = (
-        "SELECT DISTINCT(city_name) AS city_name " "FROM integration_layer.dim_sights_cities " "ORDER BY city_name ASC"
-    )
+    cities_query = 'select distinct(city_name) from data_mart_layer.current_trained_models order by city_name asc'
     cities = exec_dql_query(cities_query, return_result=True)
     cities = [] if not cities else list(map(lambda _city: _city[0], cities))
 
-    return dumps({"cities": cities}), 200
+    return dumps({'cities': cities}), 200
 
 
 def _get_crawler_docker_run_command(city: str) -> str:
