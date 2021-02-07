@@ -313,14 +313,14 @@ class UiMainWindow(QWidget):
 			Pushed button inside the popup.
 		"""
 
-		if button.text() == "OK":
+		if "OK" in button.text().upper():
 			city = self.Box_Stadt.currentText().replace(' ', '_').upper()
 			self.model_selected = True
 			model = get_downloaded_model(city)
 			if model is not None:
 				with open("weights/" + city + ".pt", "wb+") as file:
 					file.write(model)
-		elif button.text() == "Cancel":
+		elif "CANCEL" in button.text().upper():
 			self.Box_Stadt.setCurrentIndex(0)
 
 	def detect_sights(self) -> None:

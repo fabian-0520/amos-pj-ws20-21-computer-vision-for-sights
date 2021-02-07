@@ -5,8 +5,10 @@ and merging them into the data warehouse - provided the specified city is yet no
 from dwh_communication.exec_dwh_sql import exec_dql_query, exec_dml_query
 from google.cloud import vision
 from google.protobuf.json_format import MessageToDict
+from multiprocessing import Pool
 from os import environ
 from PIL import Image
+from threading import Thread
 from typing import Optional, Dict, Union, Tuple, List
 import datetime
 import io
@@ -26,20 +28,54 @@ def persist_google_vision_labels(city_name: str) -> None:
         Name of the city to retrieve bounding box labels for.
     """
     image_ids_for_labelling = _read_image_ids_for_labelling(city_name)
-    if isinstance(image_ids_for_labelling, list) and len(image_ids_for_labelling) > 0:
-        for image_id in image_ids_for_labelling:
-            log_incident(
-                f"Trying to retrieve bounding box labels for image {image_id} " f"[new city: {city_name.upper()}]."
-            )
-            if _label_image(image_id):
-                log_incident(
-                    f"Retrieving + persisting bounding box labels for image "
-                    f"{image_id} successful [new city: {city_name.upper()}]."
+    process_starter_thread = Thread(target=_retrieve_city_labels_from_vision,
+                                    daemon=True,
+                                    args=(image_ids_for_labelling, city_name))
+    process_starter_thread.start()
+
+
+def _retrieve_city_labels_from_vision(image_ids_for_labelling: List[int], city_name: str) -> None:
+    """Retrieves the city labels from Google Vision.
+
+    Parameters
+    ----------
+    image_ids_for_labelling: list[int]
+        Image ids used for labelling.
+    city_name: str
+        Name of the city to train for.
+    """
+    if isinstance(image_ids_for_labelling, list) and image_ids_for_labelling:
+        with Pool() as process_pool:
+            process_worker_inputs = list(
+                zip(
+                    image_ids_for_labelling,
+                    [city_name] * len(image_ids_for_labelling)
                 )
-            else:
-                log_incident(f"Google vision API has identified no landmark for image {image_id}.")
+            )
+            process_pool.map(_retrieve_single_label_from_vision, process_worker_inputs)
     else:
         log_incident(f"No images to be labelled found [new city: {city_name.upper()}].")
+
+
+def _retrieve_single_label_from_vision(image_input: Tuple[int, str]) -> None:
+    """Asynchronously inserts a single label from Google Vision into the DWH.
+
+    Parameters
+    ----------
+    image_input: tuple[int, str]
+        Tuple describing the image to label, including its id and the city it belongs to.
+    """
+    image_id, city_name = image_input[0], image_input[1]
+    log_incident(
+        f"Trying to retrieve bounding box labels for image {image_id} " f"[new city: {city_name.upper()}]."
+    )
+    if _label_image(image_id):
+        log_incident(
+            f"Retrieving + persisting bounding box labels for image "
+            f"{image_id} successful [new city: {city_name.upper()}]."
+        )
+    else:
+        log_incident(f"Google vision API has identified no landmark for image {image_id}.")
 
 
 def _get_image_resolution(image_bytes: bytes) -> Tuple[int, int]:
@@ -186,7 +222,7 @@ def log_incident(msg: str) -> None:
 
 
 def _parse_landmark_to_bounding_box_str(
-    landmark_annotation: Dict[str, Union[str, float, dict, list]], image_width: int, image_height: int
+        landmark_annotation: Dict[str, Union[str, float, dict, list]], image_width: int, image_height: int
 ) -> str:
     """Returns the bounding box landmark in its bounding box string representation.
 
@@ -208,7 +244,7 @@ def _parse_landmark_to_bounding_box_str(
     bounding_box = landmark_annotation["boundingPoly"]["vertices"]
 
     x_vals = [point["x"] / image_width for point in bounding_box]
-    y_vals = [point["y"] / image_height for point in bounding_box]
+    y_vals = [(image_height - point["y"]) / image_height for point in bounding_box]
     ul_x, ul_y, lr_x, lr_y = min(x_vals), max(y_vals), max(x_vals), min(y_vals)
     ul_x = round(ul_x, ndigits=BOUNDING_BOX_DECIMALS_PRECISION)
     ul_y = round(ul_y, ndigits=BOUNDING_BOX_DECIMALS_PRECISION)

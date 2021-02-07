@@ -1,3 +1,19 @@
+# How to run the MTS (standalone)
+0. Make sure you have a NVidia GPU installed
+1. Navigate into the mts/yolov5 folder
+2. Build the image: docker build . -t mts
+3. Run the shell script mts.sh (contained in the root directory) while providing the seven arguments from it
+    PGHOST: DWH host
+    PGPORT: DWH port
+    PGDATABASE: DWH database
+    PGUSER: DWH user
+    PGPASSWORD: DWH password
+    CITY: city to train on
+    EPOCHS: epochs to train for
+    MIN_IMAGE_NUMBER_PER_LABEL: minimum images per class
+
+# Reference README file
+
 <a href="https://apps.apple.com/app/id1452689527" target="_blank">
 <img src="https://user-images.githubusercontent.com/26833433/98699617-a1595a00-2377-11eb-8145-fc674eb9b1a7.jpg" width="1000"></a>
 &nbsp

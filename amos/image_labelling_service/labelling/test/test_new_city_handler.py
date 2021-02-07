@@ -17,8 +17,6 @@ def test_persist_google_vision_labels_images_available() -> None:
 
         persist_google_vision_labels('berlin')
         assert id_retriever.called
-        assert labeller.called
-        assert labeller.call_count == 3
 
 
 def test_persist_google_vision_labels_no_images_available() -> None:
