@@ -40,3 +40,6 @@ pyqt5
 psycopg2-binary
 typing
 python-dotenv
+
+#filtering
+geotext
