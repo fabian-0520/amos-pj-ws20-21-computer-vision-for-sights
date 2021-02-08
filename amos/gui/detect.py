@@ -54,9 +54,9 @@ class Detection:
         opt_device = ''
         opt_augment = False
         opt_conf_thres = 0.25
-        opt_iou_thres = 0.20
+        opt_iou_thres = 0.01
         opt_classes = 0
-        opt_agnostic_nms = False
+        opt_agnostic_nms = True
         opt_save_conf = False
         webcam = False
 
@@ -88,6 +88,7 @@ class Detection:
             cudnn.benchmark = True  # set True to speed up constant image size inference
             dataset = LoadStreams(source, img_size=imgsz)
             print("webcam")  # debug
+            logging.debug("webcam")
         else:
             dataset = LoadImages(source, img_size=imgsz)
             print("image")  # debug
@@ -102,7 +103,9 @@ class Detection:
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
         for path, img, im0s, vid_cap in dataset:
             if self.detection is False and webcam is True:
+                logging.debug("kill thread")
                 dataset.kill_thread()
+                logging.debug("set detection true")
                 self.detection = True
                 break
             img = torch.from_numpy(img).to(device)
@@ -123,6 +126,7 @@ class Detection:
             if classify:
                 pred = apply_classifier(pred, modelc, img, im0s)
 
+            logging.debug("process detections")
             # Process detections
             for i, det in enumerate(pred):  # detections per image
                 if webcam:  # batch_size >= 1

@@ -147,7 +147,8 @@ class UiMainWindow(QWidget):
 		)
 		self.Box_Camera_selector.setObjectName("Box_Camera_selector")
 		self.Box_Camera_selector.addItem("")
-		self.Box_Camera_selector.addItems([camera.description() for camera in self.available_cameras])
+		# self.Box_Camera_selector.addItems([camera.description() for camera in self.available_cameras])
+		self.Box_Camera_selector.addItems(["Camera " + str(i) for i in range(len(self.available_cameras))])
 		self.Box_Camera_selector.currentIndexChanged.connect(self.select_camera)
 
 		self.stacked_widget = QStackedWidget(self.centralwidget)
@@ -175,7 +176,7 @@ class UiMainWindow(QWidget):
             QRect(
                 int(self.dist*3.5),
                 5,
-                300,
+                350,
                 20)
             )
 		self.checkBox.setChecked(False)
@@ -356,6 +357,7 @@ class UiMainWindow(QWidget):
 				self.Label_Bild.image != "logo.png":
 			# if no model selected
 			if self.model_selected is False:
+
 				self.show_missing_model_popup()
 			# if model selected
 			else:
@@ -380,7 +382,7 @@ class UiMainWindow(QWidget):
 					self.prep_video_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
 												   kwargs={'weights': 'weights/' + city + '.pt', 'source': '0',
-														   'image_size': 608, 'debug': self.debug})
+														   'image_size': 703, 'debug': self.debug})
 					self.detection_thread.start()
 		else:
 			print("Drop a File or select a Webcam!")
