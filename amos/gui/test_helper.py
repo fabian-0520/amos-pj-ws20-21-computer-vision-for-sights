@@ -1,4 +1,4 @@
-from helper import wipe_prediction_input_images, get_current_prediction_output_path
+from helper import wipe_prediction_input_images, get_current_prediction_output_path, filterCity
 import os
 
 
@@ -47,3 +47,20 @@ def test_file_reload_new_dir():
 def _create_file(dummy_full_path):
     with open(f'{os.getcwd()}/{dummy_full_path}', 'w+') as file:
         file.write('dummy')
+
+
+def test_filter_city_name():
+    correct_input = "Madrid"
+    wrong_typed_input = "Rio De Janeiro"
+    multiple_worded_input = "Andorra la Vella"
+    unknown_input = "Louvre"
+
+    result_1 = filterCity(correct_input)
+    result_2 = filterCity(wrong_typed_input)
+    result_3 = filterCity(multiple_worded_input)
+    result_4 = filterCity(unknown_input)
+
+    assert result_1 is not [] and result_1[0] == correct_input
+    assert result_2 is []
+    assert result_3 is not [] and result_3[0] == multiple_worded_input
+    assert result_4 is []
