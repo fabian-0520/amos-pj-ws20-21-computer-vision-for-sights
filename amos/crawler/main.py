@@ -81,7 +81,7 @@ class AutoCrawler:
         self.full_resolution = full_resolution
         self.face = face
         self.no_gui = no_gui
-        self.limit = limit
+        self.limit = int(limit / 2)
         self.no_driver = no_driver
         self.keyword_list = keyword_list
         self.region = region
@@ -437,4 +437,4 @@ if __name__ == "__main__":
         shutil.rmtree("./download")
         print("Download folder removed")
     except OSError as e:
-        print("Download directory could not be deleted")
+        print("Download directory could not be deleted:{} ".format(e))
