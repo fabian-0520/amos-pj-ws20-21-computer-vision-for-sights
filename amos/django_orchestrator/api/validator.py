@@ -59,7 +59,7 @@ def is_city_existing(city: str) -> bool:
     is_existing: bool
         Whether the passed city exists.
     """
-    cities_query = "SELECT DISTINCT(city_name) AS city_name FROM integration_layer.dim_sights_cities"
+    cities_query = "select distinct(city_name) from data_mart_layer.current_trained_models"
     cities = set(map(lambda _city: _city[0].upper(), exec_dql_query(cities_query, return_result=True)))
     return city.upper() in cities
 
