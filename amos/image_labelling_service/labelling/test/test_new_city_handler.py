@@ -10,11 +10,6 @@ import re
 MODULE_PATH = 'labelling.new_city_handler'
 
 
-def get_test_image_bytes() -> bytes:
-    with open('labelling/test/test_image.testimage', 'rb') as image:
-        return image.read()
-
-
 def test_persist_google_vision_labels_images_available() -> None:
     with patch(f'{MODULE_PATH}._read_image_ids_for_labelling', return_value=[1, 2, 3]) as id_retriever, \
             patch(f'{MODULE_PATH}._label_image') as labeller, \
@@ -22,8 +17,6 @@ def test_persist_google_vision_labels_images_available() -> None:
 
         persist_google_vision_labels('berlin')
         assert id_retriever.called
-        assert labeller.called
-        assert labeller.call_count == 3
 
 
 def test_persist_google_vision_labels_no_images_available() -> None:
@@ -34,10 +27,10 @@ def test_persist_google_vision_labels_no_images_available() -> None:
         assert 'No images' in logger.call_args[0][0]
 
 
-def test_get_image_resolution() -> None:
-    width, height = _get_image_resolution(get_test_image_bytes())
-    assert width == 718
-    assert height == 620
+def test_get_image_resolution(image_mock: bytes) -> None:
+    width, height = _get_image_resolution(image_mock)
+    assert width == 1337
+    assert height == 1338
 
 
 def test_get_merged_bounding_box_string() -> None:
@@ -52,11 +45,11 @@ def test_get_merged_bounding_box_string() -> None:
     assert actual_result == expected_result
 
 
-def test_label_image(vision_response_mock: List[Dict[str, Union[str, float, dict, list]]]) -> None:
+def test_label_image(vision_response_mock: List[Dict[str, Union[str, float, dict, list]]], image_mock: bytes) -> None:
     mock_url = 'https://xd.com/awesome.png'
 
     with patch(f'{MODULE_PATH}.exec_dql_query',
-               return_value=[[get_test_image_bytes(), mock_url]]), \
+               return_value=[[image_mock, mock_url]]), \
          patch(f'{MODULE_PATH}._get_landmarks_from_vision', return_value=vision_response_mock), \
          patch(f'{MODULE_PATH}.exec_dml_query') as persistor:
         _label_image(42)
@@ -83,9 +76,10 @@ def test_log_incident() -> None:
     os.remove(LOG_FILE_NAME)
 
 
-def test_parsing_landmark_to_str(vision_response_mock: List[Dict[str, Union[str, float, dict, list]]]) -> None:
+def test_parsing_landmark_to_str(vision_response_mock: List[Dict[str, Union[str, float, dict, list]]],
+                                 image_mock: bytes) -> None:
 
-    width, height = _get_image_resolution(get_test_image_bytes())
+    width, height = _get_image_resolution(image_mock)
     test_landmark = vision_response_mock[1]
     bounding_box_infos = _parse_landmark_to_bounding_box_str(test_landmark, width, height)[2:-2].split(',')
 

@@ -19,3 +19,4 @@ def env_setup(monkeypatch):
     monkeypatch.setenv("DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS", "55")
     monkeypatch.setenv("DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS", "66")
     monkeypatch.setenv("MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING", "100")
+    monkeypatch.setenv("MIN_IMAGE_NUMBER_PER_LABEL", "10")
