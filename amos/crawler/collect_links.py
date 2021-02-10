@@ -110,7 +110,7 @@ class CollectLinks:
     def remove_duplicates(_list):
         return list(dict.fromkeys(_list))
 
-    def pinterest(self, keyword, region, add_url=""):
+    def pinterest(self, keyword, region, add_url="", limit=5000):
         sight_keyword = str(region + " " + keyword)
         url = "https://www.pinterest.de/search/pins/?q="
         self.browser.get("{0}{1}".format(url, sight_keyword))
@@ -132,8 +132,11 @@ class CollectLinks:
         print("Scraping links")
 
         links = []
-
+        count = 0
         for img in self.browser.find_elements(By.TAG_NAME, "img"):
+            count += 1
+            if count == limit:
+                break
             try:
 
                 # self.highlight(img)
@@ -247,7 +250,6 @@ class CollectLinks:
 
                 if src is not None:
                     links.append(src)
-                    print("%d: %s" % (count, src))
                     count += 1
 
             except StaleElementReferenceException:
