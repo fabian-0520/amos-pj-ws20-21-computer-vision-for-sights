@@ -54,7 +54,7 @@ def update_dropdown(Box_Stadt: QComboBox) -> None:
         Box_Stadt.update()
 
 
-def filterCity(input_city: str) -> str:
+def filter_city(input_city: str) -> str:
     """Returns the list of filtered cities from input string.
 
     Parameters
