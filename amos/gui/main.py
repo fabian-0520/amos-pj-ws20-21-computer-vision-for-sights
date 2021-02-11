@@ -1,5 +1,5 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import wipe_prediction_input_images, update_dropdown, filterCity, initialize_cities
+from helper import wipe_prediction_input_images, update_dropdown, filter_city, initialize_cities
 from label import ImageLabel
 from detect import Detection
 from debug import *
