@@ -16,7 +16,7 @@ class RequestMock:
     FILES: dict = None
 
     def __init__(self):
-        self.FILES = {'image': 'some Image', 'labels': _get_labels_string()}
+        self.FILES = {'image': 'some Image'}
 
 
 class CursorMock:
@@ -78,6 +78,7 @@ class CursorExceptionMock(CursorMock):
 
 class ImageMock:
     size: Tuple[int, int] = None
+    file: bytes = b'testtesttesttesttesttesttest'
 
     def __init__(self):
         self.size = (1920, 1080)
@@ -102,19 +103,6 @@ class ModelMock:
         return b'ThisIsSomeGreatPytorchModel!'
 
 
-def _get_labels_string():
-    return '{"boundingBoxes": [{\"ulx\": 0.12122, ' \
-           '\"uly\": 0.34212, ' \
-           '\"lrx\": 0.33311, ' \
-           '\"lry\": 0.12315, ' \
-           '\"sightName\": \"Brandenburger Tor\"}, ' \
-           '{\"ulx\": 0.12122, ' \
-           '\"uly\": 0.34212, ' \
-           '\"lrx\": 0.33311, ' \
-           '\"lry\": 0.12315, ' \
-           '\"sightName\": \"Siegessaeule\"}]}'
-
-
 @pytest.fixture(autouse=True)
 def env_setup(monkeypatch):
     monkeypatch.setenv('PYTHONPATH', '/django_orchestrator')
@@ -133,16 +121,6 @@ def env_setup(monkeypatch):
 @pytest.fixture(scope='module')
 def in_memory_uploaded_file_mock():
     return InMemoryUploadedFileMock()
-
-
-@pytest.fixture(scope='module')
-def labels_mock():
-    return _get_labels_string()
-
-
-@pytest.fixture(scope='module')
-def request_mock():
-    return RequestMock()
 
 
 @pytest.fixture(scope='module')

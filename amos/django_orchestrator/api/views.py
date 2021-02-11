@@ -1,5 +1,7 @@
 """This module contains the views exposed to the user."""
-import json
+from django.http import HttpResponse
+from rest_framework.decorators import api_view
+from rest_framework.request import Request
 from api.view_handlers import (
     handle_get_trained_city_model,
     handle_persist_sight_image,
@@ -8,9 +10,6 @@ from api.view_handlers import (
     HTTP_200_MESSAGE,
     handle_get_latest_city_model_version,
 )
-from django.http import HttpResponse
-from rest_framework.decorators import api_view
-from rest_framework.request import Request
 
 
 @api_view(["GET"])
@@ -55,7 +54,7 @@ def get_latest_city_model_version(request: Request, city: str) -> HttpResponse:
 
 @api_view(["POST"])
 def persist_sight_image(request: Request, city: str) -> HttpResponse:
-    """Persists a labelled image of a given supported city in the data warehouse.
+    """Persists an image of a given supported city in the data warehouse.
 
     Parameters
     ----------
@@ -70,9 +69,7 @@ def persist_sight_image(request: Request, city: str) -> HttpResponse:
         Response object containing a status message.
     """
     image = request.FILES["image"] if "image" in request.FILES else None
-    labels = request.FILES["labels"].read().decode("utf-8") if "labels" in request.FILES else None
-
-    response = handle_persist_sight_image(city.replace(' ', '_'), image, labels)
+    response = handle_persist_sight_image(city.replace(' ', '_'), image)
     return HttpResponse(response[0], status=response[1])
 
 

@@ -44,14 +44,14 @@ def get_current_prediction_output_path(prediction_output_base_path: str, image_n
     return newest_dir + '/' + image_name.replace('/', '')
 
 
-def update_dropdown(Box_Stadt: QComboBox) -> None:
+def update_dropdown(box_city: QComboBox) -> None:
     while True:
         sleep(30)
-        selected = Box_Stadt.currentText()
-        Box_Stadt.clear()
-        Box_Stadt.addItems(['Choose City'] + initialize_cities())
-        Box_Stadt.setCurrentText(selected)
-        Box_Stadt.update()
+        selected = box_city.currentText()
+        box_city.clear()
+        box_city.addItems(['Choose City'] + initialize_cities())
+        box_city.setCurrentText(selected)
+        box_city.update()
 
 
 def filter_city(input_city: str) -> str:
@@ -71,12 +71,13 @@ def filter_city(input_city: str) -> str:
     result = filterString(input_city).cities
     return result
 
+
 def initialize_cities() -> list:
     """Returns a list of all supported cities with which points of interest can be detected. 
     If there is a connection to the DOS, the cities in our DWH are returned.
     Otherwise the locally available cities are returned.
     """
-    if get_supported_cities() != []:
+    if get_supported_cities():
         supported_cities = get_supported_cities()
     else:
         supported_cities = []
