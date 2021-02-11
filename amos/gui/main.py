@@ -170,7 +170,7 @@ class UiMainWindow(QWidget):
 		self.Label_Bild = ImageLabel(self)
 		self.Label_Bild.setGeometry(QRect(0, 0, self.window_width - (self.dist * 2), label_height))
 
-		self.checkBox = QCheckBox("Help improving SightScan's detection quality", self.centralwidget)
+		self.checkBox = QCheckBox("Help improve SightScan's detection quality", self.centralwidget)
 		self.checkBox.setObjectName(u"improvement")
 		self.checkBox.setGeometry(
             QRect(
