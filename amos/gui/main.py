@@ -403,7 +403,7 @@ class UiMainWindow(QWidget):
 		# Send entered city to dwh and show confirmation popup if the city name is known
 		city_input = self.Text_City.text()
 		city_request = city_input.upper()
-		if len(filterCity(city_input)) == 1:
+		if len(filter_city(city_input)) == 1:
 			send_city_request(city_request)
 
 			cmsg = QMessageBox()
