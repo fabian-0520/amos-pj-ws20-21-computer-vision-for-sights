@@ -33,7 +33,7 @@ paths:
     post:
       tags:
       - "cities"
-      summary: "Inserts a given image including labels into the data warehouse to extend the overall training set."
+      summary: "Inserts a given image into the data warehouse to extend the overall training set."
       operationId: "insertImage"
       parameters:
         - in: path
@@ -45,13 +45,6 @@ paths:
           type: "file"
           required: true
           description: "The image to upload"
-        - in: formData
-          name: labels
-          type: "file"
-          required: true
-          schema:
-            $ref: "#/definitions/BoundingBoxLabels"
-          description: "The bounding box labels belonging to the image."
       responses:
         "200":
           description: "Image successfully saved."

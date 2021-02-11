@@ -1,12 +1,12 @@
 """This module contains the handling logic behind the available API views."""
-from api.validator import is_valid_city, is_valid_image_upload, is_city_existing
-from data_django.exec_sql import exec_dql_query
-from data_django.handler import get_downloaded_model, upload_image, upload_image_labels, get_latest_model_version
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from json import dumps
 from typing import Union, Tuple
-import paramiko
 import os
+import paramiko
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from api.validator import is_valid_city, is_valid_image_upload, is_city_existing
+from data_django.exec_sql import exec_dql_query
+from data_django.handler import get_downloaded_model, upload_image, get_latest_model_version
 
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
@@ -53,12 +53,12 @@ def handle_get_latest_city_model_version(city: str) -> Tuple[int, int]:
     if is_valid_city(city):
         version = get_latest_model_version(city)
         return version, 200
-    else:
-        return -1, 200
+
+    return -1, 200
 
 
-def handle_persist_sight_image(city: str, image: InMemoryUploadedFile, labels: str) -> Tuple[str, int]:
-    """Persists a labelled image of a given supported city in the data warehouse.
+def handle_persist_sight_image(city: str, image: InMemoryUploadedFile) -> Tuple[str, int]:
+    """Persists an image of a given supported city in the data warehouse.
 
     Parameters
     ----------
@@ -66,8 +66,6 @@ def handle_persist_sight_image(city: str, image: InMemoryUploadedFile, labels: s
         Name of the city.
     image: InMemoryUploadedFile
         Uploaded image.
-    labels: str
-        Labels string.
 
     Returns
     -------
@@ -76,9 +74,8 @@ def handle_persist_sight_image(city: str, image: InMemoryUploadedFile, labels: s
     http_status: int
         HTTP status code.
     """
-    if is_valid_image_upload(city, image, labels):
-        source_hash = upload_image(image, city)
-        upload_image_labels(labels, source_hash)
+    if is_valid_image_upload(city, image):
+        upload_image(image, city)
         return HTTP_200_MESSAGE, 200
 
     return HTTP_400_MESSAGE, 400
@@ -108,7 +105,7 @@ def handle_add_new_city(city: str) -> Tuple[str, int]:
                            pkey=paramiko.RSAKey.from_private_key_file('ec2key.pem'))
         cmd = _get_crawler_docker_run_command(city)
         print(f'Performing: {cmd} on remote image crawler {os.getenv("IC_URL")}')
-        stdin, stdout, stderr = ssh_client.exec_command(cmd)
+        _, _, stderr = ssh_client.exec_command(cmd)
         print(f'Response: {stderr.readlines()}')
         ssh_client.close()
 

@@ -1,6 +1,6 @@
 """This module contains the tests for the config module of the data sub-app."""
-from data_django.config import config
 from pytest import raises
+from data_django.config import config
 
 
 def test_config():
