@@ -1,10 +1,12 @@
 """This module contains necessary business logic in order to communicate with the dwh_communication warehouse."""
 from typing import Optional, List
+from dotenv import load_dotenv
 import requests
 import os
 import json
 
-os.environ["API_ENDPOINT_URL"] = "http://ec2-18-159-48-86.eu-central-1.compute.amazonaws.com:8002"
+load_dotenv()
+os.environ["API_ENDPOINT_URL"] = os.environ.get('API_ENDPOINT_URL')
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
 
@@ -99,7 +101,7 @@ def get_supported_cities() -> List[str]:
     api_endpoint_url = os.environ["API_ENDPOINT_URL"]
     print("{0}/api/cities".format(api_endpoint_url))
     try:
-        r = requests.get("{0}/api/cities".format(api_endpoint_url))
+        r = requests.get("{0}/api/cities".format(api_endpoint_url), timeout=2)
         cities = json.loads(r.text)
         return list(
             map(

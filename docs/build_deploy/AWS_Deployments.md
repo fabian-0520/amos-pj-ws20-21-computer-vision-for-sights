@@ -24,6 +24,7 @@ How To: Deploying ILS, DOS, MTS, and DMR Services on AWS using EC2 (using macOS 
 - <AWS_REGION>: AWS region (e.g. eu-central-1)
 - <MTS_EPOCHS>: number of epochs per MTS city training
 - <MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING>: minimum number of labelled images needed to trigger training
+- <MIN_IMAGE_NUMBER_PER_LABEL>: minimum number of images per actual label (labels with less than this number are not considered during training for accuracy reasons)
 - <DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS>: frequency for refreshing DWH data marts => set at least to 600 since refreshing is computationally intensive!
 - <DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS>: frequency for triggering model trainings => set at least to 300 since training needs time!
 - <DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS>: frequency for retrieving image labels
@@ -124,7 +125,7 @@ Step 7: Deploy DMR (attention - by linking the DMR with the ILS & MTS, costs may
     - sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<ILS_DOS_DMR_EC2_IP>
     - cd dmr/data_mart_refresher
     - sudo docker build -t dmr .
-    - sudo docker run -d -e ILS_PUBLIC_ENDPOINT_URL=<ILS_PUBLIC_ENDPOINT_URL>:8001 -e MTS_EC2_INSTANCE_ID=<MTS_EC2_INSTANCE_ID> -e AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> -e AWS_ACCESS_KEY=<AWS_ACCESS_KEY> -e AWS_REGION=<AWS_REGION> -e MTS_EPOCHS=<MTS_EPOCHS> -e DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=<DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS> -e DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=<DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS> -e DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=<DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS> -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING=<MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING> -it dmr
+    - sudo docker run -d -e ILS_PUBLIC_ENDPOINT_URL=<ILS_PUBLIC_ENDPOINT_URL>:8001 -e MTS_EC2_INSTANCE_ID=<MTS_EC2_INSTANCE_ID> -e AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> -e AWS_ACCESS_KEY=<AWS_ACCESS_KEY> -e AWS_REGION=<AWS_REGION> -e MTS_EPOCHS=<MTS_EPOCHS> -e DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS=<DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS> -e DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS=<DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS> -e DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS=<DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS> -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING=<MIN_LABELLED_IMAGES_NEEDED_FOR_TRAINING> -e MIN_IMAGE_NUMBER_PER_LABEL=<MIN_IMAGE_NUMBER_PER_LABEL> -it dmr
 Step 8: Make sure the security groups of the EC2 instances are configured, otherwise tweak
     - DOS/ILS/DMR sec. group: must allow access on DOS port 8002 from 0.0.0.0 (anywhere)
     - MTS sec. group: must allow access from DMR EC2 instance

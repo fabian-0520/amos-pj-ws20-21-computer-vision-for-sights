@@ -72,4 +72,5 @@ def _get_start_command(city: str) -> str:
            f'{os.environ["PGUSER"]} ' \
            f'{os.environ["PGPASSWORD"]} ' \
            f'{city} ' \
-           f'{int(os.environ["MTS_EPOCHS"])}'
+           f'{int(os.environ["MTS_EPOCHS"])} ' \
+           f'{int(os.environ["MIN_IMAGE_NUMBER_PER_LABEL"])}'

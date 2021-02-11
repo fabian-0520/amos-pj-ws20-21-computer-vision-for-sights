@@ -2,6 +2,7 @@ from mock import patch
 from data_crawler.image import insert_image
 
 
+
 def triggered_exec_sql(sql, value):
     return (sql, value)
 

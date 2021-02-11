@@ -81,7 +81,7 @@ class AutoCrawler:
         self.full_resolution = full_resolution
         self.face = face
         self.no_gui = no_gui
-        self.limit = limit
+        self.limit = int(limit / 2)
         self.no_driver = no_driver
         self.keyword_list = keyword_list
         self.region = region
@@ -246,10 +246,11 @@ class AutoCrawler:
                 print("Invalid Site Code")
                 links = []
 
-            links = links + collect.pinterest(keyword, region, add_url)
-
-            print("Downloading images from collected links... {} from {}".format(keyword, site_name))
-            self.download_images(keyword, links, site_name, max_count=self.limit)
+            print("Google Links:", len(links))
+            links = links + collect.pinterest(keyword, region, add_url, self.limit)
+            print("Total Links:", len(links))
+            print("Downloading images from {} collected links... {} from {}".format(len(links), keyword, site_name))
+            self.download_images(keyword, links, site_name, max_count=len(links))
 
             print("Done {} : {}".format(site_name, keyword))
 
@@ -436,4 +437,4 @@ if __name__ == "__main__":
         shutil.rmtree("./download")
         print("Download folder removed")
     except OSError as e:
-        print("Download directory could not be deleted")
+        print("Download directory could not be deleted:{} ".format(e))
