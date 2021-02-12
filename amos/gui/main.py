@@ -476,6 +476,8 @@ class UiMainWindow(QWidget):
 			self.camera_viewfinder.hide()
 			self.Label_Bild.show()
 			time.sleep(2)
+			self.Label_Bild.image = logo_with_text
+			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		else:
 			self.camera_viewfinder.show()
 			self.stacked_widget.setCurrentIndex(1)
