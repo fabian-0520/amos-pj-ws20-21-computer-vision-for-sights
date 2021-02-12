@@ -74,6 +74,7 @@ class UiMainWindow(QWidget):
 	small_button_height = 30
 	debug_height = 200
 	debug = False
+	accepted_download = False
 
 	def __init__(self, parent) -> None:
 		super().__init__(parent)
@@ -317,17 +318,9 @@ class UiMainWindow(QWidget):
 					update_msg.buttonClicked.connect(self.handover_city)
 
 					update_msg.exec_()
-
-			self.model_selected = True
-			newest_vers_msg = QMessageBox()
-			newest_vers_msg.setWindowTitle("Ready for Detection!")
-			newest_vers_msg.setWindowIcon(QIcon(logo_without_text))
-			newest_vers_msg.setText("You can start detecting sights in " + city_pretty_print + "!")
-			newest_vers_msg.setStandardButtons(QMessageBox.Ok)
-			newest_vers_msg.setDefaultButton(QMessageBox.Ok)
-
-			newest_vers_msg.exec_()
-
+			if self.accepted_download is True or latest_version == downloaded_version:
+				self.accepted_download = False
+				self.show_download_result()
 		else:
 			self.model_selected = False
 
@@ -347,6 +340,7 @@ class UiMainWindow(QWidget):
 			if model is not None:
 				with open("weights/" + city + ".pt", "wb+") as file:
 					file.write(model)
+			self.accepted_download = True
 		elif "CANCEL" in button.text().upper():
 			self.Box_Stadt.setCurrentIndex(0)
 
@@ -395,6 +389,19 @@ class UiMainWindow(QWidget):
 
 		emsg.exec_()
 
+	def show_download_result(self) -> None:
+		city_pretty_print = self.Box_Stadt.currentText()
+
+		self.model_selected = True
+		newest_vers_msg = QMessageBox()
+		newest_vers_msg.setWindowTitle("Ready for Detection!")
+		newest_vers_msg.setWindowIcon(QIcon(logo_without_text))
+		newest_vers_msg.setText("You can start detecting sights in " + city_pretty_print + "!")
+		newest_vers_msg.setStandardButtons(QMessageBox.Ok)
+		newest_vers_msg.setDefaultButton(QMessageBox.Ok)
+
+		newest_vers_msg.exec_()
+
 	def request_city(self) -> None:
 		# Send entered city to dwh and show confirmation popup if the city name is known
 		city_input = self.Text_City.text()
@@ -422,6 +429,10 @@ class UiMainWindow(QWidget):
 	def dragdrop(self) -> None:
 		"""Enables / disables Drag&Drop of images."""
 		if self.Button_Bild.text() == ENABLE:
+			# stop video detection if active
+			if self.Button_Detection.text() == STOP:
+				self.Button_Detection.setText(QCoreApplication.translate(WINDOW, START))
+				self.detector.disable_detection()
 			self.Label_Bild.setAcceptDrops(True)
 			self.Label_Bild.setText("\n\n Drop Image here \n\n")
 			self.Label_Bild.setStyleSheet(
