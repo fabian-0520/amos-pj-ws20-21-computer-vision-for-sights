@@ -1,18 +1,33 @@
-# How to run the MTS (standalone)
-0. Make sure you have a NVidia GPU installed
-1. Navigate into the mts/yolov5 folder
-2. Build the image: docker build . -t mts
-3. Run the shell script mts.sh (contained in the root directory) while providing the seven arguments from it
-    PGHOST: DWH host
-    PGPORT: DWH port
-    PGDATABASE: DWH database
-    PGUSER: DWH user
-    PGPASSWORD: DWH password
-    CITY: city to train on
-    EPOCHS: epochs to train for
-    MIN_IMAGE_NUMBER_PER_LABEL: minimum images per class
+# SightScan: Model Training Service (MTS) Component
+====================================================
 
-# Reference README file
+## How to: building and running the SightScan model training service locally in a Docker container
+
+1. Determine the environment variables:
+- PGHOST: DWH host
+- PGPORT: DWH port
+- PGDATABASE: DWH database
+- PGUSER: DWH user
+- PGPASSWORD: DWH password
+- CITY: city to train on
+- MTS_EPOCHS: epochs to train for
+- MIN_IMAGE_NUMBER_PER_LABEL: minimum images per class
+2. Make sure you have a NVidia GPU installed, along with NVidia CUDA and at least a Pascal generation GPU (or later)
+3. Navigate into the mts/yolov5 folder
+4. Build the image: docker build . -t mts
+5. Run the shell script mts.sh (contained in the root directory) while providing the seven arguments from it: 
+sudo sh mts/mts.sh <PGHOST> <PGPORT> <PGDATABASE> <PGUSER> <PGPASSWORD> <CITY> <MTS_EPOCHS> <MIN_IMAGE_NUMBER_PER_LABEL>
+
+## How to: running tests incl. coverage
+
+1. Open the terminal
+2. Move into the project directory (.../mts)
+3. Run: pip install -r requirements.txt
+4. Move into the project directory (./yolov5)
+5. Run: coverage run -m pytest -v
+6. Show coverage: coverage report
+
+## Reference original README file from Ultralytics
 
 <a href="https://apps.apple.com/app/id1452689527" target="_blank">
 <img src="https://user-images.githubusercontent.com/26833433/98699617-a1595a00-2377-11eb-8145-fc674eb9b1a7.jpg" width="1000"></a>
@@ -31,7 +46,7 @@ This repository represents Ultralytics open-source research into future object d
 - **June 19, 2020**: [FP16](https://pytorch.org/docs/stable/nn.html#torch.nn.Module.half) as new default for smaller checkpoints and faster inference [d4c6674](https://github.com/ultralytics/yolov5/commit/d4c6674c98e19df4c40e33a777610a18d1961145).
 
 
-## Pretrained Checkpoints
+### Pretrained Checkpoints
 
 | Model | size | AP<sup>val</sup> | AP<sup>test</sup> | AP<sub>50</sub> | Speed<sub>V100</sub> | FPS<sub>V100</sub> || params | GFLOPS |
 |---------- |------ |------ |------ |------ | -------- | ------| ------ |------  |  :------: |
@@ -54,7 +69,7 @@ This repository represents Ultralytics open-source research into future object d
 ** Test Time Augmentation ([TTA](https://github.com/ultralytics/yolov5/issues/303)) runs at 3 image sizes. **Reproduce TTA** by `python test.py --data coco.yaml --img 832 --iou 0.65 --augment` 
 
 
-## Requirements
+### Requirements
 
 Python 3.8 or later with all [requirements.txt](https://github.com/ultralytics/yolov5/blob/master/requirements.txt) dependencies installed, including `torch>=1.7`. To install run:
 ```bash
@@ -62,7 +77,7 @@ $ pip install -r requirements.txt
 ```
 
 
-## Tutorials
+### Tutorials
 
 * [Train Custom Data](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)&nbsp; 🚀 RECOMMENDED
 * [Weights & Biases Logging](https://github.com/ultralytics/yolov5/issues/1289)&nbsp; 🌟 NEW
@@ -77,7 +92,7 @@ $ pip install -r requirements.txt
 * [TensorRT Deployment](https://github.com/wang-xinyu/tensorrtx)
 
 
-## Environments
+### Environments
 
 YOLOv5 may be run in any of the following up-to-date verified environments (with all dependencies including [CUDA](https://developer.nvidia.com/cuda)/[CUDNN](https://developer.nvidia.com/cudnn), [Python](https://www.python.org/) and [PyTorch](https://pytorch.org/) preinstalled):
 
@@ -87,7 +102,7 @@ YOLOv5 may be run in any of the following up-to-date verified environments (with
 - **Docker Image** https://hub.docker.com/r/ultralytics/yolov5. See [Docker Quickstart Guide](https://github.com/ultralytics/yolov5/wiki/Docker-Quickstart) ![Docker Pulls](https://img.shields.io/docker/pulls/ultralytics/yolov5?logo=docker)
 
 
-## Inference
+### Inference
 
 detect.py runs inference on a variety of sources, downloading models automatically from the [latest YOLOv5 release](https://github.com/ultralytics/yolov5/releases) and saving results to `runs/detect`.
 ```bash
@@ -118,6 +133,7 @@ Results saved to runs/detect/exp
 Done. (0.113s)
 ```
 <img src="https://user-images.githubusercontent.com/26833433/97107365-685a8d80-16c7-11eb-8c2e-83aac701d8b9.jpeg" width="500">  
+
 
 ### PyTorch Hub
 

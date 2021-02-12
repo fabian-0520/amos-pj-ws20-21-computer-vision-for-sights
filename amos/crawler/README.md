@@ -1,14 +1,23 @@
-### How to: using the SightScan crawler
+# SightScan: Image Crawler (IC) Component
+=========================================
+
+## How to: building and running the SightScan image crawler locally in a Docker container
 
 1. docker build . -t crawler
 2. docker run -e PGHOST=<PGHOST> -e PGDATABASE=<PGDATABASE> -e PGUSER=<PGUSER> -e PGPORT=<PGPORT> -e PGPASSWORD=<PGPASSWORD> -e MAPS_KEY=<GOOGLE_MAPS_KEY> -it crawler <CITY_TO_COLLECT_SIGHTS_FOR> --sights_limit=<MAX_NUMBER_OF_DIFFERENT_SIGHTS> --limit=<MAX_NUMBER_OF_IMAGES_PER_SIGHT>
 
+## How to: running tests incl. coverage
+
+1. Open the terminal
+2. Move into the project directory (.../crawler)
+3. Run: pip install -r requirements.txt
+4. Run: coverage run -m pytest -v
+5. Show coverage: coverage report
 
 ## AutoCrawler library
-Google multiprocess image crawler (High Quality & Speed & Customizable)
+The crawler SightScan utilizes relies on the existing AutoCrawler library (see sources).
 
-
-### (Other) optional arguments to append to run command above with --<VARIABLE_NAME>=<VARIABLE_VALUE>
+## (Other) optional command line arguments to append to run command above with --<VARIABLE_NAME>=<VARIABLE_VALUE>
 ```
 --skip true        Skips keyword if downloaded directory already exists. This is needed when re-downloading.
 
@@ -33,12 +42,5 @@ Google multiprocess image crawler (High Quality & Speed & Customizable)
 --sights_limit The limit of sights to be found by the collector api
 ```
 
-
-### Full Resolution Mode
-You can download full resolution image of JPG, GIF, PNG files by specifying --full true
-
-
-### Data Imbalance Detection
-Detects data imbalance based on number of files.
-When crawling ends, the message show you what directory has under 50% of average files.
-I recommend you to remove those directories and re-download.
+## Sources
+For more information, visit: https://github.com/YoongiKim/AutoCrawler
