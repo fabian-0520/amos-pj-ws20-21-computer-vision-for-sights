@@ -42,6 +42,7 @@ DISABLE = "Disable File Drop"
 WINDOW = "MainWindow"
 logo_without_text = "icon_logo.png"
 logo_with_text = "logo.png"
+loading_image = "loading_image.png"
 	
 
 
@@ -479,6 +480,8 @@ class UiMainWindow(QWidget):
 		self.camera.stop()
 		self.camera_viewfinder.hide()
 		self.stacked_widget.setCurrentIndex(0)
+		self.Label_Bild.image = loading_image
+		self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		self.Label_Bild.show()
 
 	def stop_video_detection(self) -> None:
