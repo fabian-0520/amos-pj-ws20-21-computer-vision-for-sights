@@ -1,5 +1,7 @@
-How to: run/deploy the service via Docker
-_________________________________________
+# SightScan: Image Labelling Service (ILS) Component
+====================================================
+
+## How to: building and running the SightScan image labelling service locally in a Docker container
 
 1. Open your terminal.
 2. Move into the project directory (.../image_labelling_service).
@@ -21,6 +23,14 @@ docker run  -e PG_HOST=<HOST>
             -e PG_PORT=<PORT>
             -e PG_PASSWORD=<PASSWORD>
             -e MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY=<MAX_GOOGLE_VISION_CALLS_PER_NEW_CITY>
-            -p 8001:8001
+            -p <ILS_PORT>:8001
             -it image_labelling_service
-7. Refer to 0.0.0.0:8001/swagger to get a nicely formatted overview of the supported communication protocol
+7. Refer to 0.0.0.0:<ILS_PORT>/swagger to get a nicely formatted overview of the supported communication protocol
+
+## How to: running tests incl. coverage
+
+1. Open the terminal
+2. Move into the project directory (.../image_labelling_service)
+3. Run: pip install -r requirements.txt
+4. Run: coverage run -m pytest -v
+5. Show coverage: coverage report
