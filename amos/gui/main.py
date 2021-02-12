@@ -152,7 +152,7 @@ class UiMainWindow(QWidget):
 		self.Box_Camera_selector.setObjectName("Box_Camera_selector")
 		self.Box_Camera_selector.addItem("")
 		# self.Box_Camera_selector.addItems([camera.description() for camera in self.available_cameras])
-		self.Box_Camera_selector.addItems(["Camera " + str(i) for i in range(len(self.available_cameras))])
+		self.Box_Camera_selector.addItems(["Camera " + str(i) + ": " + str(self.available_cameras[i].description()) for i in range(len(self.available_cameras))])
 		self.Box_Camera_selector.currentIndexChanged.connect(self.select_camera)
 
 		self.stacked_widget = QStackedWidget(self.centralwidget)
@@ -348,6 +348,7 @@ class UiMainWindow(QWidget):
 		"""Starts detection for the dropped image or shown webcam video
 		with the downloaded model and displays the results in the label."""
 		city = self.Box_Stadt.currentText().replace(' ', '_').upper()
+		print("Detection Status: " + str(self.detector.detection))
 
 		if self.model_selected is False:
 			self.show_missing_model_popup()
@@ -358,6 +359,7 @@ class UiMainWindow(QWidget):
 				print(f"Starting detection of {self.Label_Bild.image}")
 				wipe_prediction_input_images(INPUT_PREDICTION_DIR)
 				shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
+				self.detector.enable_detection()
 				self.detector.detect(self, weights='weights/' + city + '.pt', debug=self.debug)
 			# stop video detection
 			elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == STOP:
@@ -370,9 +372,11 @@ class UiMainWindow(QWidget):
 					self.Button_Detection.setText(QCoreApplication.translate(WINDOW, STOP))
 					print("Video Detection Started")
 					self.prep_video_detection()
+					source = self.Box_Camera_selector.currentIndex()
+					self.detector.enable_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
-												   kwargs={'weights': 'weights/' + city + '.pt', 'source': '0',
-														   'image_size': 703, 'debug': self.debug})
+												   kwargs={'weights': 'weights/' + city + '.pt', 'source': str(source - 1),
+														   'image_size': 400, 'debug': self.debug})
 					self.detection_thread.start()
 			else:
 				print("Drop a File or select a Webcam!")
