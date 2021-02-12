@@ -5,8 +5,13 @@ import requests
 import os
 import json
 
-load_dotenv()
-os.environ["API_ENDPOINT_URL"] = os.environ.get('API_ENDPOINT_URL')
+try:
+    load_dotenv()
+    os.environ["API_ENDPOINT_URL"] = os.environ.get('API_ENDPOINT_URL')
+except:
+    print('Please create an .env file with your "API_ENDPOINT_URL" in the api_communication folder')
+    os.environ["API_ENDPOINT_URL"] = ""
+
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
 

@@ -151,18 +151,19 @@ class Detection:
                         logging.debug('Prediction: {}; Confidence {}'.format(f'{names[int(cls)]}', f'{conf:.2f}'))
                         label = ''.join(map(lambda x: x if x.islower() else ' ' + x, names[int(cls)]))
                         label = f'{label} {conf:.2f}' if debug else label
-                        plot_one_point(xyxy,
-                                        im0,
-                                        label=label,
-                                        color=colors[int(cls)],
-                                        point_thickness=None,
-                                        r=10)
                         if debug:
                             plot_one_box(xyxy,
                                             im0,
                                             label=label,
                                             color=colors[int(cls)],
                                             line_thickness=3)
+                        plot_one_point(xyxy,
+                                        im0,
+                                        label=label,
+                                        color=colors[int(cls)],
+                                        point_thickness=None,
+                                        r=10)
+
 
                 app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
                 app.Label_Bild.setPixmap(QPixmap(app.image))
