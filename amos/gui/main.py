@@ -43,7 +43,6 @@ WINDOW = "MainWindow"
 logo_without_text = "icon_logo.png"
 logo_with_text = "logo.png"
 loading_image = "loading_image.png"
-	
 
 
 class UiMainWindow(QWidget):
@@ -356,40 +355,33 @@ class UiMainWindow(QWidget):
 		with the downloaded model and displays the results in the label."""
 		city = self.Box_Stadt.currentText().replace(' ', '_').upper()
 
-		# start drag&drop image detection
-		if self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == DISABLE and \
-				self.Label_Bild.image != logo_with_text:
-			# if no model selected
-			if self.model_selected is False:
-
-				self.show_missing_model_popup()
-			# if model selected
-			else:
+		if self.model_selected is False:
+			self.show_missing_model_popup()
+		else:
+			# start drag&drop image detection
+			if self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == DISABLE and \
+					self.Label_Bild.image != logo_with_text:
 				print(f"Starting detection of {self.Label_Bild.image}")
 				wipe_prediction_input_images(INPUT_PREDICTION_DIR)
 				shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 				self.detector.detect(self, weights='weights/' + city + '.pt', debug=self.debug)
-		# stop video detection
-		elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == STOP:
-			self.stop_video_detection()
-			time.sleep(2)
-			self.reactivate_cam()
-		# if webcam activated
-		elif self.stacked_widget.currentIndex() == 1:
-			if self.Button_Detection.text() == START:
-				self.Button_Detection.setText(QCoreApplication.translate(WINDOW, STOP))
-				if self.model_selected is False:
-					self.show_missing_model_popup()
-				# start webcam detection
-				else:
+			# stop video detection
+			elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == STOP:
+				self.stop_video_detection()
+				time.sleep(2)
+				self.reactivate_cam()
+			# if webcam activated
+			elif self.stacked_widget.currentIndex() == 1:
+				if self.Button_Detection.text() == START:
+					self.Button_Detection.setText(QCoreApplication.translate(WINDOW, STOP))
 					print("Video Detection Started")
 					self.prep_video_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
 												   kwargs={'weights': 'weights/' + city + '.pt', 'source': '0',
 														   'image_size': 703, 'debug': self.debug})
 					self.detection_thread.start()
-		else:
-			print("Drop a File or select a Webcam!")
+			else:
+				print("Drop a File or select a Webcam!")
 
 	def show_missing_model_popup(self) -> None:
 		# Show Pop Up to choose a city
