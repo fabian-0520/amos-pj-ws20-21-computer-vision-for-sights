@@ -151,7 +151,7 @@ class UiMainWindow(QWidget):
 		self.Box_Camera_selector.setObjectName("Box_Camera_selector")
 		self.Box_Camera_selector.addItem("")
 		# self.Box_Camera_selector.addItems([camera.description() for camera in self.available_cameras])
-		self.Box_Camera_selector.addItems(["Camera " + str(i) for i in range(len(self.available_cameras))])
+		self.Box_Camera_selector.addItems(["Camera " + str(i) + ": " + str(self.available_cameras[i].description()) for i in range(len(self.available_cameras))])
 		self.Box_Camera_selector.currentIndexChanged.connect(self.select_camera)
 
 		self.stacked_widget = QStackedWidget(self.centralwidget)
@@ -376,8 +376,9 @@ class UiMainWindow(QWidget):
 					self.Button_Detection.setText(QCoreApplication.translate(WINDOW, STOP))
 					print("Video Detection Started")
 					self.prep_video_detection()
+					source = self.Box_Camera_selector.currentIndex()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
-												   kwargs={'weights': 'weights/' + city + '.pt', 'source': '0',
+												   kwargs={'weights': 'weights/' + city + '.pt', 'source': str(source - 1),
 														   'image_size': 703, 'debug': self.debug})
 					self.detection_thread.start()
 			else:
