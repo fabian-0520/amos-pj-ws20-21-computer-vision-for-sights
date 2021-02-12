@@ -101,6 +101,7 @@ class Detection:
         t0 = time.time()
         img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
+        logging.debug("start inference")
         for path, img, im0s, vid_cap in dataset:
             if self.detection is False and webcam is True:
                 logging.debug("kill thread")
@@ -126,7 +127,6 @@ class Detection:
             if classify:
                 pred = apply_classifier(pred, modelc, img, im0s)
 
-            logging.debug("process detections")
             # Process detections
             for i, det in enumerate(pred):  # detections per image
                 if webcam:  # batch_size >= 1
@@ -170,7 +170,7 @@ class Detection:
                 time.sleep(1/60)
 
                 # Print time (inference + NMS)
-                logging.debug(f'{s}Done. ({t2 - t1:.3f}s)')
                 print(f'{s}Done. ({t2 - t1:.3f}s)')
 
+        logging.debug(f'Done. ({time.time() - t0:.3f}s)')
         print(f'Done. ({time.time() - t0:.3f}s)')
