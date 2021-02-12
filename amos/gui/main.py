@@ -40,6 +40,9 @@ STOP = "Stop Detection"
 ENABLE = "Enable File Drop"
 DISABLE = "Disable File Drop"
 WINDOW = "MainWindow"
+logo_without_text = "icon_logo.png"
+logo_with_text = "logo.png"
+	
 
 
 class UiMainWindow(QWidget):
@@ -237,7 +240,7 @@ class UiMainWindow(QWidget):
 		self.statusbar.setObjectName("statusbar")
 		main_window.setStatusBar(self.statusbar)
 
-		main_window.setWindowIcon(QIcon("icon_logo.png"))
+		main_window.setWindowIcon(QIcon(logo_without_text))
 
 		self.retranslateUi(main_window)
 		QMetaObject.connectSlotsByName(main_window)
@@ -290,7 +293,7 @@ class UiMainWindow(QWidget):
 				if downloaded_version == -1:
 					msg = QMessageBox()
 					msg.setWindowTitle("Download City")
-					msg.setWindowIcon(QIcon("icon_logo.png"))
+					msg.setWindowIcon(QIcon(logo_without_text))
 					msg.setText("Do you want to download " + city_pretty_print + "?")
 					msg.setIcon(QMessageBox.Question)
 					msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
@@ -303,7 +306,7 @@ class UiMainWindow(QWidget):
 				elif latest_version > downloaded_version:
 					update_msg = QMessageBox()
 					update_msg.setWindowTitle("Update available")
-					update_msg.setWindowIcon(QIcon("icon_logo.png"))
+					update_msg.setWindowIcon(QIcon(logo_without_text))
 					update_msg.setText("Do you want to download an update for " + city + "?")
 					update_msg.setIcon(QMessageBox.Question)
 					update_msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
@@ -318,7 +321,7 @@ class UiMainWindow(QWidget):
 			self.model_selected = True
 			newest_vers_msg = QMessageBox()
 			newest_vers_msg.setWindowTitle("Ready for Detection!")
-			newest_vers_msg.setWindowIcon(QIcon("icon_logo.png"))
+			newest_vers_msg.setWindowIcon(QIcon(logo_without_text))
 			newest_vers_msg.setText("You can start detecting sights in " + city_pretty_print + "!")
 			newest_vers_msg.setStandardButtons(QMessageBox.Ok)
 			newest_vers_msg.setDefaultButton(QMessageBox.Ok)
@@ -354,7 +357,7 @@ class UiMainWindow(QWidget):
 
 		# start drag&drop image detection
 		if self.stacked_widget.currentIndex() == 0 and self.Button_Bild.text() == DISABLE and \
-				self.Label_Bild.image != "logo.png":
+				self.Label_Bild.image != logo_with_text:
 			# if no model selected
 			if self.model_selected is False:
 
@@ -391,7 +394,7 @@ class UiMainWindow(QWidget):
 		# Show Pop Up to choose a city
 		emsg = QMessageBox()
 		emsg.setWindowTitle("No city chosen")
-		emsg.setWindowIcon(QIcon("icon_logo.png"))
+		emsg.setWindowIcon(QIcon(logo_without_text))
 		emsg.setText("You need to choose a city before the detection can start.")
 		emsg.setIcon(QMessageBox.Warning)
 		emsg.setStandardButtons(QMessageBox.Ok)
@@ -408,7 +411,7 @@ class UiMainWindow(QWidget):
 
 			cmsg = QMessageBox()
 			cmsg.setWindowTitle("Request confirmed")
-			cmsg.setWindowIcon(QIcon("icon_logo.png"))
+			cmsg.setWindowIcon(QIcon(logo_without_text))
 			cmsg.setText("Your request to add support for " + city_input + " has been sent to our backend.")
 			cmsg.setStandardButtons(QMessageBox.Ok)
 			cmsg.setDefaultButton(QMessageBox.Ok)
@@ -416,7 +419,7 @@ class UiMainWindow(QWidget):
 		else:
 			cmsg = QMessageBox()
 			cmsg.setWindowTitle("Unknown city name")
-			cmsg.setWindowIcon(QIcon("icon_logo.png"))
+			cmsg.setWindowIcon(QIcon(logo_without_text))
 			cmsg.setText("The typed city name is not known. Please check the spelling.")
 			cmsg.setIcon(QMessageBox.Warning)
 			cmsg.setStandardButtons(QMessageBox.Ok)
@@ -440,7 +443,7 @@ class UiMainWindow(QWidget):
 			self.Label_Bild.setAcceptDrops(False)
 			self.Label_Bild.setText("")
 			self.Label_Bild.setStyleSheet("")
-			self.Label_Bild.image = "logo.png"
+			self.Label_Bild.image = logo_with_text
 			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 			self.Button_Bild.setText(QCoreApplication.translate(WINDOW, ENABLE))
 
@@ -452,7 +455,7 @@ class UiMainWindow(QWidget):
 		i:
 			Index of the chosen camera.
 		"""
-		self.Label_Bild.image = "logo.png"
+		self.Label_Bild.image = logo_with_text
 		self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		if i == 0:
 			self.camera.stop()
@@ -496,7 +499,7 @@ class UiMainWindow(QWidget):
 			self.textDebug.widget.setEnabled(False)
 
 	def reactivate_cam(self) -> None:
-		self.Label_Bild.image = "logo.png"
+		self.Label_Bild.image = logo_with_text
 		self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		self.camera.start()
 
@@ -505,7 +508,7 @@ if __name__ == "__main__":
 	# starts the UI
 	app = QApplication(sys.argv)
 	app.setWindowIcon(QIcon('logo_exe_icon.ico'))
-	trayIcon = QtWidgets.QSystemTrayIcon(QtGui.QIcon("icon_logo.png"), app)
+	trayIcon = QtWidgets.QSystemTrayIcon(QtGui.QIcon(logo_without_text), app)
 	trayIcon.show()
 	main_window = QMainWindow()
 	ui = UiMainWindow(main_window)
