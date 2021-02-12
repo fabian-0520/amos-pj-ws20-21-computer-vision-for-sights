@@ -106,8 +106,6 @@ class Detection:
             if self.detection is False and webcam is True:
                 logging.debug("kill thread")
                 dataset.kill_thread()
-                logging.debug("set detection true")
-                self.detection = True
                 break
             img = torch.from_numpy(img).to(device)
             img = img.half() if half else img.float()  # uint8 to fp16/32

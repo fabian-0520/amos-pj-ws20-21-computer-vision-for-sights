@@ -270,6 +270,8 @@ class UiMainWindow(QWidget):
 		if city != "CHOOSE_CITY":
 			# if no connection to dos
 			if get_supported_cities() == []:
+				latest_version="couldn't get the latest version"
+				downloaded_version="couldn't get the downloaded version"
 				print('no connection to dos')
 
 			# if connection to dos
@@ -321,6 +323,7 @@ class UiMainWindow(QWidget):
 			if self.accepted_download is True or latest_version == downloaded_version:
 				self.accepted_download = False
 				self.show_download_result()
+			self.model_selected = True
 		else:
 			self.model_selected = False
 

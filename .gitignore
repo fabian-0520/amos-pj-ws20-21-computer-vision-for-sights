@@ -154,6 +154,7 @@ dmypy.json
 *.pt
 !amos/gui/logo.png
 !amos/gui/icon_logo.png
+!amos/gui/loading_image.png
 
 *.cfg
 !cfg/yolov3*.cfg
