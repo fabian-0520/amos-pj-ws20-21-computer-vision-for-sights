@@ -16,15 +16,15 @@ Before the detection can be started, SightScan needs to download all necessary d
 2. Choose City from drop-down-menu
 3. Click  **OK** in pop-up-window
 
-![alt text](https://i.ibb.co/ftfk4cb/user-doc1.png) 
+![alt text](https://i.ibb.co/bLTszfx/user-doc1.png) 
 
 * If the city has never been downloaded before, the user is asked if they want to download the city data. The download starts after clicking **OK**.
 
-![alt text](https://i.ibb.co/wp3BMdL/user-doc2.png)
+![alt text](https://i.ibb.co/h2hLDgM/user-doc2.png)
 
 * If there is an outdated version available, the user is asked if they want to download the updated city data. The detection will still work as before without updating. The download starts after clicking **OK**.
 
-![alt text](https://i.ibb.co/Dg9FsdM/user-doc3.png)
+![alt text](https://i.ibb.co/M5cHWd1/user-doc3.png)
 
 * If the most recent version is available, the detection can start right away.
 
@@ -38,8 +38,8 @@ Images can be added to SightScan via Drag-and-Drop. This function is enabled by 
 1. Click **Enable File Drop**
 2. Drag image into marked area
 
-![alt text](https://i.ibb.co/1MGLzgM/user-doc5.png)
-![alt text](https://i.ibb.co/RzWb3rw/user-doc6.png)
+![alt text](https://i.ibb.co/RNT9jFN/user-doc5.png)
+![alt text](https://i.ibb.co/qkwjNqQ/user-doc6.png)
 
 
 ### Detection via Webcam
@@ -49,7 +49,7 @@ In the drop-down-menu *Choose Webcam* in the upper right corner the user can cho
 1. Click **Choose Webcam**
 2. Choose Webcam from dropdown-menu
 
-![alt text](https://i.ibb.co/z4Bz8Hq/user-doc7.png)
+![alt text](https://i.ibb.co/1mPksJF/user-doc7.png)
 
 
 ### Sight Detection
@@ -58,7 +58,7 @@ As soon as the user has dragged an image into SightScan the detection can be sta
 
 1. Click **Start Detection**
 
-![alt text](https://i.ibb.co/FhCtrBH/user-doc8.png)
+![alt text](https://i.ibb.co/K5SHP9K/user-doc8.png)
 
 
 ### New city support
@@ -69,8 +69,8 @@ The user has the option to request the support of new cities that are not yet in
 2. Click **Add City**
 3. Click **OK**
 
-![alt text](https://i.ibb.co/d4Zydp5/user-doc9.png)
-![alt text](https://i.ibb.co/XLR24T8/user-doc10.png)
+![alt text](https://i.ibb.co/PGk87W6/user-doc9.png)
+![alt text](https://i.ibb.co/qjQynw5/user-doc10.png)
 
 ### More features
 
@@ -78,7 +78,7 @@ The user has the option to request the support of new cities that are not yet in
 
 * SightScan provides a debug mode. It can be enabled by checking the box *Debug* in the lower left corner. In debug mode the user can have insights into the logging process and receives more information about the detection. After starting the detection, the sight’s location will no longer be indicated by a dot but by its exact bounding box. Additionally, the detection probability of the sight is displayed. 
 
-![alt text](https://i.ibb.co/Cv5xP2B/user-doc11.png)
+![alt text](https://i.ibb.co/rMGndsk/user-doc11.png)
 
 
 Berlin, December 2020 | AMOS@TU Berlin in cooperation with IAV GmbH 
