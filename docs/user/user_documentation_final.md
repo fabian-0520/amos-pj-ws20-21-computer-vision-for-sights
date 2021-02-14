@@ -28,7 +28,7 @@ Before the detection can be started, SightScan needs to download all necessary d
 
 * If the most recent version is available, the detection can start right away.
 
-![alt text](https://ibb.co/HnbThnR)
+![alt text](https://ibb.co/HnbThnR/user_doc4.png)
 
 
 ### Detection on an image
