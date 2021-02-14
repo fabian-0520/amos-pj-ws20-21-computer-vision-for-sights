@@ -373,6 +373,10 @@ class UiMainWindow(QWidget):
 			elif self.stacked_widget.currentIndex() == 1:
 				if self.Button_Detection.text() == START:
 					self.Button_Detection.setText(QCoreApplication.translate(WINDOW, STOP))
+					self.Label_Bild.setStyleSheet(
+						"""
+					"""
+					)
 					print("Video Detection Started")
 					self.prep_video_detection()
 					source = self.Box_Camera_selector.currentIndex()
@@ -478,6 +482,10 @@ class UiMainWindow(QWidget):
 			time.sleep(2)
 			self.Label_Bild.image = logo_with_text
 			self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
+			self.Label_Bild.setStyleSheet(
+				"""
+			"""
+			)
 		else:
 			self.camera_viewfinder.show()
 			self.stacked_widget.setCurrentIndex(1)
