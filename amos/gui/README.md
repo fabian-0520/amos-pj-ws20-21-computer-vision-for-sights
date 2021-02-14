@@ -9,17 +9,26 @@ Load images and detect sights in the SightScan Desktop app.
 3. "python main.py" or double-click the main.py
 
 
-### How to use - current functionalities are all optional
-- select your city in the top-left corner and confirm the selection, which later should trigger the download of the specific pretrained model
-- enable / disable loading of images in the bottom-left corner
-- when loading images is enabled, load images by dragging and dropping them into the target in the application
-- detection button in the bottom-right corner currently outputs the path of the image loaded into the application
+### How to use 
 
-### Future work
-- button to request the addition of a new city
-- enabling client-side image labelling
-- download the specific pretrained model associated with the currently selected city
-- if nothing was detected - ask for support by the user by labeling the current image or by telling the application which sight is in the image --> create new class for the sight ???
-- what to do with incorrect use of the application, e.g. labeling an image with no sight in it - confusing the model...
-	e.g. request for adding a new city with irregular name / too small, too uninsteresting
-	e.g. loading non-image files --> label should still display "Drop the image here"
+## City download
+- select city in the top-left corner and confirm the new download or update
+
+## Detection in image
+- enable / disable loading of images by clicking button in bottom-left corner
+- when loading images is enabled, load images by dragging and dropping them into the target area
+- start detection by clicking on start detection button in bottom right corner
+
+## Detection in webcam feed 
+- select webcam in the top right corner
+- webcam feed in displayed in application
+- start detection by clicking on start detection button in bottom right corner
+
+## Request city
+- enter text at top for new city not shown in drop-down-menu
+- send request by clicking add city button
+- city will appear in drop-down-menu as soon as it is available
+
+## Features
+- help improve detection by checking box in top left corner -> dropped images will be used by SightScan
+- debug mode by checking box in botton right corner -> added logging display, exact bounding boxes after detection and detection probability displayed
