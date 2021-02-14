@@ -114,7 +114,7 @@ class UiMainWindow(QWidget):
 		self.Button_Detection.setGeometry(
 			QRect(
 				self.window_width - (self.dist + self.button_width),
-				self.window_height - (self.dist + self.button_height),
+				self.window_height - (self.dist + self.button_height + 20 ),
 				self.button_width,
 				self.button_height,
 			)
@@ -126,7 +126,7 @@ class UiMainWindow(QWidget):
 		self.Button_Bild.setGeometry(
 			QRect(
 				self.dist,
-				self.window_height - (self.dist + self.button_height),
+				self.window_height - (self.dist + self.button_height + 20 ),
 				self.button_width,
 				self.button_height,
 			)
@@ -178,7 +178,7 @@ class UiMainWindow(QWidget):
 		self.checkBox.setObjectName(u"improvement")
 		self.checkBox.setGeometry(
             QRect(
-                int(self.dist*3.5),
+                self.dist,
                 5,
                 350,
                 20)
@@ -191,8 +191,8 @@ class UiMainWindow(QWidget):
 		self.checkBox.setObjectName(u"checkBox")
 		self.checkBox.setGeometry(
             QRect(
-                self.dist,
-                5,
+                self.window_width - (self.dist + 50),
+				self.window_height - (self.dist + 20),
                 70,
                 20)
             )
