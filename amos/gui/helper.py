@@ -1,5 +1,6 @@
 """This module contains helper functions for the main app module."""
 import os
+from pathlib import Path
 from time import sleep
 from PyQt5.QtWidgets import QComboBox
 from api_communication.api_handler import get_supported_cities
@@ -80,8 +81,12 @@ def initialize_cities() -> list:
         supported_cities = get_supported_cities()
     else:
         supported_cities = []
-        for filename in os.listdir('weights'):
-            if filename.endswith(".pt"):
-                pretty_modelname = filename[:-3].replace("_", " ").title()
-                supported_cities.append(pretty_modelname)
+        if os.path.exists("weights"):
+            for filename in os.listdir('weights'):
+                if filename.endswith(".pt"):
+                    pretty_modelname = filename[:-3].replace("_", " ").title()
+                    supported_cities.append(pretty_modelname)
+        else:
+            print("There are no locally stored models. Try to connect the GUI with the DWH.")
+            Path("weights").mkdir(mode=0o700, exist_ok=True)
     return supported_cities
