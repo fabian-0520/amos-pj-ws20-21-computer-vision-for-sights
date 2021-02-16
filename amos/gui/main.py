@@ -14,8 +14,8 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QStackedWidget,
     QLineEdit,
-	  QCheckBox,
-    QSizePolicy,
+	QCheckBox,
+	QSizePolicy
 )
 from PyQt5 import QtGui
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
@@ -526,6 +526,11 @@ class UiMainWindow(QWidget):
 		self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		self.camera.start()
 
+	def closeEvent(self) -> None:
+		if self.Button_Detection.text() == STOP:
+			self.detector.disable_detection()
+			self.stop_video_detection()
+
 
 if __name__ == "__main__":
 	# starts the UI
@@ -535,5 +540,6 @@ if __name__ == "__main__":
 	trayIcon.show()
 	main_window = QMainWindow()
 	ui = UiMainWindow(main_window)
+	app.aboutToQuit.connect(ui.closeEvent)
 	main_window.show()
 	sys.exit(app.exec_())
