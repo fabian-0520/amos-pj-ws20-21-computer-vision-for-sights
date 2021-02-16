@@ -526,7 +526,7 @@ class UiMainWindow(QWidget):
 		self.Label_Bild.setPixmap(QPixmap(self.Label_Bild.image))
 		self.camera.start()
 
-	def closeEvent(self) -> None:
+	def close_all(self) -> None:
 		if self.Button_Detection.text() == STOP:
 			self.detector.disable_detection()
 			self.stop_video_detection()
@@ -540,6 +540,6 @@ if __name__ == "__main__":
 	trayIcon.show()
 	main_window = QMainWindow()
 	ui = UiMainWindow(main_window)
-	app.aboutToQuit.connect(ui.closeEvent)
+	app.aboutToQuit.connect(ui.close_all)
 	main_window.show()
 	sys.exit(app.exec_())
