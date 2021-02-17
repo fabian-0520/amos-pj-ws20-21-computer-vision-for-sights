@@ -94,12 +94,12 @@ inserting them into the data warehouse subsequently.
 - **threads** : number of threads available for downloading; default: 4
 - **google** : whether to download from google.com; default: true
 - **full** : whether to download images in full resolution; default: false
-    o Note: enabling full resolution downloads often substantially
+    - Note: enabling full resolution downloads often substantially
        improves model performance, but comes with the expense
        of increased memory footprints in the data warehouse
 - **face** : whether to use the included face search mode; default: false
 - **no_gui** : whether to load images in headless mode; default: auto
-    o Note: When this parameter is set to auto instead of a
+    - Note: When this parameter is set to auto instead of a
        Boolean value, it is internally overwritten with false if the
        full argument is true, otherwise it is set to false
 - **limit** : maximum images to download per identified sight; default: 0
@@ -114,33 +114,34 @@ inserting them into the data warehouse subsequently.
 ###### Deployment
 
 **1.** Launch an EC2 instance for the IC component with the following basic requirements:
-    - **Operating system** : up-to-date Linux Ubuntu
-    - **Computing power** : at least two vCPUs
-    - **Random access memory** : at least 8 GB
-    - **Disk memory** : enough memory to store the downloaded sight images for a given
-       city; we recommend 5 GB memory for small and at least 40GB for large deep
-       learning models
-    - **Security group** : allowing traffic from 0.0.0.0/0 and ::/0 origins for port 22 (SSH port),
-       or preferably merely from the default AWS virtual private cloud (VPC) IP range
-    - **Docker daemon** : configured and running
+- **Operating system** : up-to-date Linux Ubuntu
+- **Computing power** : at least two vCPUs
+- **Random access memory** : at least 8 GB
+- **Disk memory** : enough memory to store the downloaded sight images for a given
+   city; we recommend 5 GB memory for small and at least 40GB for large deep
+   learning models
+- **Security group** : allowing traffic from 0.0.0.0/0 and ::/0 origins for port 22 (SSH port),
+   or preferably merely from the default AWS virtual private cloud (VPC) IP range
+- **Docker daemon** : configured and running
 
 **2.** Prepare the folder structures on the EC2 instance to deploy your code into:
 - **a.** Notice the target values for **IC_IP** (public IPv4 IP address) and
        **IC_URL** (public IPv4 DNS) on the main page of your launched instance.
 - **b.** Connect to the instance via SSH through your terminal of choice:
-    sudo ssh -i ~/Downloads/ ec2key.pem ubuntu@<IC_IP>
+```
+sudo ssh -i ~/Downloads/ ec2key.pem ubuntu@<IC_IP>
+```
 - **c.** On the instance, create a dedicated crawler folder to store the artifacts:
 ```
 sudo mkdir crawler
 sudo chmod 777 crawler
 exit
 ```
-**3.** From your local computer, upload the cache-free, clean code to the EC2 instance of the
-    crawler:
+**3.** From your local computer, upload the cache-free, clean code to the EC2 instance of the crawler:
 
-       sudo scp -i ~/Downloads/ec2key.pem - r ~/amos-pj-ws20- 21
-       -computer-vision-for-sights/amos/crawler
-       ubuntu@<IC_URL>:~/crawler/
+    sudo scp -i ~/Downloads/ec2key.pem - r ~/amos-pj-ws20-21
+    -computer-vision-for-sights/amos/crawler
+    ubuntu@<IC_URL>:~/crawler/
 
 **4.** Reconnect to the instance via SSH and build its Docker image:
 
@@ -226,12 +227,12 @@ exit
     exit
 
 **7.** Stop the EC2 instance of the MTS
-    Note 1 : This step is crucial since the EC2 instance of the MTS is dynamically booted and
-    shut down for training to save costs – GPU instances are expensive. By stopping the
-    instance initially, we allow it
-    to be booted by dedicated city training jobs and minimize financial expenditures.
-    Note 2 : Terminating the instance deallocates the entire instance forever and should not
-    be performed at all – stopping it merely shuts it down and retains the configurations.
+- Note 1 : This step is crucial since the EC2 instance of the MTS is dynamically booted and
+shut down for training to save costs – GPU instances are expensive. By stopping the
+instance initially, we allow it
+to be booted by dedicated city training jobs and minimize financial expenditures.
+- Note 2 : Terminating the instance deallocates the entire instance forever and should not
+be performed at all – stopping it merely shuts it down and retains the configurations.
 
 **8.** That’s it – now, city training jobs can be triggered from remote services, which
     subsequently boots the MTS instance, performs training, and finally shuts the instance
@@ -276,12 +277,11 @@ sudo mkdir ils
 sudo chmod 777 ils
 exit
 ```
-**3.** From your local computer, upload the cache-free, clean code to the EC2 instance of the
-    ILS:
+**3.** From your local computer, upload the cache-free, clean code to the EC2 instance of the ILS:
 
-       sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20- 21
-       -computer-vision-for-sights/amos/image_labelling_service
-       ubuntu@<ILS_URL>:~/ils/
+    sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20- 21
+    -computer-vision-for-sights/amos/image_labelling_service
+    ubuntu@<ILS_URL>:~/ils/
 
 **4.** Reconnect to the instance via SSH and build its Docker image:
 
@@ -321,15 +321,15 @@ whenever new city models are trainable, and notifies the MTS subsequently.
 - **AWS_REGION** : region of the AWS EC2 instances; generally: eu-central- 1
 - **DATA_MART_REFRESH_DATA_MARTS_EVERY_SECONDS** : delay between resource-
     intensive data mart refreshes
-       o Note: typically, refreshing every hour (setting this value to 3600 ) is more than
-          enough since users usually not count the seconds until a new model is available
+   - Note: typically, refreshing every hour (setting this value to 3600 ) is more than
+      enough since users usually not count the seconds until a new model is available
 - **DATA_MART_ENABLE_MODEL_TRAINING_EVERY_SECONDS** : delay between checking
     if a city is available for training and potentially triggering the MTS
-       o Note: with the same reasoning as before, we advise setting this value to 3600
-          or higher; training usually takes more than an hour anyway
+   - Note: with the same reasoning as before, we advise setting this value to 3600
+      or higher; training usually takes more than an hour anyway
 - **DATA_MART_ENABLE_LABELLING_REQUESTS_EVERY_SECONDS** : delay between
     emitting a batch of labelling requests to the ILS component
-       o Note: the same reasoning as with the two previously mentioned parameters
+       - Note: the same reasoning as with the two previously mentioned parameters
           applies here
 - **ILS_PUBLIC_ENDPOINT_URL** : public URL to the ILS service, including port and http
     prefix
@@ -339,20 +339,21 @@ whenever new city models are trainable, and notifies the MTS subsequently.
     labelled images to trigger a city training job in the MTS component
 - **MIN_IMAGE_NUMBER_PER_LABEL** : minimum number of required available images per
     label
-       o Note: setting this parameter too high leaves more data points out of the training
-          points, setting it too low may decrease the model performance due to highly
-          poor class performance; consider the trade-off between data volume and data
-          quality in your training process
+    - Note: setting this parameter too high leaves more data points out of the training
+      points, setting it too low may decrease the model performance due to highly
+      poor class performance; consider the trade-off between data volume and data
+      quality in your training process
 - **PGHOST, PGPORT, PGDATABASE, PGUSER,** and **PGPASSWORD** (database parameters
     from above)
 
 ###### Deployment
 
 **1.** Launch an EC2 instance for the DMR with the following basic requirements:
-    - **Operating system** : up-to-date Linux Ubuntu
-    - **Computing power** : at least one vCPU
-    - **Random access memory** : at least 4 GB
-    - **Docker daemon** : configured and running
+- **Operating system** : up-to-date Linux Ubuntu
+- **Computing power** : at least one vCPU
+- **Random access memory** : at least 4 GB
+- **Docker daemon** : configured and running
+
 **2.** Prepare the folder structures on the EC2 instance to deploy your code into:
 - **a.** Notice the target values for **DMR_IP** (public IPv4 IP address) and
        **DMR_URL** (public IPv4 DNS) on the main page of your launched instance.
@@ -399,7 +400,9 @@ whenever new city models are trainable, and notifies the MTS subsequently.
     -e MIN_IMAGE_NUMBER_PER_LABEL=<MIN_IMAGE_NUMBER_PER_LABEL>
     -it dmr
 6. Exit the instance:
-    _exit_
+```
+exit
+```
 
 #### Django Orchestration Service (DOS)
 
@@ -415,7 +418,7 @@ exposes data from the latter to the client, and triggers the image crawler if ne
     retrieval
 - **MAX_IMAGES_PER_SIGHT** : maximum number of images the triggered image crawler
     should retrieve per sight
-       o Note: under the hood, this parameter sets the limit command line argument
+       - Note: under the hood, this parameter sets the limit command line argument
           of the image crawler
 - **MAX_SIGHTS_PER_CITY** : maximum number of sights the triggered image crawler
     should retrieve for the city
