@@ -129,7 +129,7 @@ inserting them into the data warehouse subsequently.
        **IC_URL** (public IPv4 DNS) on the main page of your launched instance.
 - **b.** Connect to the instance via SSH through your terminal of choice:
 ```
-sudo ssh -i ~/Downloads/ ec2key.pem ubuntu@<IC_IP>
+sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<IC_IP>
 ```
 - **c.** On the instance, create a dedicated crawler folder to store the artifacts:
 ```
@@ -189,7 +189,7 @@ computer vision.
        (i-xxxxxxxxxxxxx) on the main page of your launched instance.
 - **b.** Connect to the instance via SSH through your terminal of choice:
 ```
-sudo ssh -i ~/Downloads/ ec2key.pem ubuntu@<MTS_IP>
+sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<MTS_IP>
 ```
 - **c.** Make sure the AWS CLI is installed to enable dynamic remote calls:
 ```
@@ -359,7 +359,7 @@ whenever new city models are trainable, and notifies the MTS subsequently.
        **DMR_URL** (public IPv4 DNS) on the main page of your launched instance.
 - **b.** Connect to the instance via SSH through your terminal of choice:
    ```
-    sudo ssh -i ~/Downloads/ ec2key.pem ubuntu@<DMR_IP>
+    sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<DMR_IP>
     c. On the instance, create a dedicated data mart refresher folder to store the
     artifacts:
     sudo mkdir dmr
@@ -443,7 +443,7 @@ exposes data from the latter to the client, and triggers the image crawler if ne
 **DOS_URL** (public IPv4 DNS) on the main page of your launched instance.
 
 - **b.** Connect to the instance via SSH through your terminal of choice:
-sudo ssh -i ~/Downloads/ ec2key.pem ubuntu@<DOS_IP>
+sudo ssh -i ~/Downloads/ec2key.pem ubuntu@<DOS_IP>
 
 - **c.** On the instance, create a dedicated Django orchestrator folder to store the
 artifacts:
