@@ -101,12 +101,11 @@ class Detection:
         t0 = time.time()
         img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
+        logging.debug("start inference")
         for path, img, im0s, vid_cap in dataset:
             if self.detection is False and webcam is True:
                 logging.debug("kill thread")
                 dataset.kill_thread()
-                logging.debug("set detection true")
-                self.detection = True
                 break
             img = torch.from_numpy(img).to(device)
             img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -126,7 +125,6 @@ class Detection:
             if classify:
                 pred = apply_classifier(pred, modelc, img, im0s)
 
-            logging.debug("process detections")
             # Process detections
             for i, det in enumerate(pred):  # detections per image
                 if webcam:  # batch_size >= 1
@@ -151,25 +149,26 @@ class Detection:
                         logging.debug('Prediction: {}; Confidence {}'.format(f'{names[int(cls)]}', f'{conf:.2f}'))
                         label = ''.join(map(lambda x: x if x.islower() else ' ' + x, names[int(cls)]))
                         label = f'{label} {conf:.2f}' if debug else label
-                        plot_one_point(xyxy,
-                                        im0,
-                                        label=label,
-                                        color=colors[int(cls)],
-                                        point_thickness=None,
-                                        r=10)
                         if debug:
                             plot_one_box(xyxy,
                                             im0,
                                             label=label,
                                             color=colors[int(cls)],
                                             line_thickness=3)
+                        plot_one_point(xyxy,
+                                        im0,
+                                        label=label,
+                                        color=colors[int(cls)],
+                                        point_thickness=None,
+                                        r=10)
+
 
                 app.image = QImage(bytearray(im0), im0.shape[1], im0.shape[0], QImage.Format_RGB888).rgbSwapped()
                 app.Label_Bild.setPixmap(QPixmap(app.image))
                 time.sleep(1/60)
 
                 # Print time (inference + NMS)
-                logging.debug(f'{s}Done. ({t2 - t1:.3f}s)')
                 print(f'{s}Done. ({t2 - t1:.3f}s)')
 
+        logging.debug(f'Done. ({time.time() - t0:.3f}s)')
         print(f'Done. ({time.time() - t0:.3f}s)')

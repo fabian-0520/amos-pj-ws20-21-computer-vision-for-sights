@@ -1,5 +1,6 @@
 """This module contains helper functions for the main app module."""
 import os
+from pathlib import Path
 from time import sleep
 from PyQt5.QtWidgets import QComboBox
 from api_communication.api_handler import get_supported_cities
@@ -8,6 +9,7 @@ from geotext import GeoText as filterString
 
 def wipe_prediction_input_images(images_base_path: str) -> None:
     """Wipes the passed images load directory clean of any existing files.
+
 
     Parameters
     ----------
@@ -73,7 +75,7 @@ def filter_city(input_city: str) -> str:
 
 
 def initialize_cities() -> list:
-    """Returns a list of all supported cities with which points of interest can be detected. 
+    """Returns a list of all supported cities with which points of interest can be detected.
     If there is a connection to the DOS, the cities in our DWH are returned.
     Otherwise the locally available cities are returned.
     """
@@ -81,8 +83,12 @@ def initialize_cities() -> list:
         supported_cities = get_supported_cities()
     else:
         supported_cities = []
-        for filename in os.listdir('weights'):
-            if filename.endswith(".pt"):
-                pretty_modelname = filename[:-3].replace("_", " ").title()
-                supported_cities.append(pretty_modelname)
+        if os.path.exists("weights"):
+            for filename in os.listdir('weights'):
+                if filename.endswith(".pt"):
+                    pretty_modelname = filename[:-3].replace("_", " ").title()
+                    supported_cities.append(pretty_modelname)
+        else:
+            print("There are no locally stored models. Try to connect the GUI with the DWH.")
+            Path("weights").mkdir(mode=0o700, exist_ok=True)
     return supported_cities
