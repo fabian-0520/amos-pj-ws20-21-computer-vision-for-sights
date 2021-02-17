@@ -27,7 +27,7 @@ possibility of using the free tier for testing or development purposes.
 
 ###### Important Environment Variables
 
-- **PGHOST** : raw host URL the DWH runs on (without [http://](http://) or https:// as a prefix)
+- **PGHOST** : raw host URL the DWH runs on (without http:// or https:// as a prefix)
 - **PGPORT** : port the DWH is available from
 - **PGDATABASE** : name of the internal database the DWH is setup with
 - **PGUSER** : username for accessing the database
@@ -47,12 +47,11 @@ possibility of using the free tier for testing or development purposes.
 **4.** Confirm your input and create the database instance
 
 **5.** In the settings, make sure incoming traffic from anywhere (0.0.0.0/0 and
-    ::/ 0 )
+    ::/0 )
 
 **6.** Execute the database_init.sql file on the newly created database instance
     to initialize its schema and automation mechanisms – either directly in the
-    Amazon RDS dashboard or by using an external tool of choice, e.g. DBeaver,
-    as can be seen below:
+    Amazon RDS dashboard or by using an external tool of choice, e.g. DBeaver
 
 #### Global SSH Key for Computing Instance Access
 
@@ -491,7 +490,7 @@ functionalities, e.g. detecting a city’s sights in a real-time webcam stream.
 
 - **API_ENDPOINT_URL** : full base URL of the DOS component
     - **Note** : this parameter needs to follow the format
-       [http://](http://) **<DOS_URL>**:**<DOS_PORT>**
+      http://**<DOS_URL>**:**<DOS_PORT>**
 
 ###### Deployment
 
