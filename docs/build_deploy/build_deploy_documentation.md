@@ -11,8 +11,8 @@ Make sure to follow the exact order presented in this documentation to prevent a
 dependency clashes between the components. The same applies to our advised hardware
 requirements, especially on the model training side. This documentation relies on any
 arbitrary Unix based operating system. We assume that the open source SightScan
-repository is cloned and located in your local home directory, i.e. ~/amos-pj-ws20- 21 -
-computer-vision-for-sights directory. Furthermore, being familiar with the technical
+repository is cloned and located in your local home directory, i.e. ~/amos-pj-ws20-21-computer-vision-for-sights directory. 
+Furthermore, being familiar with the technical
 documentation and especially the software architecture before advancing to the following
 contents is highly advised. If you simply want to launch selected components locally using
 Docker, please refer to the README.md files in the individual component folders.
@@ -139,8 +139,7 @@ exit
 ```
 **3.** From your local computer, upload the cache-free, clean code to the EC2 instance of the crawler:
 
-    sudo scp -i ~/Downloads/ec2key.pem - r ~/amos-pj-ws20-21
-    -computer-vision-for-sights/amos/crawler
+    sudo scp -i ~/Downloads/ec2key.pem -r ~/amos-pj-ws20-21-computer-vision-for-sights/amos/crawler
     ubuntu@<IC_URL>:~/crawler/
 
 **4.** Reconnect to the instance via SSH and build its Docker image:
@@ -466,7 +465,7 @@ exit
 
 **5.** Launch the DOS on its EC2 instance via Docker:
 
-    sudo docker run - d
+    sudo docker run -d
     -e PGHOST=<PGHOST>
     -e PGDATABASE=<PGDATABASE>
     -e PGUSER=<PGUSER>
@@ -497,10 +496,12 @@ functionalities, e.g. detecting a city’s sights in a real-time webcam stream.
 ###### Deployment
 
 **1.** Navigate into the folder containing the GUI
-    _cd ~/amos-pj-ws20- 21 - computer-vision-for-sights/amos/gui_
+
+    cd ~/amos-pj-ws20- 21 -computer-vision-for-sights/amos/gui
 
 **2.** Create a file with name .env, containing only a single line:
-    _API_ENDPOINT_URL= [http://](http://)<DOS_URL>:<DOS_PORT>_
+
+    API_ENDPOINT_URL= http://<DOS_URL>:<DOS_PORT>
 
 **3.** Make sure SightScan’s GUI runs as expected on the client’s local hardware by double-
     click the main.py file to launch it; alternatively, you may also double-click on the bash
