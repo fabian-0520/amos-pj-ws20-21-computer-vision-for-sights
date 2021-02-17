@@ -5,8 +5,14 @@ import requests
 import os
 import json
 
-load_dotenv()
-os.environ["API_ENDPOINT_URL"] = os.environ.get('API_ENDPOINT_URL')
+
+try:
+    load_dotenv()
+    os.environ["API_ENDPOINT_URL"] = os.environ.get('API_ENDPOINT_URL')
+except:
+    print('Please create an .env file with your "API_ENDPOINT_URL" in the api_communication folder')
+    os.environ["API_ENDPOINT_URL"] = ""
+
 HTTP_400_MESSAGE = "Wrong request format - please refer to /api/swagger!"
 HTTP_200_MESSAGE = "Request successfully executed."
 
@@ -113,3 +119,22 @@ def get_supported_cities() -> List[str]:
         print(e)
         return []
 
+
+def send_new_image(city: str, image_path: str) -> None:
+    """Sends an image to the DOS API service for enhancing SightScan's quality.
+
+    Parameters
+    ----------
+    city: str
+        City the image belongs to.
+    image_path: str
+        Path the image lies in.
+    """
+    print('path: ', image_path)
+    with open(image_path, 'rb') as image:
+        try:
+            url = "{0}/api/cities/{1}/image".format(os.environ["API_ENDPOINT_URL"], city.replace(' ', '_'))
+            file = {'image': image.read()}
+            requests.post(url, files=file)
+        except requests.exceptions.RequestException as e:
+            print(e)

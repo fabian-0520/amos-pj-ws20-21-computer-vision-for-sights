@@ -41,7 +41,7 @@ def exec_dql_query(postgres_sql_string: str, return_result=False) -> Optional[ob
 
 
 def exec_dml_query(dml_query: str, filling_parameters: Optional[Tuple[object]]) -> None:
-    """Inserts a given set of image labels for the image of the PostgreSQL database corresponding to the source hash.
+    """Inserts a given image for the image of the PostgreSQL database corresponding to the source hash.
 
     Parameters
     ----------

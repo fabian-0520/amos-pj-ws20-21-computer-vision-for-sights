@@ -25,6 +25,7 @@ class ImageLabel(QLabel):
 
         self.setText("")
         self.setPixmap(QPixmap(self.image))
+
         self.setScaledContents(False)
         self.setObjectName("Label_Bild")
         self.setAlignment(QtCore.Qt.AlignCenter)

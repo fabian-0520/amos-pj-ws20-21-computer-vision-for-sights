@@ -1,11 +1,11 @@
 import logging
-from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QPlainTextEdit
 
 
 class QTextEditLogger(logging.Handler):
     def __init__(self, parent):
         super().__init__()
-        self.widget = QtWidgets.QPlainTextEdit(parent)
+        self.widget = QPlainTextEdit(parent)
         self.widget.setReadOnly(True)
 
     def emit(self, record):
