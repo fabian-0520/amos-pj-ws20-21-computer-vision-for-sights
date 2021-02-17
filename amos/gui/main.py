@@ -76,6 +76,7 @@ class UiMainWindow(QWidget):
 	debug_height = 200
 	debug_mode = False
 	accepted_download = False
+	current_city = ""
 
 	def __init__(self, parent) -> None:
 		super().__init__(parent)
@@ -181,7 +182,7 @@ class UiMainWindow(QWidget):
 		self.checkBoxImprove.setObjectName(u"improvement")
 		self.checkBoxImprove.setGeometry(
 			QRect(
-				int(self.dist*3.5),
+				self.dist,
 				5,
 				350,
 				20)
@@ -273,6 +274,7 @@ class UiMainWindow(QWidget):
 		city = self.Box_Stadt.currentText().replace(' ', '_').upper()
 
 		if city != "CHOOSE_CITY":
+			self.current_city = self.Box_Stadt.currentText()
 			# if no connection to dos
 			if get_supported_cities() == []:
 				latest_version = "couldn't get the latest version"
@@ -406,13 +408,13 @@ class UiMainWindow(QWidget):
 		emsg.exec_()
 
 	def show_download_result(self) -> None:
-		city_pretty_print = self.Box_Stadt.currentText()
+		# city_pretty_print = self.Box_Stadt.currentText()
 
 		self.model_selected = True
 		newest_vers_msg = QMessageBox()
 		newest_vers_msg.setWindowTitle("Ready for Detection!")
 		newest_vers_msg.setWindowIcon(QIcon(logo_without_text))
-		newest_vers_msg.setText("You can start detecting sights in " + city_pretty_print + "!")
+		newest_vers_msg.setText("You can start detecting sights in " + self.current_city + "!")
 		newest_vers_msg.setStandardButtons(QMessageBox.Ok)
 		newest_vers_msg.setDefaultButton(QMessageBox.Ok)
 
