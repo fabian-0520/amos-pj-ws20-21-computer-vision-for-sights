@@ -2,7 +2,7 @@
 from helper import wipe_prediction_input_images, update_dropdown, filterCity, initialize_cities
 from label import ImageLabel
 from detect import Detection
-import debug
+from debug import QTextEditLogger
 from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
@@ -14,14 +14,14 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QStackedWidget,
     QLineEdit,
-	QCheckBox,
-	QSizePolicy,
-	QSystemTrayIcon
+    QCheckBox,
+    QSizePolicy,
+    QSystemTrayIcon
 )
 from PyQt5 import QtGui
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
-from PyQt5.QtGui import QPixmap, QIcon, QTextEditLogger
+from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 from api_communication.api_handler import get_downloaded_model, get_dwh_model_version, \
 	get_supported_cities, send_city_request
@@ -385,7 +385,7 @@ class UiMainWindow(QWidget):
 					self.detector.enable_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
 												   kwargs={'weights': 'weights/' + city + '.pt', 'source': str(source - 1),
-														   'image_size': 400, 'debug': self.debugMode})
+														   'image_size': 704, 'debug': self.debug})
 					self.detection_thread.start()
 			else:
 				print("Drop a File or select a Webcam!")
