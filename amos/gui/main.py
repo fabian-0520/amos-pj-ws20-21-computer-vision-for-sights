@@ -74,7 +74,7 @@ class UiMainWindow(QWidget):
 	small_button_width = 100
 	small_button_height = 30
 	debug_height = 200
-	debugMode = False
+	debug_mode = False
 	accepted_download = False
 
 	def __init__(self, parent) -> None:
@@ -176,7 +176,6 @@ class UiMainWindow(QWidget):
 
 		self.Label_Bild = ImageLabel(self)
 		self.Label_Bild.setGeometry(QRect(0, 0, self.window_width - (self.dist * 2), label_height))
-		self.Label_Bild.show()
 
 		self.checkBox = QCheckBox("Help improve SightScan's detection quality", self.centralwidget)
 		self.checkBox.setObjectName(u"improvement")
@@ -366,7 +365,7 @@ class UiMainWindow(QWidget):
 				wipe_prediction_input_images(INPUT_PREDICTION_DIR)
 				shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 				self.detector.enable_detection()
-				self.detector.detect(self, weights='weights/' + city + '.pt', debug=self.debugMode)
+				self.detector.detect(self, weights='weights/' + city + '.pt', debug=self.debug_mode)
 			# stop video detection
 			elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == STOP:
 				self.stop_video_detection()
@@ -515,7 +514,7 @@ class UiMainWindow(QWidget):
 		self.camera_viewfinder.show()
 
 	def debug_click(self, state):
-		self.debugMode = bool(state)
+		self.debug_mode = bool(state)
 
 		if state:
 			main_window.resize(self.window_width, self.window_height + self.debug_height)
