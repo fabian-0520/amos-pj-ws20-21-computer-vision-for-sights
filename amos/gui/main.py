@@ -2,7 +2,7 @@
 from helper import wipe_prediction_input_images, update_dropdown, filterCity, initialize_cities
 from label import ImageLabel
 from detect import Detection
-from debug import *
+import debug
 from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
@@ -15,12 +15,13 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QLineEdit,
 	QCheckBox,
-	QSizePolicy
+	QSizePolicy,
+	QSystemTrayIcon
 )
 from PyQt5 import QtGui
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
 from PyQt5.QtMultimediaWidgets import QCameraViewfinder
-from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtGui import QPixmap, QIcon, QTextEditLogger
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 from api_communication.api_handler import get_downloaded_model, get_dwh_model_version, \
 	get_supported_cities, send_city_request
@@ -73,7 +74,7 @@ class UiMainWindow(QWidget):
 	small_button_width = 100
 	small_button_height = 30
 	debug_height = 200
-	debug = False
+	debugMode = False
 	accepted_download = False
 
 	def __init__(self, parent) -> None:
@@ -95,7 +96,7 @@ class UiMainWindow(QWidget):
 
 		self.Text_City = QLineEdit(self.centralwidget)
 		self.Text_City.setGeometry(
-			QRect(self.dist + self.dist + self.button_width, self.dist+10,
+			QRect(self.dist + self.dist + self.button_width, self.dist + 10,
 			self.button_width, self.textbox_height))
 		self.Text_City.setObjectName("Text_City")
 		self.Text_City.setToolTip(
@@ -104,7 +105,7 @@ class UiMainWindow(QWidget):
 		self.Button_City = QPushButton(self.centralwidget)
 		self.Button_City.setGeometry(
 			QRect(
-				int(2.3*self.dist) + self.button_width + self.button_width, self.dist+8,
+				int(2.3 * self.dist) + self.button_width + self.button_width, self.dist + 8,
 				self.small_button_width, self.small_button_height)
 		)
 		self.Button_City.setObjectName("Button_City")
@@ -114,7 +115,7 @@ class UiMainWindow(QWidget):
 		self.Button_Detection.setGeometry(
 			QRect(
 				self.window_width - (self.dist + self.button_width),
-				self.window_height - (self.dist + self.button_height + 20 ),
+				self.window_height - (self.dist + self.button_height + 20),
 				self.button_width,
 				self.button_height,
 			)
@@ -126,7 +127,7 @@ class UiMainWindow(QWidget):
 		self.Button_Bild.setGeometry(
 			QRect(
 				self.dist,
-				self.window_height - (self.dist + self.button_height + 20 ),
+				self.window_height - (self.dist + self.button_height + 20),
 				self.button_width,
 				self.button_height,
 			)
@@ -152,7 +153,9 @@ class UiMainWindow(QWidget):
 		self.Box_Camera_selector.setObjectName("Box_Camera_selector")
 		self.Box_Camera_selector.addItem("")
 		# self.Box_Camera_selector.addItems([camera.description() for camera in self.available_cameras])
-		self.Box_Camera_selector.addItems(["Camera " + str(i) + ": " + str(self.available_cameras[i].description()) for i in range(len(self.available_cameras))])
+		self.Box_Camera_selector.addItems(
+			["Camera " + str(i) + ": " + str(self.available_cameras[i].description()) for i in
+			 range(len(self.available_cameras))])
 		self.Box_Camera_selector.currentIndexChanged.connect(self.select_camera)
 
 		self.stacked_widget = QStackedWidget(self.centralwidget)
@@ -184,8 +187,7 @@ class UiMainWindow(QWidget):
                 20)
             )
 		self.checkBox.setChecked(False)
-		#self.checkBox.stateChanged.connect(self.improve_quality)
-
+		# self.checkBox.stateChanged.connect(self.improve_quality)
 
 		self.checkBox = QCheckBox("Debug", self.centralwidget)
 		self.checkBox.setObjectName(u"checkBox")
@@ -221,11 +223,11 @@ class UiMainWindow(QWidget):
                 self.debug_height - self.dist
             )
         )
-		sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.textDebug.widget.sizePolicy().hasHeightForWidth())
-		self.textDebug.widget.setSizePolicy(sizePolicy)
+		size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+		size_policy.setHorizontalStretch(0)
+		size_policy.setVerticalStretch(0)
+		size_policy.setHeightForWidth(self.textDebug.widget.sizePolicy().hasHeightForWidth())
+		self.textDebug.widget.setSizePolicy(size_policy)
 		self.textDebug.widget.setReadOnly(True)
 
 		self.stacked_widget.addWidget(self.Label_Bild)
@@ -270,8 +272,8 @@ class UiMainWindow(QWidget):
 		if city != "CHOOSE_CITY":
 			# if no connection to dos
 			if get_supported_cities() == []:
-				latest_version="couldn't get the latest version"
-				downloaded_version="couldn't get the downloaded version"
+				latest_version = "couldn't get the latest version"
+				downloaded_version = "couldn't get the downloaded version"
 				print('no connection to dos')
 
 			# if connection to dos
@@ -363,7 +365,7 @@ class UiMainWindow(QWidget):
 				wipe_prediction_input_images(INPUT_PREDICTION_DIR)
 				shutil.copy2(self.Label_Bild.image, INPUT_PREDICTION_DIR)
 				self.detector.enable_detection()
-				self.detector.detect(self, weights='weights/' + city + '.pt', debug=self.debug)
+				self.detector.detect(self, weights='weights/' + city + '.pt', debug=self.debugMode)
 			# stop video detection
 			elif self.stacked_widget.currentIndex() == 0 and self.Button_Detection.text() == STOP:
 				self.stop_video_detection()
@@ -383,7 +385,7 @@ class UiMainWindow(QWidget):
 					self.detector.enable_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
 												   kwargs={'weights': 'weights/' + city + '.pt', 'source': str(source - 1),
-														   'image_size': 400, 'debug': self.debug})
+														   'image_size': 400, 'debug': self.debugMode})
 					self.detection_thread.start()
 			else:
 				print("Drop a File or select a Webcam!")
@@ -512,7 +514,7 @@ class UiMainWindow(QWidget):
 		self.camera_viewfinder.show()
 
 	def debug_click(self, state):
-		self.debug = bool(state)
+		self.debugMode = bool(state)
 
 		if state:
 			main_window.resize(self.window_width, self.window_height + self.debug_height)
@@ -536,7 +538,7 @@ if __name__ == "__main__":
 	# starts the UI
 	app = QApplication(sys.argv)
 	app.setWindowIcon(QIcon('logo_exe_icon.ico'))
-	trayIcon = QtWidgets.QSystemTrayIcon(QtGui.QIcon(logo_without_text), app)
+	trayIcon = QSystemTrayIcon(QtGui.QIcon(logo_without_text), app)
 	trayIcon.show()
 	main_window = QMainWindow()
 	ui = UiMainWindow(main_window)

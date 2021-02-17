@@ -10,6 +10,7 @@ from geotext import GeoText as filterString
 def wipe_prediction_input_images(images_base_path: str) -> None:
     """Wipes the passed images load directory clean of any existing files.
 
+
     Parameters
     ----------
     images_base_path: str
@@ -72,8 +73,9 @@ def filterCity(input_city: str) -> str:
     result = filterString(input_city).cities
     return result
 
+
 def initialize_cities() -> list:
-    """Returns a list of all supported cities with which points of interest can be detected. 
+    """Returns a list of all supported cities with which points of interest can be detected.
     If there is a connection to the DOS, the cities in our DWH are returned.
     Otherwise the locally available cities are returned.
     """

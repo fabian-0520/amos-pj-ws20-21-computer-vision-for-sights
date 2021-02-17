@@ -5,6 +5,7 @@ import requests
 import os
 import json
 
+
 try:
     load_dotenv()
     os.environ["API_ENDPOINT_URL"] = os.environ.get('API_ENDPOINT_URL')
@@ -117,4 +118,3 @@ def get_supported_cities() -> List[str]:
     except requests.exceptions.RequestException as e:
         print(e)
         return []
-
