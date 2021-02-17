@@ -1,6 +1,7 @@
-How to: run/deploy the service via Docker
+# SightScan: Django Orchestration Service (DOS) Component
+=========================================================
 
----
+## How to: building and running the SightScan Django orchestration service locally in a Docker container
 
 1. Open the terminal
 2. Move into the project directory (.../django_orchestrator)
@@ -17,6 +18,14 @@ How to: run/deploy the service via Docker
    -e MAX_SIGHTS_PER_CITY=<MAX_SIGHTS_PER_CITY>
    -e MAX_IMAGES_PER_SIGHT=<MAX_IMAGES_PER_SIGHT>
    -e MAPS_KEY=<GOOGLE_MAPS_KEY>
-   -p 8002:8002
+   -p <DOS_PORT>:8002
    -it django_orchestrator
-6. Refer to 0.0.0.0:8002/swagger to get a nicely formatted overview of the supported communication protocol
+6. Refer to 0.0.0.0:<DOS_PORT>/swagger to get a nicely formatted overview of the supported communication protocol
+
+## How to: running tests incl. coverage
+
+1. Open the terminal
+2. Move into the project directory (.../django_orchestrator)
+3. Run: pip install -r requirements.txt
+4. Run: coverage run -m pytest -v
+5. Show coverage: coverage report

@@ -1,11 +1,10 @@
-"""This module contains various validation functions for passed
-user input like uploaded files or bounding box labels."""
-from data_django.exec_sql import exec_dql_query
+"""This module contains various validation functions for passed user inputs like uploaded files."""
+import imghdr
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from json import JSONDecodeError, loads
+from data_django.exec_sql import exec_dql_query
 
 
-def is_valid_image_upload(city: str, image: InMemoryUploadedFile, labels: str) -> bool:
+def is_valid_image_upload(city: str, image: InMemoryUploadedFile) -> bool:
     """Returns whether the passed request is a valid image upload request.
 
     Parameters
@@ -14,15 +13,13 @@ def is_valid_image_upload(city: str, image: InMemoryUploadedFile, labels: str) -
         City name.
     image: InMemoryUploadedFile
         Read image.
-    labels: str
-        Read bounding box labels.
 
     Returns
     -------
     is_valid_image_upload: bool
         Whether the request is valid for uploading a city image.
     """
-    return bool(is_valid_city(city) and _is_valid_image_file(image) and _is_valid_labels_file(labels))
+    return bool(is_valid_city(city) and _is_valid_image_file(image))
 
 
 def is_valid_city(city: str, must_be_supported: bool = False) -> bool:
@@ -32,6 +29,8 @@ def is_valid_city(city: str, must_be_supported: bool = False) -> bool:
     ----------
     city: str
         Name of the requested city.
+    must_be_supported: bool
+        Whether the city must be already supported.
 
     Returns
     -------
@@ -77,66 +76,13 @@ def _is_valid_image_file(image: InMemoryUploadedFile) -> bool:
     is_valid: bool
         Whether the uploaded image file is valid.
     """
-    if image is not None and hasattr(image, "content_type"):
-        image_content_types = [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/bmp",
-            "image/svg+xml",
-            "image/tiff",
-            "image/webp",
-        ]
+    image_content_types = [
+        "jpeg",
+        "png",
+        "gif",
+        "bmp",
+        "webp",
+        "tiff"
+    ]
 
-        return image.content_type in image_content_types
-
-    return False
-
-
-def _is_valid_labels_file(labels: str) -> bool:
-    """Returns whether the uploaded labels file is valid.
-
-    Parameters
-    ----------
-    labels: str
-        Uploaded labels file as a string.
-
-    Returns
-    -------
-    is_valid_labels_file: bool
-        Whether the uploaded labels file is valid.
-    """
-    try:
-        labels_dict = loads(labels)
-        if "boundingBoxes" in labels_dict:
-            return all(
-                map(lambda bounding_box: _is_valid_bounding_box_label(bounding_box), labels_dict["boundingBoxes"])
-            )
-    except JSONDecodeError:
-        pass
-
-    return False
-
-
-def _is_valid_bounding_box_label(bounding_box_dict: dict) -> bool:
-    """Returns whether the passed dictionary contains a valid bounding box label.
-
-    Parameters
-    ----------
-    bounding_box_dict: dict
-        Bounding box label.
-
-    Returns
-    -------
-    is_valid_bounding_box_label: bool
-        Whether the bounding box label is valid.
-    """
-    coord_keys = ["ulx", "uly", "lrx", "lry"]
-
-    check_buffer = []
-    for key in bounding_box_dict.keys():
-        check_buffer.append(key in coord_keys + ["sightName"])
-        if key in coord_keys:
-            check_buffer.append(isinstance(bounding_box_dict[key], float) and 0.0 <= bounding_box_dict[key] <= 1.0)
-
-    return all(check_buffer)
+    return imghdr.what(file=image.file) in image_content_types

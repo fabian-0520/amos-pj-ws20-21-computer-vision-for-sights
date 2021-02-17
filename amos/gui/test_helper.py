@@ -1,4 +1,4 @@
-from helper import wipe_prediction_input_images, get_current_prediction_output_path
+from helper import wipe_prediction_input_images, get_current_prediction_output_path, filter_city
 import os
 
 
@@ -55,10 +55,10 @@ def test_filter_city_name():
     multiple_worded_input = "Andorra la Vella"
     unknown_input = "Louvre"
 
-    result_1 = filterCity(correct_input)
-    result_2 = filterCity(wrong_typed_input)
-    result_3 = filterCity(multiple_worded_input)
-    result_4 = filterCity(unknown_input)
+    result_1 = filter_city(correct_input)
+    result_2 = filter_city(wrong_typed_input)
+    result_3 = filter_city(multiple_worded_input)
+    result_4 = filter_city(unknown_input)
 
     assert result_1 is not [] and result_1[0] == correct_input
     assert result_2 is []

@@ -1,7 +1,7 @@
 """This module contains the tests for the exec_sql module of the data sub-app."""
-from data_django.exec_sql import exec_dml_query, exec_dql_query
 from mock import patch
 import pytest
+from data_django.exec_sql import exec_dml_query, exec_dql_query
 
 
 def test_valid_dql_query(connection_mock):

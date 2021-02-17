@@ -1,5 +1,5 @@
 """This module contains the overall UI frame object and is responsible for launching it."""
-from helper import wipe_prediction_input_images, update_dropdown, filterCity, initialize_cities
+from helper import wipe_prediction_input_images, update_dropdown, filter_city, initialize_cities
 from label import ImageLabel
 from detect import Detection
 from debug import QTextEditLogger
@@ -24,7 +24,7 @@ from PyQt5.QtMultimediaWidgets import QCameraViewfinder
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QCoreApplication, QRect, QMetaObject
 from api_communication.api_handler import get_downloaded_model, get_dwh_model_version, \
-	get_supported_cities, send_city_request
+	get_supported_cities, send_city_request, send_new_image
 from datetime import datetime
 import shutil
 import sys
@@ -52,18 +52,18 @@ class UiMainWindow(QWidget):
 	Attributes:
 	----------
 	window_width: int
-        Width of the window
-    window_height: int
-        Height of the window
-    button_width: int
-        Width of buttons
-    button_height: int
-        Height of buttons
-    dist: int
-        Distance to the edge of Widgets(Window/Button/Label...)
-    model_selected: bool
-        Shows whether a model is selected or not
-    """
+		Width of the window
+	window_height: int
+		Height of the window
+	button_width: int
+		Width of buttons
+	button_height: int
+		Height of buttons
+	dist: int
+		Distance to the edge of Widgets(Window/Button/Label...)
+	model_selected: bool
+		Shows whether a model is selected or not
+	"""
 	window_height = 650
 	window_width = 800
 	button_width = 180
@@ -118,7 +118,7 @@ class UiMainWindow(QWidget):
 				self.window_height - (self.dist + self.button_height + 20),
 				self.button_width,
 				self.button_height,
-			)
+				)
 		)
 		self.Button_Detection.setObjectName("Button_Detection")
 		self.Button_Detection.clicked.connect(self.detect_sights)
@@ -130,7 +130,7 @@ class UiMainWindow(QWidget):
 				self.window_height - (self.dist + self.button_height + 20),
 				self.button_width,
 				self.button_height,
-			)
+				)
 		)
 		self.Button_Bild.setObjectName("Button_Bild")
 		self.Button_Bild.clicked.connect(lambda: self.camera_viewfinder.hide())
@@ -148,7 +148,7 @@ class UiMainWindow(QWidget):
 				self.dist,
 				self.button_width,
 				self.button_height,
-			)
+				)
 		)
 		self.Box_Camera_selector.setObjectName("Box_Camera_selector")
 		self.Box_Camera_selector.addItem("")
@@ -160,7 +160,7 @@ class UiMainWindow(QWidget):
 
 		self.stacked_widget = QStackedWidget(self.centralwidget)
 		label_height = (self.window_height - self.dist - self.button_height - self.dist) - (
-			self.dist + self.button_height + self.dist
+				self.dist + self.button_height + self.dist
 		)
 		label_start_y = self.dist + self.button_height + self.dist
 		self.stacked_widget.setGeometry(
@@ -169,7 +169,7 @@ class UiMainWindow(QWidget):
 				label_start_y,
 				self.window_width - (self.dist * 2),
 				label_height,
-			)
+				)
 		)
 
 		self.camera_viewfinder = QCameraViewfinder()
@@ -177,17 +177,17 @@ class UiMainWindow(QWidget):
 		self.Label_Bild = ImageLabel(self)
 		self.Label_Bild.setGeometry(QRect(0, 0, self.window_width - (self.dist * 2), label_height))
 
-		self.checkBox = QCheckBox("Help improve SightScan's detection quality", self.centralwidget)
-		self.checkBox.setObjectName(u"improvement")
-		self.checkBox.setGeometry(
-            QRect(
-                self.dist,
-                5,
-                350,
-                20)
-            )
-		self.checkBox.setChecked(False)
-		# self.checkBox.stateChanged.connect(self.improve_quality)
+		self.checkBoxImprove = QCheckBox("Help improving SightScan's detection quality", self.centralwidget)
+		self.checkBoxImprove.setObjectName(u"improvement")
+		self.checkBoxImprove.setGeometry(
+			QRect(
+				int(self.dist*3.5),
+				5,
+				350,
+				20)
+		)
+		self.checkBoxImprove.setChecked(False)
+		self.checkBoxImprove.stateChanged.connect(self.set_improve_quality_var)
 
 		self.checkBox = QCheckBox("Debug", self.centralwidget)
 		self.checkBox.setObjectName(u"checkBox")
@@ -247,6 +247,9 @@ class UiMainWindow(QWidget):
 
 		self.retranslateUi(main_window)
 		QMetaObject.connectSlotsByName(main_window)
+
+	def set_improve_quality_var(self):
+		self.improve_checkbox_enabled = self.checkBoxImprove.isChecked()
 
 	def retranslateUi(self, main_window: QMainWindow) -> None:
 		"""Set the text initially for all items.
@@ -419,7 +422,7 @@ class UiMainWindow(QWidget):
 		# Send entered city to dwh and show confirmation popup if the city name is known
 		city_input = self.Text_City.text()
 		city_request = city_input.upper()
-		if len(filterCity(city_input)) == 1:
+		if len(filter_city(city_input)) == 1:
 			send_city_request(city_request)
 
 			cmsg = QMessageBox()
