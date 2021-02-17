@@ -2,7 +2,7 @@
 from helper import wipe_prediction_input_images, update_dropdown, filterCity, initialize_cities
 from label import ImageLabel
 from detect import Detection
-from debug import *
+from debug import QTextEditLogger
 from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
@@ -14,8 +14,9 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QStackedWidget,
     QLineEdit,
-	QCheckBox,
-	QSizePolicy
+    QCheckBox,
+    QSizePolicy,
+    QSystemTrayIcon
 )
 from PyQt5 import QtGui
 from PyQt5.QtMultimedia import QCamera, QCameraInfo
@@ -383,7 +384,7 @@ class UiMainWindow(QWidget):
 					self.detector.enable_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
 												   kwargs={'weights': 'weights/' + city + '.pt', 'source': str(source - 1),
-														   'image_size': 400, 'debug': self.debug})
+														   'image_size': 704, 'debug': self.debug})
 					self.detection_thread.start()
 			else:
 				print("Drop a File or select a Webcam!")
@@ -536,7 +537,7 @@ if __name__ == "__main__":
 	# starts the UI
 	app = QApplication(sys.argv)
 	app.setWindowIcon(QIcon('logo_exe_icon.ico'))
-	trayIcon = QtWidgets.QSystemTrayIcon(QtGui.QIcon(logo_without_text), app)
+	trayIcon = QSystemTrayIcon(QtGui.QIcon(logo_without_text), app)
 	trayIcon.show()
 	main_window = QMainWindow()
 	ui = UiMainWindow(main_window)
