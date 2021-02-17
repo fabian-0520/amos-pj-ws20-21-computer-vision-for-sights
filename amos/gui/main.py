@@ -385,7 +385,7 @@ class UiMainWindow(QWidget):
 					self.detector.enable_detection()
 					self.detection_thread = Thread(target=self.detector.detect, args=(self,),
 												   kwargs={'weights': 'weights/' + city + '.pt', 'source': str(source - 1),
-														   'image_size': 704, 'debug': self.debug})
+														   'image_size': 704, 'debug': self.debug_mode})
 					self.detection_thread.start()
 			else:
 				print("Drop a File or select a Webcam!")
