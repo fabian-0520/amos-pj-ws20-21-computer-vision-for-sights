@@ -31,8 +31,8 @@ This repository includes:
 ## Screenshots
 
 <p float="left">
-  <img src="/screenshots/gui1.png" width="1206" />
-  <img src="/screenshots/gui2.png" width="1206" /> 
+  <img src="/screenshots/gui1.png" width="400" />
+  <img src="/screenshots/gui2.png" width="400" /> 
 </p>
 
 ## Getting started
