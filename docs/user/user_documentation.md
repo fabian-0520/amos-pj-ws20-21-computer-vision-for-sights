@@ -81,5 +81,5 @@ The user has the option to request the support of new cities that are not yet in
 ![alt text](https://i.ibb.co/rMGndsk/user-doc11.png)
 
 
-Berlin, December 2020 | AMOS@TU Berlin in cooperation with IAV GmbH 
+Berlin, February 2021 | AMOS@TU Berlin in cooperation with IAV GmbH 
 
