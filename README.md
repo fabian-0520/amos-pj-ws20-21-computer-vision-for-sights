@@ -5,7 +5,7 @@ width="200" hspace="10" vspace="10">
 
 For detecting sights in _your_ city.
 
-SightScan was completed as part of the AMOS Module in WS20/21 by Team 2 (Computer vision for sights)
+SightScan was completed as part of the AMOS Module in WS20/21 by Team 2 (Computer vision for sights) at the Technical University of Berlin.
 
 ## About
 
@@ -27,6 +27,8 @@ This repository includes:
 - A django orchestrator which is acting as a connection point to users and a starting/ending point for the training pipeline
 - A gui application written in python, with the ability to detect sights, suggest cities and upload new images 
   to extend the training set
+- An image labeling service responsible for adding labels to crawled images with the help of Google's Vision API
+- A data warehouse integration which is adjusted perfectly for dynamic scaling and parallelisation of the entire architecture as well as the training pipeline
 
 ## Screenshots
 
@@ -39,7 +41,7 @@ This repository includes:
 
 This project contains a detailed user documentation and build/deploy documentation inside the wiki of the repository.
 
-Please be aware that you need and **.env** file with a set of required variables and keys.
+Please be aware that you need an **.env** file with a set of required variables and keys.
 The .env file can be found in the AMOS Documentation Tab in the Google Sheet.
 
 You will need pipenv, because it is passing the .env file into Environment variables.
